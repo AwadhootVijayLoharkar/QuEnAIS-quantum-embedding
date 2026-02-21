@@ -1,0 +1,6 @@
+Metadata-Version: 2.4
+Name: quenais
+Version: 0.0.1
+Summary: Hybrid quantum-classical embedding framework (DFT + DMET + advanced solvers)
+Author: QuEnAIS Project
+Requires-Python: >=3.12

@@ -1,0 +1,10 @@
+[project]
+name = "quenais"
+version = "0.0.1"
+description = "Hybrid quantum-classical embedding framework (DFT + DMET + advanced solvers)"
+authors = [{name = "QuEnAIS Project"}]
+requires-python = ">=3.12"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"

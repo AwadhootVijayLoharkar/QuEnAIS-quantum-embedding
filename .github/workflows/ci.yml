@@ -1,0 +1,18 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: quenais
+          environment-file: environment.yml
+      - name: Run Tests
+        run: pytest tests/

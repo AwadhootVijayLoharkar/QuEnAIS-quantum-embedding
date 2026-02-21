@@ -1,0 +1,16 @@
+name: quenais
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - pyyaml
+  - pytest
+  - jupyterlab
+  - pyscf
+  - pip
+  - pip:
+      - itensor
