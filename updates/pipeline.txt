@@ -1,0 +1,418 @@
+Full Pipeline Explanation: ASF → DMET → SQD
+
+Big Picture — What the Whole Pipeline Does
+Real molecule (e.g. H2O)
+        │
+        │  Too expensive to solve exactly
+        ▼
+┌───────────────────────────────────────────────────┐
+│  Step 1: ASF                                      │
+│  "Which orbitals are strongly correlated?"        │
+│  → finds the chemically important orbitals        │
+│  → tells us which atoms to focus on               │
+└───────────────────┬───────────────────────────────┘
+                    │  most correlated atom/fragment
+                    ▼
+┌───────────────────────────────────────────────────┐
+│  Step 2: DMET                                     │
+│  "Solve the big molecule by solving small pieces" │
+│  → embeds each fragment in a quantum bath         │
+│  → extracts h1e, h2e for each fragment            │
+└───────────────────┬───────────────────────────────┘
+                    │  embedded h1e, h2e
+                    ▼
+┌───────────────────────────────────────────────────┐
+│  Step 3: SQD                                      │
+│  "Use a quantum computer to solve the fragment"   │
+│  → sample configurations from quantum circuit     │
+│  → diagonalise H in that subspace classically     │
+│  → converge to fragment ground state energy       │
+└───────────────────────────────────────────────────┘
+
+Part 1 — ASF (Active Space Finder) in Detail
+What Problem it Solves
+In quantum chemistry, not all orbitals contribute equally to electron correlation. Most orbitals are either:
+
+Fully occupied (always 2 electrons) → can be frozen, treated classically
+Fully empty (always 0 electrons) → irrelevant
+Partially occupied (between 0 and 2) → strongly correlated, need quantum treatment
+
+ASF finds that third category automatically.
+
+Step 1.1 — UHF + Stability Analysis
+# ASF internally calls stable_scf(mol, with_uhf=True)
+# Why UHF and not RHF?
+#   - RHF forces electron pairs → hides correlation
+#   - UHF allows spin symmetry breaking → REVEALS correlation
+#   - A stable UHF solution means the mean-field is trustworthy
+#   - An unstable UHF solution → SCF is restarted
+#
+# From docs output:
+# converged SCF energy = -77.977530565129  <S^2> = 0.032  ← slight spin contamination
+# UHF/UKS wavefunction is stable                          ← OK to proceed
+
+Step 1.2 — MP2 Natural Orbitals
+# MP2 = Møller-Plesset Perturbation Theory (2nd order)
+# Adds electron correlation ON TOP of HF
+#
+# Key quantity: Natural Orbital Occupation Numbers (NOONs)
+# Computed by diagonalising the MP2 1-electron density matrix
+#
+# NOON interpretation:
+#   2.0        → always doubly occupied  (core/inactive)
+#   0.0        → always empty            (virtual/inactive)
+#   0 < n < 2  → partially occupied      (correlated → ACTIVE)
+#
+# Example from docs:
+#   MO 7: NOON = 0.029  ← partially empty   (ACTIVE)
+#   MO 8: NOON = 0.954  ← partially filled  (ACTIVE)
+#   → These are HOMO and LUMO of ethene
+
+# ASF selects a window of MP2 NOs for further analysis:
+# "-> Selected initial orbital window of 12 electrons in 12 MP2 natural orbitals."
+
+Step 1.3 — CASCI/DMRG One-Orbital Entropy
+# With the MP2 NO window, ASF runs either:
+#   CASCI  → if n_orbitals <= switch_dmrg (default 12)
+#   DMRG   → if n_orbitals >  switch_dmrg (large systems)
+#
+# For each orbital, ASF computes the ONE-ORBITAL ENTROPY:
+#
+#   S_i = - Σ_{n∈{0,↑,↓,↑↓}} w_i(n) * log(w_i(n))
+#
+# where w_i(n) = probability orbital i has occupation n
+#
+# From the docs entropy table:
+# MO    w( )    w(↑)    w(↓)    w(⇅)       S   sel
+#  7   0.029   0.008   0.008   0.954   0.226    a   ← S > threshold → ACTIVE
+#  8   0.954   0.008   0.008   0.030   0.228    a   ← S > threshold → ACTIVE
+#  9   0.984   0.007   0.007   0.003   0.101       ← S < threshold → inactive
+#
+# High entropy = orbital is in a superposition of occupations
+#             = strongly entangled with rest of molecule
+#             = MUST be treated quantum mechanically
+#
+# entropy_threshold = 0.15 (our setting)
+# Orbitals with S > 0.15 are selected → mo_list
+
+Step 1.4 — ActiveSpace Return Object
+active_space = find_from_mol(mol_pyscf, entropy_threshold=0.15)
+
+# Returns ActiveSpace dataclass:
+active_space.nel       # int: total electrons in active space
+                       # = sum of occupation numbers of active orbitals
+
+active_space.mo_list   # list[int]: indices of active orbitals
+                       # 0-indexed, in MP2 NATURAL ORBITAL basis
+                       # NOT in RHF orbital basis
+
+active_space.mo_coeff  # ndarray shape (n_AO, n_MO)
+                       # rows = atomic orbitals (basis functions)
+                       # cols = ALL molecular orbitals (MP2 NOs)
+                       # active ones are at columns mo_list
+
+Step 1.5 — Mulliken Population: Mapping Orbitals to Atoms
+# We now know WHICH orbitals are active
+# But DMET needs to know WHICH ATOMS they belong to
+# → Mulliken population analysis answers this
+
+S         = mol_pyscf.intor("int1e_ovlp")    # AO overlap matrix S_μν
+active_coeffs = mo_coeff[:, mo_list]         # coefficients of active NOs
+
+# For each active orbital i and atom A:
+# weight(i, A) = Σ_{μ∈A} C_μi * (S·C)_μi
+#
+# This measures: "how much of orbital i lives on atom A?"
+# The atom with the highest weight = dominant atom for that orbital
+
+# active_per_atom[A] = how many active orbitals are primarily on atom A
+# most_active_frag   = atom with most active orbitals
+#                    = most correlated fragment
+#                    = best candidate for quantum (SQD) treatment
+
+Part 2 — DMET (Density Matrix Embedding Theory) in Detail
+What Problem it Solves
+Even with ASF telling us which orbitals matter, the full molecular Hamiltonian is still large. DMET decomposes the molecule into fragments and embeds each fragment in a bath that captures its interaction with the rest.
+
+Step 2.1 — Mean Field (RHF)
+dmet.build()
+# Internally runs RHF on the full H2O molecule
+# Gets global mean-field:
+#   mo_coeff  → molecular orbital coefficients
+#   onerdm    → 1-electron reduced density matrix (1-RDM)
+#               onerdm[i,j] = ⟨aᵢ†aⱼ⟩
+#               describes average electron distribution
+
+Step 2.2 — Orbital Localization
+# DMET needs localized orbitals (assigned to specific atoms)
+# vs RHF which gives delocalized canonical MOs
+#
+# Default: Meta-Löwdin localization
+# Transforms delocalized MOs → localized orbitals
+# Each localized orbital belongs primarily to one atom/fragment
+#
+#   Delocalized RHF:          Localized (Meta-Löwdin):
+#   ψ₁ spread over H2O    →  φ₁ mostly on O
+#   ψ₂ spread over H2O    →  φ₂ mostly on H₁
+#   ψ₃ spread over H2O    →  φ₃ mostly on H₂
+
+Step 2.3 — Schmidt Decomposition (Bath Construction)
+# For fragment A (e.g. the O atom):
+#
+# Take the occupied localized orbitals on fragment A
+# Perform Schmidt decomposition of the global 1-RDM:
+#
+#   |Ψ_global⟩ = Σᵢ λᵢ |fragment_i⟩ ⊗ |bath_i⟩
+#
+# This gives:
+#   fragment orbitals  → orbitals physically on atom O
+#   bath orbitals      → orbitals on rest of molecule (H₁, H₂)
+#                        but ENTANGLED with O
+#
+# For a fragment of size k:
+#   n_fragment_orbs = k  (one per atom in fragment)
+#   n_bath_orbs     = k  (Schmidt decomposition gives at most k bath orbs)
+#   n_embedded_orbs = 2k (fragment + bath)
+#
+# For H2O with [1,1,1] fragments:
+#   Each fragment: 1 atom → n_embedded = 2 orbitals (sto-3g)
+#   But with bath: can be larger depending on basis
+
+Step 2.4 — Embedded Hamiltonian Construction
+# In the embedded space (fragment + bath), project the full Hamiltonian:
+#
+#   H_embedded = h1e + h2e
+#
+# h1e[i,j] = ⟨i|T + V_nuc + V_mf_bath|j⟩
+#   T       = kinetic energy
+#   V_nuc   = nuclear attraction
+#   V_mf_bath = mean-field potential from the environment
+#              (how the bath electrons affect fragment electrons on average)
+#
+# h2e[i,j,k,l] = ⟨ij|1/r₁₂|kl⟩
+#   = electron-electron repulsion within embedded space
+#   = chemist notation (ij|kl)
+#
+# These are stored in scf_fragments[i]:
+# frag_data[1] = h1e  (n_emb × n_emb)
+# frag_data[5] = h2e  (n_emb × n_emb × n_emb × n_emb)
+
+Step 2.5 — DMET Self-Consistency Loop
+dmet.simulate()
+# DMET is NOT just one calculation — it's a loop:
+#
+# While not converged:
+#   1. Solve each fragment with embedded H (here: FCI)
+#   2. Get fragment 1-RDM from FCI solution
+#   3. Compare fragment 1-RDM to global mean-field 1-RDM
+#   4. If they don't match: adjust chemical potential μ
+#      μ acts like a Lagrange multiplier
+#      H_embedded → H_embedded - μ * N_fragment
+#   5. Repeat until fragment 1-RDMs = global 1-RDM
+#
+# Convergence criterion:
+#   ||γ_fragment - γ_global||² < threshold
+#
+# This ensures the fragment solution is CONSISTENT with
+# the global electron distribution
+#
+# dmet_energy = Σᵢ E_fragment_i  (energy partitioning)
+
+Part 3 — SQD (Sample-based Quantum Diagonalization) in Detail
+What Problem it Solves
+The embedded Hamiltonian h1e, h2e defines a smaller problem (e.g. 4 electrons in 4 orbitals). SQD uses a quantum computer to explore the configuration space and then solves the Hamiltonian in that explored subspace classically.
+
+Step 3.1 — Why Not Just Use FCI?
+Full Hilbert space for 4e in 4 orbs:
+  C(4,2) × C(4,2) = 36 configurations   ← small, FCI trivial
+
+For larger fragments (e.g. 10e in 10 orbs):
+  C(10,5) × C(10,5) = 63,504 configurations  ← FCI gets expensive
+
+For production systems (20e in 20 orbs):
+  C(20,10)² ≈ 3.4 × 10¹⁰                    ← FCI impossible
+
+SQD: quantum circuit samples the IMPORTANT configurations
+     (those with high amplitude in the ground state)
+     → solve H in that small subspace
+     → approach FCI quality without full FCI cost
+
+Step 3.2 — Qubit Layout
+# n_qubits = 2 * n_orb  (8 qubits for 4 orbitals)
+#
+# Layout:
+#   qubit 0,1,2,3  → alpha (spin-up)   orbitals 0,1,2,3
+#   qubit 4,5,6,7  → beta  (spin-down) orbitals 0,1,2,3
+#
+# A bitstring like  |1100 1100⟩
+#                    ↑↑↑↑ ↑↑↑↑
+#                    q0-3 q4-7
+# means:
+#   alpha: orbitals 0,1 occupied, 2,3 empty
+#   beta:  orbitals 0,1 occupied, 2,3 empty
+#   → HF state for 2α + 2β electrons
+
+Step 3.3 — Circuit Design
+# Two parts to the circuit:
+
+# Part A: Hartree-Fock state preparation
+hf_circ = QuantumCircuit(n_qubits)
+for i in range(n_alpha): hf_circ.x(i)         # |0⟩ → |1⟩ for alpha orbs
+for i in range(n_beta):  hf_circ.x(n_orb + i) # |0⟩ → |1⟩ for beta  orbs
+# Result: |1100 1100⟩  (HF determinant)
+# Purpose: start from physically meaningful state
+#          → most samples will be near the correct sector
+
+# Part B: EfficientSU2 ansatz (hardware-efficient)
+ansatz = efficient_su2(n_qubits, reps=3, entanglement="full")
+# Structure per rep:
+#   Layer of Ry(θ), Rz(φ) on every qubit    ← single-qubit rotations
+#   CNOT ladder connecting all pairs          ← entanglement
+#   (repeat 3 times)
+#
+# Parameters: random in [0, 2π]
+#   → NOT optimised (no VQE!)
+#   → random parameters → diverse bitstrings
+#   → we WANT broad exploration, not ground state
+#
+# Why not optimise?
+#   SQD doesn't need the BEST circuit
+#   It needs DIVERSE configurations that SPAN the ground state
+#   Random parameters near HF give exactly this
+
+Step 3.4 — Sampling + Filtering
+# Simulate circuit on statevector simulator → 500,000 shots
+# Each shot → one 8-bit measurement outcome (bitstring)
+# e.g.: "11001100", "11000110", "10011001", ...
+
+# Problem: random circuit generates bitstrings with wrong electron counts
+# e.g. "11110000" = 4 alpha, 0 beta → wrong (need 2α, 2β)
+
+# filter_bitstrings removes these:
+#   keep only bitstrings where:
+#     qubits[0:4].sum() == n_alpha == 2
+#     qubits[4:8].sum() == n_beta  == 2
+#
+# Why wrong bitstrings are a problem:
+#   solve_fermion INFERS n_alpha from Hamming weight of bitstrings
+#   If different bitstrings have different Hamming weights → error
+#   All bitstrings MUST agree on electron count
+
+bitstring_matrix  # shape (n_valid, 8)  dtype bool
+probs             # shape (n_valid,)    sampling probability of each
+
+Step 3.5 — SQD Self-Consistent Loop
+# Each iteration has two substeps:
+
+# ── Substep A: recover_configurations ────────────────────────────────────
+# Input:  bitstring_matrix, probs, avg_occs (from previous iter)
+# 
+# avg_occs = (alpha_occs, beta_occs)
+#   alpha_occs[i] = average occupation of alpha orbital i
+#                 = probability orbital i is occupied in the current subspace
+#
+# recover_configurations:
+#   Looks at each bitstring
+#   If a bit is in a "wrong" position given avg_occs → flip it
+#   Enforces correct total electron count (num_elec_a, num_elec_b)
+#   Returns improved bitstring_matrix with better configuration coverage
+#
+# Iteration 0: avg_occs = HF occupations ([1,1,0,0], [1,1,0,0])
+#              → nudges away from pure HF toward correlated configs
+# Iteration k: avg_occs from solve_fermion → better guided flipping
+
+# ── Substep B: solve_fermion ──────────────────────────────────────────────
+# Input:  bitstring_matrix (n_configs, n_qubits)
+#         h1e (n_orb, n_orb)
+#         h2e (n_orb, n_orb, n_orb, n_orb)
+#
+# Step 1: Convert bitstrings → CI strings (integers encoding configurations)
+#         "1100" → integer 12 (binary: 1100)
+#
+# Step 2: Build CI Hamiltonian matrix in the bitstring subspace
+#         H_subspace[I,J] = ⟨I|H_embedded|J⟩
+#         where I,J are Slater determinants from the bitstring set
+#         Uses h1e and h2e to compute matrix elements
+#
+# Step 3: Diagonalise H_subspace (classical, small matrix)
+#         Lowest eigenvalue = SQD energy
+#         Lowest eigenvector = CI coefficients
+#
+# Step 4: Compute avg_occs from eigenvector
+#         avg_occs[i] = Σ_I |c_I|² * (occupation of orbital i in det I)
+#         = expected orbital occupancy in the ground state
+#         → fed back to recover_configurations in next iteration
+#
+# Returns:
+#   sqd_energy  : float           ground state energy in subspace
+#   sci_state   : SCIState        CI state object
+#   avg_occs    : tuple(ndarray)  (alpha_occs, beta_occs) for next iter
+#   spin_sq_val : float           ⟨S²⟩ (0 = singlet, 2 = triplet)
+
+Step 3.6 — Convergence
+Iter 01: 9 configs → E = -5.128 | avg_occs updated
+Iter 02: recover_configurations uses new avg_occs
+         → may add/modify configs
+         → diagonalise again → E unchanged if subspace didn't change
+...
+Converged when: energy stops changing between iterations
+                (subspace has been fully explored)
+
+Part 4 — What the Numbers Mean
+# FCI fragment energy  = exact ground state of H_embedded
+#                      = best possible answer for this fragment
+#                      = what SQD is trying to approach
+
+# SQD fragment energy  = ground state in the SAMPLED SUBSPACE
+#                      ≥ FCI energy  (variational principle)
+#                      → improves as more configs are sampled
+
+# DMET total energy    = Σᵢ DMET_partition_energy(fragment_i)
+#                      ≠ SQD fragment energy
+#                      Different quantity entirely
+
+# ΔE (SQD vs FCI)      = how close SQD is to exact
+#                      < 1e-3 Ha = "chemical accuracy"
+
+# ⟨S²⟩                = 0     → singlet (correct for closed-shell)
+#                      = 2     → triplet
+#                      = 0.75  → doublet
+
+Complete Flow Summary
+mol_pyscf (H2O, sto-3g)
+    │
+    ▼ find_from_mol()
+    │  ① UHF + stability check
+    │  ② MP2 natural orbitals + NOONs
+    │  ③ CASCI one-orbital entropies S_i
+    │  ④ select orbitals where S_i > threshold
+    │
+    ▼ ActiveSpace(nel=2, mo_list=[7,8], mo_coeff=...)
+    │
+    ▼ Mulliken population analysis
+    │  orbital 7 → mostly on O atom
+    │  orbital 8 → mostly on O atom
+    │  most_active_frag = 0 (O atom)
+    │
+    ▼ DMET fragment_atoms=[1,1,1]
+    │  ① RHF mean-field on full H2O
+    │  ② Meta-Löwdin localization
+    │  ③ Schmidt decomposition for each fragment
+    │     → bath orbitals
+    │  ④ Project H into embedded space
+    │     → h1e (n_emb × n_emb)
+    │     → h2e (n_emb × n_emb × n_emb × n_emb)
+    │  ⑤ Self-consistency loop (FCI, adjust μ)
+    │     → dmet_energy
+    │
+    ▼ h1e, h2e for fragment 0 (O atom, most correlated)
+    │
+    ▼ SQD
+    │  ① HF state + EfficientSU2 → 500k samples
+    │  ② filter: keep bitstrings with correct e-count
+    │  ③ for each iteration:
+    │     recover_configurations (guided bit flips)
+    │     solve_fermion (CI diagonalisation in subspace)
+    │     update avg_occs
+    │
+    ▼ sqd_energy ≈ fci_energy  (fragment ground state)
