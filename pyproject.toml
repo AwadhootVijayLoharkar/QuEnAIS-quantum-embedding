@@ -1,10 +1,28 @@
-[project]
-name = "quenais"
-version = "0.0.1"
-description = "Hybrid quantum-classical embedding framework (DFT + DMET + advanced solvers)"
-authors = [{name = "QuEnAIS Project"}]
-requires-python = ">=3.12"
-
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+requires      = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name        = "tmq"
+version     = "0.1.0"
+description = "Transition Metal Quantum Chemistry Pipeline"
+requires-python = ">=3.9"
+
+dependencies = [
+    "numpy",
+    "pyscf",
+    "qiskit",
+    "qiskit-addon-sqd",
+    "tangelo-gc",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov"]
+
+[tool.setuptools.packages.find]
+where = ["."]       # looks for packages (dirs with __init__.py) in project_root
+include = ["tmq*"]  # include tmq and all sub-packages
+
+[tool.pytest.ini_options]
+testpaths    = ["tests"]
+python_files = ["test_*.py"]
