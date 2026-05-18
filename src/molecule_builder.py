@@ -1,7 +1,9 @@
 from __future__ import annotations
 from pyscf import gto
 from tangelo import SecondQuantizedMolecule
-from tmq.config import MoleculeConfig
+
+# no cross-module import needed here — only config
+from config import MoleculeConfig
 
 
 def build_pyscf_mol(cfg: MoleculeConfig) -> gto.Mole:
@@ -17,7 +19,7 @@ def build_pyscf_mol(cfg: MoleculeConfig) -> gto.Mole:
 def build_tangelo_mol(cfg: MoleculeConfig) -> SecondQuantizedMolecule:
     return SecondQuantizedMolecule(
         cfg.geometry,
-        q    = cfg.charge,
-        spin = cfg.spin,
-        basis= cfg.basis,
+        q     = cfg.charge,
+        spin  = cfg.spin,
+        basis = cfg.basis,
     )
