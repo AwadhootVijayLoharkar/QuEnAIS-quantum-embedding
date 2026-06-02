@@ -788,6 +788,304 @@ def run_skqd(h1e, h2e, n_emb, n_alpha, n_beta, fci_ref_e, cfg):
         "converged"    : converged,
     }
 
+# ═════════════════════════════════════════════════════════════════════════════
+# Solver 3 : SqDRIFT
+# ═════════════════════════════════════════════════════════════════════════════
+
+def run_sqdrift(h1e, h2e, n_emb, n_alpha, n_beta, fci_ref_e, cfg):
+    """
+    SqDRIFT: Sampling-based Quantum Diagonalization with qDRIFT circuits.
+
+    Difference from SQD:
+      Instead of one random EfficientSU2, generates an ENSEMBLE of time
+      evolution circuits by subsampling Hamiltonian terms via qDRIFT.
+      Each randomization explores a different region of Hilbert space.
+
+    Pipeline:
+      1. h1e/h2e → FermionOperator (via temp FCIDUMP, PySCF → qiskit_fermions)
+      2. Group symmetry-related terms  → shorter circuits per group
+      3. Build Evolution circuit template
+      4. Transpile N randomized qDRIFT circuits (each uses different rng seed)
+      5. Prepend HF init + append measurement to each circuit
+      6. Sample all circuits via sample_circuits() (backend-dispatched)
+      7. Aggregate bitstrings, run iterative recover_configs + solve_fermion
+    """
+    try:
+        from qiskit_fermions.operators.library import FCIDump
+        from qiskit_fermions.operators import FermionOperator
+        from qiskit_fermions.operators.grouping import group_terms_by_electronic_structure
+        from qiskit_fermions.circuit import FermionicCircuit
+        from qiskit_fermions.circuit.library import Evolution
+        from qiskit_fermions.transpiler.presets import generate_preset_jw_pass_manager
+        from qiskit_fermions.transpiler.passes import QDriftTrotterization
+        from qiskit_fermions.transpiler import FermionicPassManager
+    except ImportError:
+        raise ImportError(
+            "qiskit-fermions is required for SqDRIFT.\n"
+            "Install: pip install qiskit-fermions\n"
+            "Or switch solver: config.QUANTUM_SOLVER = 'sqd'"
+        )
+
+    import os, tempfile
+    from pyscf.tools import fcidump as pyscf_fcidump
+    from collections import Counter
+
+    num_modes    = 2 * n_emb
+    num_circuits = getattr(cfg, "SQDRIFT_NUM_CIRCUITS", 10)
+    num_groups   = getattr(cfg, "SQDRIFT_NUM_GROUPS",   10)
+    time_scale   = getattr(cfg, "SQDRIFT_TIME",         1.0)
+    n_iters      = getattr(cfg, "SQDRIFT_ITERS",        10)
+    shots        = getattr(cfg, "SQDRIFT_SHOTS",
+                           getattr(cfg, "N_SHOTS", 8192))
+
+    print("\n── SqDRIFT Solver ──────────────────────────────────────────")
+    print(f"  num_circuits : {num_circuits}")
+    print(f"  num_groups   : {num_groups}  (qDRIFT terms per circuit)")
+    print(f"  time_scale   : {time_scale} Ha⁻¹")
+    print(f"  shots/circuit: {shots:,}")
+    print(f"  backend      : {getattr(cfg, 'BACKEND', 'local').upper()}")
+
+    # ── Step 1: h1e/h2e → FermionOperator via FCIDUMP ─────────────────────────
+    # qiskit_fermions expects a FCIDump object; PySCF can write one from integrals.
+    print("\n  Building FermionOperator from h1e/h2e (via FCIDUMP)...")
+    fd, tmp_path = tempfile.mkstemp(suffix=".fcidump")
+    os.close(fd)
+
+    try:
+        pyscf_fcidump.from_integrals(
+            tmp_path,
+            h1e, h2e,
+            n_emb,
+            n_alpha + n_beta,        # total electrons
+            ms=abs(n_alpha - n_beta),
+        )
+        fcidump_obj = FCIDump.from_file(tmp_path)
+        hamil       = FermionOperator.from_fcidump(fcidump_obj)
+    finally:
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+
+    # ── Step 2: Group symmetry-related terms ──────────────────────────────────
+    # Orbitals related by spatial/spin symmetry share identical coefficients.
+    # Grouping them allows their Pauli strings to cancel → shorter circuits.
+    group_terms_by_electronic_structure(hamil, num_modes)
+    n_unique_groups = len(set(hamil.groups))
+    print(f"  Grouped into {n_unique_groups} unique excitation groups")
+
+    # ── Step 3: Build Evolution circuit template ───────────────────────────────
+    # No HF init and no measurement yet — added per-circuit below.
+    evo_gate      = Evolution(num_modes, hamil, time_scale)
+    circ_template = FermionicCircuit(num_modes)
+    circ_template.append(evo_gate, circ_template.modes)
+
+    # ── Step 4 + 5: Generate randomized circuits, add HF init + measure ────────
+    # Each seed gives a different random subsampling of Hamiltonian groups.
+    print(f"\n  Generating {num_circuits} randomized qDRIFT circuits...")
+    pm = generate_preset_jw_pass_manager()
+
+    sqdrift_circuits = []
+    for i in range(num_circuits):
+        # Fresh QDriftTrotterization per circuit — different rng seed = different
+        # subsampling of excitation groups from the Hamiltonian
+        pm.optimization = FermionicPassManager(
+            [QDriftTrotterization(num_groups, rng=42 + i)]
+        )
+        transpiled = pm.run(circ_template)   # QuantumCircuit after JW + qDRIFT
+
+        # Prepend HF reference state (matches qiskit_addon_sqd bitstring convention:
+        #   qubits 0..n_emb-1       → alpha spin-orbitals
+        #   qubits n_emb..2*n_emb-1 → beta  spin-orbitals)
+        hf_qc = QuantumCircuit(num_modes)
+        for j in range(n_alpha): hf_qc.x(j)
+        for j in range(n_beta):  hf_qc.x(n_emb + j)
+
+        full_qc = hf_qc.compose(transpiled)
+        full_qc.measure_all()
+        sqdrift_circuits.append(full_qc)
+
+    depths = [c.depth() for c in sqdrift_circuits]
+    print(f"  Depths: min={min(depths)}  max={max(depths)}  "
+          f"mean={np.mean(depths):.1f}")
+
+    '''
+    # ── Step 6: Sample all circuits (backend-dispatched) ──────────────────────
+    print(f"\n  Sampling {num_circuits} circuits...")
+    all_counts = sample_circuits(sqdrift_circuits, shots, cfg)
+
+    # Aggregate bitstrings from all circuits in the ensemble
+    cumulative = Counter()
+    for counts in all_counts:
+        cumulative.update(counts)
+
+    bsm, probs = counts_to_arrays(dict(cumulative))
+    bsm, probs = filter_bitstrings(bsm, probs, n_alpha, n_beta, n_emb)
+
+    print(f"  Total shots collected    : {sum(cumulative.values()):,}")
+    print(f"  Valid (N-conserving) configs: {bsm.shape[0]:,}")
+
+    if bsm.shape[0] == 0:
+        raise RuntimeError(
+            "No valid bitstrings after filtering.\n"
+            "Try: increase SQDRIFT_NUM_CIRCUITS or SQDRIFT_SHOTS in config.py"
+        )
+
+    # ── Step 7: Iterative SQD post-processing (identical to run_sqd) ──────────
+    # recover_configurations expands the subspace; solve_fermion diagonalizes H.
+    avg_occs = (
+        np.array([1.0 if i < n_alpha else 0.0 for i in range(n_emb)]),
+        np.array([1.0 if i < n_beta  else 0.0 for i in range(n_emb)]),
+    ) '''
+      # ── Step 6: Sample all circuits (backend-dispatched) ──────────────────────
+    print(f"\n  Sampling {num_circuits} circuits...")
+    all_counts = sample_circuits(sqdrift_circuits, shots, cfg)
+
+    # Aggregate bitstrings from all circuits in the ensemble
+    cumulative = Counter()
+    for counts in all_counts:
+        cumulative.update(counts)
+
+    bsm, probs = counts_to_arrays(dict(cumulative))
+    bsm, probs = filter_bitstrings(bsm, probs, n_alpha, n_beta, n_emb)
+
+    print(f"  Total shots collected       : {sum(cumulative.values()):,}")
+    print(f"  Valid (N-conserving) configs: {bsm.shape[0]:,} / {max_cfg:,} possible")
+
+    # ── Small-space exhaustive seeding ────────────────────────────────────────
+    # When the full configuration space is ≤ 5000 determinants, enumerate ALL
+    # valid bitstrings and merge them with the sampled set.
+    # This guarantees recover_configurations has a meaningful subspace to
+    # expand from and prevents it from being stuck on only a handful of configs.
+    if max_cfg <= 5000:
+        from itertools import combinations
+        print(f"\n  Config space is tiny ({max_cfg} dets) → injecting all valid "
+              f"bitstrings exhaustively...")
+
+        all_rows = []
+        for alpha_bits in combinations(range(n_emb), n_alpha):
+            for beta_bits in combinations(range(n_emb), n_beta):
+                row = np.zeros(2 * n_emb, dtype=bool)
+                for b in alpha_bits:
+                    row[b] = True
+                for b in beta_bits:
+                    row[n_emb + b] = True
+                all_rows.append(row)
+
+        bsm_exhaust = np.array(all_rows, dtype=bool)
+        # Uniform probability over exhaustive set
+        prob_exhaust = np.ones(len(bsm_exhaust)) / len(bsm_exhaust)
+
+        if bsm.shape[0] > 0:
+            # Merge sampled + exhaustive, remove exact duplicates
+            bsm_combined  = np.vstack([bsm_exhaust, bsm])
+            prob_combined = np.concatenate([prob_exhaust, probs])
+            # Deduplicate by treating each row as a string key
+            seen = {}
+            for i, row in enumerate(bsm_combined):
+                key = row.tobytes()
+                if key not in seen:
+                    seen[key] = (row, prob_combined[i])
+            bsm   = np.array([v[0] for v in seen.values()], dtype=bool)
+            probs = np.array([v[1] for v in seen.values()])
+            probs = probs / probs.sum()   # renormalize
+        else:
+            bsm   = bsm_exhaust
+            probs = prob_exhaust
+
+        print(f"  Configs after exhaustive merge: {bsm.shape[0]:,} "
+              f"(= full space)")
+
+    # ── Always inject HF reference explicitly ────────────────────────────────
+    # Ensures the Hartree-Fock determinant is always in the subspace
+    # regardless of what the qDRIFT circuits happened to sample.
+    hf_row = np.zeros(2 * n_emb, dtype=bool)
+    for j in range(n_alpha): hf_row[j]        = True
+    for j in range(n_beta):  hf_row[n_emb + j] = True
+    hf_key = hf_row.tobytes()
+
+    existing_keys = {bsm[i].tobytes() for i in range(bsm.shape[0])}
+    if hf_key not in existing_keys:
+        bsm   = np.vstack([bsm,   hf_row[np.newaxis, :]])
+        probs = np.append(probs, 1.0 / (bsm.shape[0]))
+        probs = probs / probs.sum()
+        print(f"  Injected HF reference (was missing from sampled configs)")
+
+    if bsm.shape[0] == 0:
+        raise RuntimeError(
+            "No valid bitstrings after filtering + seeding.\n"
+            "Try: increase SQDRIFT_NUM_CIRCUITS or SQDRIFT_SHOTS in config.py"
+        )
+
+    # ── THIS BLOCK WAS MISSING — add it here ──────────────────────────────────
+    # avg_occs: initial aufbau guess for recover_configurations guidance.
+    # Alpha: fill lowest n_alpha orbitals. Beta: fill lowest n_beta orbitals.
+    # recover_configurations uses this to decide which bits to flip.
+    avg_occs = (
+        np.array([1.0 if i < n_alpha else 0.0 for i in range(n_emb)]),
+        np.array([1.0 if i < n_beta  else 0.0 for i in range(n_emb)]),
+    )
+
+    iterations  = []
+    sqd_energy  = None
+    spin_sq_val = None
+
+    target_str = f"{fci_ref_e:.8f}" if fci_ref_e is not None else "N/A"
+    print(f"\n  Iterating (FCI target = {target_str} Ha):")
+    print(f"  {'─'*60}")
+
+    for it in range(n_iters):
+        bsm, probs = recover_configurations(
+            bsm, probs, avg_occs,
+            num_elec_a=n_alpha,
+            num_elec_b=n_beta,
+            rand_seed=42 + it,
+        )
+
+        if bsm.shape[0] == 0:
+            print(f"  [iter {it+1}] No configs after recovery — stopping.")
+            break
+
+        sqd_energy, _, avg_occs, spin_sq_val = solve_fermion(
+                bsm,
+                hcore=h1e,
+                eri=h2e,
+                open_shell=True,    # ← alpha and beta treated independently
+                    spin_sq=None,       # ← no penalty; ground state is already singlet
+                )
+
+        delta = (abs(sqd_energy - fci_ref_e)
+                 if fci_ref_e is not None else float("nan"))
+
+        iterations.append({
+            "iter"     : it + 1,
+            "energy"   : float(sqd_energy),
+            "n_configs": int(bsm.shape[0]),
+            "spin_sq"  : float(spin_sq_val),
+            "delta"    : float(delta),
+        })
+
+        print(f"  Iter {it+1:02d} | E = {sqd_energy:.8f} Ha | "
+              f"configs = {bsm.shape[0]:5d} | "
+              f"<S²> = {spin_sq_val:.4f} | "
+              f"ΔE = {delta:.2e} Ha")
+
+    converged = (
+        len(iterations) > 0
+        and fci_ref_e is not None
+        and iterations[-1]["delta"] < 1e-3
+    )
+
+    return {
+        "solver"       : "sqdrift",
+        "energy"       : float(sqd_energy) if sqd_energy is not None else None,
+        "error_vs_fci" : (abs(sqd_energy - fci_ref_e)
+                          if sqd_energy is not None and fci_ref_e is not None
+                          else None),
+        "n_configs"    : int(bsm.shape[0]),
+        "spin_sq"      : float(spin_sq_val) if spin_sq_val is not None else None,
+        "iterations"   : iterations,
+        "converged"    : converged,
+    }
+
 
 # ═════════════════════════════════════════════════════════════════════════════
 # Solver registry — add future solvers here
@@ -797,6 +1095,7 @@ SOLVER_REGISTRY = {
     "sqd"  : run_sqd,
     # "skqd" : run_skqd,   ← uncomment when openfermion is installed
     "skqd" : run_skqd,
+    "sqdrift" : run_sqdrift
     # Future:
     # "sqdrift" : run_sqdrift,
     # "vqe"     : run_vqe,
