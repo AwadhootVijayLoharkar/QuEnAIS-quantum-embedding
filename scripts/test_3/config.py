@@ -4,7 +4,7 @@ import os
 BLOCKEXE_WRAPPER = os.path.expanduser("~/block2main_wrapper.sh")
 
 # ── Molecule ──────────────────────────────────────────────────────────────────
-MOLECULE = "porphine"
+MOLECULE = "FeN6"
 
 
 # ── Protein-Binding Ligand Mode ───────────────────────────────────────────────
