@@ -223,7 +223,7 @@ MAX_EMBED_ORBS = 24
 # "jw"  — Jordan-Wigner:   O(N) Pauli string length, simpler
 # "bk"  — Bravyi-Kitaev:   O(log N) Pauli string length, fewer gates for SKQD
 # BK is preferred for larger systems (n_emb > 8) on real hardware or deep circuits.
-FERMION_TO_QUBIT = "jw"    # "jw" | "bk"
+FERMION_TO_QUBIT = "bk"    # "jw" | "bk"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Quantum Solver
@@ -281,7 +281,7 @@ IBM_MAX_CIRCUIT_DEPTH  = 3000
 #   CCSD_T  — minutes to hours (skip for large systems)
 #   CASSCF  — minutes (uses active space from Step 1 if available)
 #   NEVPT2  — minutes (requires CASSCF)
-CLASSICAL_METHODS = ["HF", "MP2" ]
+CLASSICAL_METHODS = ["HF", "MP2"]
 # CLASSICAL_METHODS = ["HF", "MP2", "CCSD", "CCSD_T", "CASSCF", "NEVPT2"]  # full
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -290,10 +290,10 @@ CLASSICAL_METHODS = ["HF", "MP2" ]
 # Set GEOMETRY_SCAN = True to enable a bond-length scan for potential energy curve.
 # SCAN_ATOM_PAIR: indices of the two atoms whose distance is scanned.
 # SCAN_DISTANCES: bond lengths in Angstrom to evaluate.
-GEOMETRY_SCAN     = False
+GEOMETRY_SCAN     = True
 SCAN_ATOM_PAIR    = (0, 1)         # Ti(0) — O(1)
-SCAN_DISTANCES    = np.linspace(1.5, 2.5, 11)   # Å
-SCAN_METHOD       = "CCSD"         # which classical method to use for scan
+SCAN_DISTANCES    = np.linspace(0.9, 4.0, 20)   # Å
+SCAN_METHOD       = "MP2"         # which classical method to use for scan
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Resolve geometry at import time
@@ -301,3 +301,20 @@ SCAN_METHOD       = "CCSD"         # which classical method to use for scan
 GEOMETRY  = load_geometry(MOLECULE)
 ATOM_SYMS = [a[0] for a in GEOMETRY]
 N_ATOMS   = len(GEOMETRY)
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Geometry Scan  (step4_visualize.py)
+# ═══════════════════════════════════════════════════════════════════════════════
+GEOMETRY_SCAN     = True
+SCAN_ATOM_PAIR    = (0, 1)
+SCAN_DISTANCES    = np.linspace(0.9, 4.0, 20)   # Å
+SCAN_METHOD       = "MP2"
+
+# ── Quantum PES scan (added) ──────────────────────────────────────────────────
+# QUANTUM_SCAN=True runs SQD at each scan geometry alongside the classical method.
+# WARNING: each geometry point reruns Steps 1-3.  Expect 5-30 min per point.
+# QUANTUM_SCAN_FAST=True uses reduced shots/iters for speed; less accurate.
+QUANTUM_SCAN          = True         # False to skip quantum curve entirely
+QUANTUM_SCAN_FAST     = True         # True = fewer shots & iters (recommended)
+QUANTUM_SCAN_SHOTS    = 2048         # shots per geometry (fast mode)
+QUANTUM_SCAN_ITERS    = 4            # SQD iterations per geometry (fast mode)
