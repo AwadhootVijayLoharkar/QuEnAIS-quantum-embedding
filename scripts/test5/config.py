@@ -307,7 +307,7 @@ N_ATOMS   = len(GEOMETRY)
 # ═══════════════════════════════════════════════════════════════════════════════
 GEOMETRY_SCAN     = True
 SCAN_ATOM_PAIR    = (0, 1)
-SCAN_DISTANCES    = np.linspace(0.9, 4.0, 20)   # Å
+SCAN_DISTANCES    = np.linspace(0.9, 3.25, 10)   # Å
 SCAN_METHOD       = "MP2"
 
 # ── Quantum PES scan (added) ──────────────────────────────────────────────────
