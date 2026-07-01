@@ -305,23 +305,23 @@ MAX_EMBED_ORBS = 24
 # ═══════════════════════════════════════════════════════════════════════════════
 # Quantum Solver
 # ═══════════════════════════════════════════════════════════════════════════════
-QUANTUM_SOLVER = "skqd"   # "sqd" | "skqd" | "sqdrift"
-BACKEND        = "mps"    # "local" | "mps" | "ibm"
+QUANTUM_SOLVER = "sqd"   # "sqd" | "skqd" | "sqdrift"
+BACKEND        = "ibm"    # "local" | "mps" | "ibm"
 
-N_SHOTS     = 8192
-ANSATZ_REPS = 3
-SQD_ITERS   = 10
+N_SHOTS     = 4096
+ANSATZ_REPS = 4
+SQD_ITERS   = 5
 
 SKQD_KRYLOV_DIM   = 5
-SKQD_DT           = 0.9
+SKQD_DT           = 1.5
 SKQD_TROTTER_REPS = 1
-SKQD_SHOTS        = 8192
+SKQD_SHOTS        = 2048
 
-SQDRIFT_NUM_CIRCUITS = 70
+SQDRIFT_NUM_CIRCUITS = 50
 SQDRIFT_NUM_GROUPS   = 100
 SQDRIFT_TIME         = 2.0
 SQDRIFT_ITERS        = 10
-SQDRIFT_SHOTS        = 8192
+SQDRIFT_SHOTS        = 2048
 
 # MPS bond dimension scales with system: min(2^n_emb, cap)
 # For n_emb ≤ 8  → exact at 256; for larger systems set higher or use cap
