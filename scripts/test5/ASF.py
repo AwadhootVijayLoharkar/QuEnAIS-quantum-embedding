@@ -6,7 +6,7 @@ Phases:
   A: UHF + tier classification (simple / moderate / strongly correlated)
   B: MP2 natural orbital deviations + ASF candidate pool
   C: Adaptive gap detection → final active space
-  D: Löwdin population analysis → orbital-to-atom mapping
+  D: Löwdin population analysis → orbital-to-atom mapping\
 
 Fixes vs original:
   - classify(): singlet S²=0 handled separately (absolute threshold, not ratio)

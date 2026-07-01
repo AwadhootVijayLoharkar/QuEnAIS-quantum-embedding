@@ -24,9 +24,9 @@ BLOCKEXE_WRAPPER = os.path.expanduser("~/block2main_wrapper.sh")
 # ═══════════════════════════════════════════════════════════════════════════════
 # Molecule Selection
 # ═══════════════════════════════════════════════════════════════════════════════
-MOLECULE = "TiO2"
+MOLECULE = "CuFeS2"
 CHARGE   = 0
-SPIN     = 0        # 2S: 0=singlet, 2=triplet, 4=quintet
+SPIN     = 0    # 2S: 0=singlet, 2=triplet, 4=quintet
 BASIS    = "def2-svp"
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -215,45 +215,48 @@ CORE_OCC_THRESHOLD = 1.95
 # ═══════════════════════════════════════════════════════════════════════════════
 BATH_TOLERANCE = 1e-8
 MIN_BATH_ORBS  = 0
-MAX_EMBED_ORBS = 24
+MAX_EMBED_ORBS = 48
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Fermion-to-Qubit Mapping
-# ═══════════════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════\
 # "jw"  — Jordan-Wigner:   O(N) Pauli string length, simpler
 # "bk"  — Bravyi-Kitaev:   O(log N) Pauli string length, fewer gates for SKQD
 # BK is preferred for larger systems (n_emb > 8) on real hardware or deep circuits.
-FERMION_TO_QUBIT = "bk"    # "jw" | "bk"
+FERMION_TO_QUBIT = "jw"    # "jw" | "bk" (use JW for LUCJ as ffsim uses JW encoding natively)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Quantum Solver
 # ═══════════════════════════════════════════════════════════════════════════════
 QUANTUM_SOLVER = "sqd"      # "sqd" | "skqd" | "sqdrift"
-BACKEND        = "mps"      # "local" | "mps" | "ibm"
+BACKEND        = "ibm"      # "local" | "mps" | "ibm"
 
 # --- Ansatz selection for SQD ---
 # "su2"  — EfficientSU2: general, does NOT conserve particle number
 #           ~30-60% of shots filtered out (expected)
 # "lucj" — Local Unitary Cluster Jastrow: conserves particle number by construction
 #           0% of shots wasted, physically motivated, faster convergence
-ANSATZ = "su2"             # "su2" | "lucj"
+# Recommended settings for ffsim LUCJ
+ANSATZ           = "lucj"          # switch from "su2"
+           
+
 
 # LUCJ parameters
-LUCJ_NUM_LAYERS     = 3     # number of orbital rotation + Jastrow layers
+LUCJ_NUM_LAYERS     = 9     # number of orbital rotation + Jastrow layers
 LUCJ_MAX_ITERATIONS = 10    # optimization iterations (if variational)
 
 # SU2 parameters (used only when ANSATZ="su2")
-ANSATZ_REPS = 3
+ANSATZ_REPS = 4
 
 # Shared SQD
-N_SHOTS   = 8192
+N_SHOTS   =  4096
 SQD_ITERS = 10
 
 # SKQD
 SKQD_KRYLOV_DIM   = 5
 SKQD_DT           = 0.9
 SKQD_TROTTER_REPS = 1
-SKQD_SHOTS        = 8192
+SKQD_SHOTS        = 2048
 
 # SqDRIFT
 SQDRIFT_NUM_CIRCUITS = 70
@@ -290,10 +293,10 @@ CLASSICAL_METHODS = ["HF", "MP2"]
 # Set GEOMETRY_SCAN = True to enable a bond-length scan for potential energy curve.
 # SCAN_ATOM_PAIR: indices of the two atoms whose distance is scanned.
 # SCAN_DISTANCES: bond lengths in Angstrom to evaluate.
-GEOMETRY_SCAN     = True
-SCAN_ATOM_PAIR    = (0, 1)         # Ti(0) — O(1)
-SCAN_DISTANCES    = np.linspace(0.9, 4.0, 20)   # Å
-SCAN_METHOD       = "MP2"         # which classical method to use for scan
+GEOMETRY_SCAN     = False
+SCAN_ATOM_PAIR    = (0, 1)
+SCAN_DISTANCES    = np.linspace(0.9, 3.25, 10)   # Å
+SCAN_METHOD       = "MP2"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Resolve geometry at import time
@@ -302,19 +305,12 @@ GEOMETRY  = load_geometry(MOLECULE)
 ATOM_SYMS = [a[0] for a in GEOMETRY]
 N_ATOMS   = len(GEOMETRY)
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# Geometry Scan  (step4_visualize.py)
-# ═══════════════════════════════════════════════════════════════════════════════
-GEOMETRY_SCAN     = True
-SCAN_ATOM_PAIR    = (0, 1)
-SCAN_DISTANCES    = np.linspace(0.9, 3.25, 10)   # Å
-SCAN_METHOD       = "MP2"
 
 # ── Quantum PES scan (added) ──────────────────────────────────────────────────
 # QUANTUM_SCAN=True runs SQD at each scan geometry alongside the classical method.
 # WARNING: each geometry point reruns Steps 1-3.  Expect 5-30 min per point.
 # QUANTUM_SCAN_FAST=True uses reduced shots/iters for speed; less accurate.
 QUANTUM_SCAN          = True         # False to skip quantum curve entirely
-QUANTUM_SCAN_FAST     = True         # True = fewer shots & iters (recommended)
-QUANTUM_SCAN_SHOTS    = 2048         # shots per geometry (fast mode)
-QUANTUM_SCAN_ITERS    = 4            # SQD iterations per geometry (fast mode)
+QUANTUM_SCAN_FAST     = False        # True = fewer shots & iters (recommended)
+QUANTUM_SCAN_SHOTS    = 2048        # shots per geometry (fast mode)
+QUANTUM_SCAN_ITERS    = 8           # SQD iterations per geometry (fast mode)

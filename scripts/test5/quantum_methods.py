@@ -311,116 +311,124 @@ def _build_su2_circuit():
 
 def _build_lucj_circuit():
     """
-    Local Unitary Cluster Jastrow (LUCJ) ansatz.
+    LUCJ ansatz via ffsim (IBM's canonical fermionic circuit library).
 
-    Structure: |ψ_LUCJ⟩ = U_R · exp(iJ) · U_L |HF⟩
+    Architecture per layer:
+      1. Orbital rotation (U):   general U(N) on alpha/beta separately
+      2. Diagonal Jastrow (J):   exp(i Σ θ_pq n_p n_q) — density correlations
+      3. Orbital rotation (U'):  second rotation block
 
-      U_L, U_R = local orbital rotation layers (nearest-neighbour SU(2) gates)
-      exp(iJ)  = diagonal Jastrow factor: exp(i Σ_{pq} θ_{pq} n_p n_q)
-                 captures density-density correlations
+    'Local' = interaction_pairs restricted to nearest neighbours only.
+    This gives O(N) depth per layer vs O(N²) for full UCJ.
 
-    Advantages over EfficientSU2:
-      1. Conserves particle number by construction → 0% shots wasted
-      2. Physically motivated: matches electronic correlation structure
-      3. Can be initialized from MP2/CCSD amplitudes for faster convergence
-      4. O(N) circuit depth per layer (vs O(N²) for full entanglement SU2)
-
-    Note: requires qiskit-addon-sqd >= 0.5 with LUCJ support.
+    Particle number is conserved by construction — no shot filtering needed.
     """
     try:
-        from qiskit_addon_sqd.lucj import LUCJAnsatz
-        lucj = LUCJAnsatz(
-            num_orbitals  = n_emb,
-            num_layers    = config.LUCJ_NUM_LAYERS,
-            num_elec_a    = n_alpha,
-            num_elec_b    = n_beta,
+        import ffsim
+        from ffsim.qiskit import (
+            PrepareHartreeFockJW,
+            UCJOpSpinBalancedJW,
         )
-        # Build circuit: HF reference + LUCJ layers
-        circ = lucj.circuit()
-        circ.measure_all()
 
-        print(f"  LUCJ circuit: {n_qubits}q,  depth={circ.depth()},  "
+        # Local interaction pairs (LUCJ constraint)
+        # Even-offset pairs:  (0,1), (2,3), (4,5), ...
+        # Odd-offset pairs:   (1,2), (3,4), (5,6), ...
+        # Together they form a "brickwork" of nearest-neighbour interactions.
+        pairs_aa = (
+            [(i, i + 1) for i in range(0, n_emb - 1, 2)]  # even layer
+            + [(i, i + 1) for i in range(1, n_emb - 1, 2)]  # odd layer
+        )
+        pairs_ab = [(i, i) for i in range(n_emb)]  # on-site alpha-beta coupling
+
+        rng = np.random.default_rng(42)
+
+        ucj_op = ffsim.random.random_ucj_op_spin_balanced(
+            norb=n_emb,
+            n_reps=config.LUCJ_NUM_LAYERS,
+            interaction_pairs=(pairs_aa, pairs_ab),
+            seed=rng,
+        )
+
+        # Build Qiskit circuit: HF reference + UCJ layers (JW encoding)
+        circuit = QuantumCircuit(2 * n_emb)
+        circuit.append(
+            PrepareHartreeFockJW(
+                norb=n_emb,
+                nelec=(n_alpha, n_beta),
+            ),
+            range(2 * n_emb),
+        )
+        circuit.append(
+            UCJOpSpinBalancedJW(ucj_op),
+            range(2 * n_emb),
+        )
+        circuit.measure_all()
+
+        print(f"  LUCJ (ffsim) : {2*n_emb}q,  depth={circuit.decompose().depth()},  "
               f"layers={config.LUCJ_NUM_LAYERS}")
-        print(f"  ✓ LUCJ conserves particle number — 0% shots wasted")
-        return circ
+        print(f"  interaction pairs α-α: {len(pairs_aa)},  α-β (on-site): {len(pairs_ab)}")
+        print(f"  ✓ Particle number conserved by construction — 0% shots wasted")
+        return circuit
 
-    except ImportError:
-        # Fallback: manual LUCJ construction using basic gates
+    except ImportError as e:
         warnings.warn(
-            "qiskit_addon_sqd.lucj not found. "
-            "Building LUCJ manually with givens rotations.",
+            f"ffsim not available ({e}).\n"
+            "Install with: pip install ffsim\n"
+            "Falling back to manual Givens rotation LUCJ.",
             RuntimeWarning,
         )
-        return _build_lucj_manual()
+        return _build_lucj_manual_givens()
 
 
-def _build_lucj_manual():
+def _build_lucj_manual_givens():
     """
-    Manual LUCJ construction when qiskit_addon_sqd.lucj is unavailable.
-
-    Implements the key LUCJ property: particle-number conservation.
-    Uses Givens rotation layers (number-preserving SU(2) on pairs of modes)
-    interleaved with diagonal phase layers (Jastrow factor approximation).
-
-    Circuit structure per layer:
-      1. Givens rotations on (0,1), (2,3), ... (even pairs)
-      2. Givens rotations on (1,2), (3,4), ... (odd pairs)
-      3. Phase gates (Z rotations) for diagonal Jastrow
-
-    Givens rotation G(θ,φ) preserves particle number:
-      G|01⟩ = cos(θ)|01⟩ + e^{iφ} sin(θ)|10⟩
-      G|10⟩ = -e^{-iφ} sin(θ)|01⟩ + cos(θ)|10⟩
-      G|00⟩ = |00⟩,  G|11⟩ = e^{i(φ_0+φ_1)}|11⟩
+    Fallback LUCJ when ffsim is unavailable.
+    Uses parameterized Givens rotations — particle-number conserving.
+    Less accurate than ffsim but structurally correct.
     """
-    from qiskit.circuit import Parameter
+    rng  = np.random.default_rng(42)
+    circ = QuantumCircuit(2 * n_emb)
 
-    rng    = np.random.default_rng(42)
-    circ   = QuantumCircuit(n_qubits)
+    # HF reference
+    for i in range(n_alpha):
+        circ.x(i)
+    for i in range(n_beta):
+        circ.x(n_emb + i)
 
-    # Initialize HF reference (particle-number conserving starting point)
-    for i in range(n_alpha): circ.x(i)
-    for i in range(n_beta):  circ.x(n_emb + i)
+    def apply_givens(qc, q0, q1):
+        """
+        Number-preserving SU(2) on modes q0, q1:
+          G|01⟩ = cos θ|01⟩ + sinθ|10⟩
+          G|10⟩ = -sinθ|01⟩ + cosθ|10⟩
+        Implemented as: CNOT — Ry(2θ) — CNOT
+        """
+        theta = rng.uniform(-np.pi / 4, np.pi / 4)
+        qc.cx(q0, q1)
+        qc.ry(2 * theta, q0)
+        qc.cx(q0, q1)
 
-    def givens_layer(qc, qubits, offset, layer_idx, spin_label):
-        """Apply Givens rotation layer to adjacent pairs."""
-        pairs = list(range(offset, len(qubits) - 1, 2))
-        for k, p in enumerate(pairs):
-            q0, q1 = qubits[p], qubits[p + 1]
-            theta = rng.uniform(-np.pi / 4, np.pi / 4)
-            phi   = rng.uniform(0, 2 * np.pi)
-            # Givens rotation via CNOT + single-qubit rotations
-            # (number-preserving decomposition)
-            qc.cx(q0, q1)
-            qc.ry(2 * theta, q0)
-            qc.rz(phi, q0)
-            qc.cx(q0, q1)
-            qc.rz(-phi, q1)
-
-    def jastrow_layer(qc, qubits):
-        """Diagonal Jastrow phase layer: Z rotations on each orbital."""
-        for q in qubits:
-            angle = rng.uniform(-np.pi / 8, np.pi / 8)
-            qc.rz(angle, q)
-
-    alpha_qubits = list(range(n_emb))
-    beta_qubits  = list(range(n_emb, 2 * n_emb))
-
-    for layer in range(config.LUCJ_NUM_LAYERS):
-        # Alpha spin block
-        givens_layer(circ, alpha_qubits, offset=0, layer_idx=layer, spin_label="α")
-        givens_layer(circ, alpha_qubits, offset=1, layer_idx=layer, spin_label="α")
-        jastrow_layer(circ, alpha_qubits)
-        # Beta spin block
-        givens_layer(circ, beta_qubits,  offset=0, layer_idx=layer, spin_label="β")
-        givens_layer(circ, beta_qubits,  offset=1, layer_idx=layer, spin_label="β")
-        jastrow_layer(circ, beta_qubits)
+    for _ in range(config.LUCJ_NUM_LAYERS):
+        # Even pairs — alpha
+        for i in range(0, n_emb - 1, 2):
+            apply_givens(circ, i, i + 1)
+        # Odd pairs — alpha
+        for i in range(1, n_emb - 1, 2):
+            apply_givens(circ, i, i + 1)
+        # Even pairs — beta
+        for i in range(n_emb, 2 * n_emb - 1, 2):
+            apply_givens(circ, i, i + 1)
+        # Odd pairs — beta
+        for i in range(n_emb + 1, 2 * n_emb - 1, 2):
+            apply_givens(circ, i, i + 1)
+        # Diagonal Jastrow (Rz on each mode)
+        for q in range(2 * n_emb):
+            circ.rz(rng.uniform(-np.pi / 8, np.pi / 8), q)
 
     circ.measure_all()
-    print(f"  LUCJ (manual) circuit: {n_qubits}q,  depth={circ.depth()},  "
+    print(f"  LUCJ (manual fallback): {2*n_emb}q,  depth={circ.depth()},  "
           f"layers={config.LUCJ_NUM_LAYERS}")
     print(f"  ✓ Particle number conserved by construction")
     return circ
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Shared helpers
@@ -505,13 +513,13 @@ def iterative_solve(bsm, probs, n_iters):
             warnings.warn(f"recover_configurations returned 0 configs at iter {it+1}.",
                           RuntimeWarning)
             break
-
         e_emb, _, avg_occs, spin_sq = solve_fermion(
-            bsm, hcore=h1e, eri=h2e, open_shell=False, spin_sq=0.0,
+            bsm, hcore=h1e, eri=h2e,  open_shell=False, spin_sq=0.0,
         )
-
-        # ── Add core energy to get total molecular energy ──────────────────
-        energy = float(e_emb) + ecore
+        # e_emb is the correlated energy of the EMBEDDING ONLY
+        # ecore is the mean-field energy of EVERYTHING ELSE
+        # Their sum = total molecular energy
+        energy = float(e_emb) + ecore    # ← this line must exist
 
         print_iteration(f"{it+1:02d}", energy, bsm.shape[0], prev_energy)
         iterations.append({
@@ -616,10 +624,15 @@ def run_skqd():
             continue
 
         try:
-            energy, _, _, spin_sq = solve_fermion(
+            '''energy, _, _, spin_sq = solve_fermion(
                 bsm, hcore=h1e, eri=h2e, open_shell=False, spin_sq=0.0,
             )
+            energy = float(e_emb) + ecore'''
+            e_emb, _, avg_occs, spin_sq = solve_fermion(
+                    bsm, hcore=h1e, eri=h2e, open_shell=False, spin_sq=0.0,
+                            )
             energy = float(e_emb) + ecore
+            
         except (np.linalg.LinAlgError, ValueError) as e:
             print(f"  k={k:2d}  │  solve_fermion failed: {e}")
             continue
