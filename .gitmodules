@@ -4,3 +4,9 @@
 [submodule "qiskit-fermions"]
 	path = qiskit-fermions
 	url = https://github.com/Qiskit/qiskit-fermions.git
+[submodule "gqe-for-qsci"]
+	path = gqe-for-qsci
+	url = https://github.com/moken20/gqe-for-qsci.git
+[submodule "external/pyci"]
+	path = external/pyci
+	url = https://github.com/theochem/PyCI.git

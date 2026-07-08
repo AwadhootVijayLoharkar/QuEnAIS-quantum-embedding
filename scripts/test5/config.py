@@ -24,7 +24,7 @@ BLOCKEXE_WRAPPER = os.path.expanduser("~/block2main_wrapper.sh")
 # ═══════════════════════════════════════════════════════════════════════════════
 # Molecule Selection
 # ═══════════════════════════════════════════════════════════════════════════════
-MOLECULE = "NiO"
+MOLECULE = "TiO2"
 CHARGE   = 0
 SPIN     = 0    # 2S: 0=singlet, 2=triplet, 4=quintet
 BASIS    = "def2-svp"
@@ -215,7 +215,7 @@ CORE_OCC_THRESHOLD = 1.95
 # ═══════════════════════════════════════════════════════════════════════════════
 BATH_TOLERANCE = 1e-8
 MIN_BATH_ORBS  = 0
-MAX_EMBED_ORBS = 24
+MAX_EMBED_ORBS = 18
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Fermion-to-Qubit Mapping
@@ -223,7 +223,7 @@ MAX_EMBED_ORBS = 24
 # "jw"  — Jordan-Wigner:   O(N) Pauli string length, simpler
 # "bk"  — Bravyi-Kitaev:   O(log N) Pauli string length, fewer gates for SKQD
 # BK is preferred for larger systems (n_emb > 8) on real hardware or deep circuits.
-FERMION_TO_QUBIT = "jw"    # "jw" | "bk" (use JW for LUCJ as ffsim uses JW encoding natively)
+FERMION_TO_QUBIT = "bk"    # "jw" | "bk" (use JW for LUCJ as ffsim uses JW encoding natively)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Quantum Solver
@@ -249,7 +249,7 @@ LUCJ_MAX_ITERATIONS = 10    # optimization iterations (if variational)
 ANSATZ_REPS = 4
 
 # Shared SQD
-N_SHOTS   =  1024
+N_SHOTS   =  4096
 SQD_ITERS = 5
 
 # SKQD
