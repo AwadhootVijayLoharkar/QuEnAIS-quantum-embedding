@@ -227,7 +227,9 @@ def compute_mp2_deviations(mf, mol):
     # Diagonalize in Löwdin orthogonal basis → natural orbital occupations
     dm_lo = S_invsqrt @ dm_ao @ S_invsqrt.T
     dm_lo = 0.5 * (dm_lo + dm_lo.T)                        # enforce symmetry
-    no_occ    = np.clip(np.linalg.eigvalsh(dm_lo)[::-1], 0.0, 2.0)
+    C = np.asarray(mf.mo_coeff[0])          # canonical MOs, same numbering as mo_list
+    dm_mo = C.T @ S @ dm_ao @ S @ C          # correlated density, expressed per canonical MO
+    no_occ    = np.clip(np.diag(dm_mo), 0.0, 2.0)
     deviation = np.minimum(no_occ, 2.0 - no_occ)
 
     return deviation, no_occ, e_corr, mp2_ok
