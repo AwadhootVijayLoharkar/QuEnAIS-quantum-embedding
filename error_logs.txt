@@ -1,48 +1,4 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ HYDRA_FULL_ERROR=1 python train.py molecule=n2 trainer.max_iters=2
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
-wandb: WARNING The anonymous setting has no effect and will be removed in a future version.
-wandb: (1) Create a W&B account
-wandb: (2) Use an existing W&B account
-wandb: (3) Don't visualize my results
-wandb: Enter your choice: 3
-wandb: You chose "Don't visualize my results"
-wandb: Using W&B in offline mode.
-wandb: W&B API key is configured. Use `wandb login --relogin` to force relogin
-wandb: WARNING `resume` will be ignored since W&B syncing is set to `offline`. Starting a new run with run id sawafk3k.
-wandb: Tracking run with wandb version 0.28.0
-wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
-wandb: Run data is saved locally in outputs/gqe-for-qsci/default-2026-07-09-00-29-05/wandb/offline-run-20260709_002910-sawafk3k
-wandb: View this run in the terminal with `wandb leet`
-converged SCF energy = -106.616959082769
-Vocab size: 188
-CASCI Energy: -107.44040897497159
-CCSD Energy: -106.98408522634637
-Using 16bit Automatic Mixed Precision (AMP)
-GPU available: True (cuda), used: True
-TPU available: False, using: 0 TPU cores
-💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
-Checkpoint outputs/gqe-for-qsci/default-2026-07-09-00-29-05/models/last.ckpt does not exist. Training from scratch.
-LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/pytorch_lightning/utilities/model_summary/model_summary.py:242: Precision 16-mixed is not supported by the model summary.  Estimated model size in MB will not be accurate. Using 32 bits instead.
-
-  | Name  | Type      | Params | Mode  | FLOPs
-----------------------------------------------------
-0 | model | GPT2Model | 42.7 M | train | 0    
-----------------------------------------------------
-42.7 M    Trainable params
-0         Non-trainable params
-42.7 M    Total params
-170.726   Total estimated model params size (MB)
-86        Modules in train mode
-0         Modules in eval mode
-0         Total Flops
-Error executing job with overrides: ['molecule=n2', 'trainer.max_iters=2']
-RuntimeError: architecture mismatch
-wandb: 
-wandb: You can sync this run to the cloud by running:
-wandb: wandb sync outputs/gqe-for-qsci/default-2026-07-09-00-29-05/wandb/offline-run-20260709_002910-sawafk3k
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ export CUDAQ_DEFAULT_SIMULATOR=qpp-cpu
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ export HYDRA_FULL_ERROR=1
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ python train.py molecule=n2 trainer.max_iters=2
 /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   import pkg_resources
@@ -54,10 +10,10 @@ wandb: Enter your choice: 3
 wandb: You chose "Don't visualize my results"
 wandb: Using W&B in offline mode.
 wandb: W&B API key is configured. Use `wandb login --relogin` to force relogin
-wandb: WARNING `resume` will be ignored since W&B syncing is set to `offline`. Starting a new run with run id b455d861.
+wandb: WARNING `resume` will be ignored since W&B syncing is set to `offline`. Starting a new run with run id qvnu8049.
 wandb: Tracking run with wandb version 0.28.0
 wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
-wandb: Run data is saved locally in outputs/gqe-for-qsci/default-2026-07-09-00-31-20/wandb/offline-run-20260709_003124-b455d861
+wandb: Run data is saved locally in outputs/gqe-for-qsci/default-2026-07-09-00-39-17/wandb/offline-run-20260709_003940-qvnu8049
 wandb: View this run in the terminal with `wandb leet`
 converged SCF energy = -106.616959082769
 Vocab size: 188
@@ -67,7 +23,7 @@ Using 16bit Automatic Mixed Precision (AMP)
 GPU available: True (cuda), used: True
 TPU available: False, using: 0 TPU cores
 💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
-Checkpoint outputs/gqe-for-qsci/default-2026-07-09-00-31-20/models/last.ckpt does not exist. Training from scratch.
+Checkpoint outputs/gqe-for-qsci/default-2026-07-09-00-39-17/models/last.ckpt does not exist. Training from scratch.
 LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
 /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/pytorch_lightning/utilities/model_summary/model_summary.py:242: Precision 16-mixed is not supported by the model summary.  Estimated model size in MB will not be accurate. Using 32 bits instead.
 
@@ -84,9 +40,30 @@ LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
 0         Total Flops
 Error executing job with overrides: ['molecule=n2', 'trainer.max_iters=2']
 TypeError: cannot pickle 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult' object
-
-Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
 wandb: 
 wandb: You can sync this run to the cloud by running:
-wandb: wandb sync outputs/gqe-for-qsci/default-2026-07-09-00-31-20/wandb/offline-run-20260709_003124-b455d861
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ 
+wandb: wandb sync outputs/gqe-for-qsci/default-2026-07-09-00-39-17/wandb/offline-run-20260709_003940-qvnu8049
+
+
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ export OPENBLAS_CORETYPE=Haswell
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ python train.py molecule=n2 trainer.max_iters=2
+python: can't open file '/home/loharkar/QuEnAIS-quantum-embedding/train.py': [Errno 2] No such file or directory
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ cd gqe-for-qsci/
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:gqe-for-qsci]$ python train.py molecule=n2 trainer.max_iters=2
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+wandb: WARNING The anonymous setting has no effect and will be removed in a future version.
+wandb: (1) Create a W&B account
+wandb: (2) Use an existing W&B account
+wandb: (3) Don't visualize my results
+wandb: Enter your choice: 3
+wandb: You chose "Don't visualize my results"
+wandb: Using W&B in offline mode.
+wandb: W&B API key is configured. Use `wandb login --relogin` to force relogin
+wandb: WARNING `resume` will be ignored since W&B syncing is set to `offline`. Starting a new run with run id d19sobhw.
+wandb: Tracking run with wandb version 0.28.0
+wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+wandb: Run data is saved locally in outputs/gqe-for-qsci/default-2026-07-09-00-45-32/wandb/offline-run-20260709_004537-d19sobhw
+wandb: View this run in the terminal with `wandb leet`
+Illegal instruction (core dumped)
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:gqe-for-qsci]$ 
