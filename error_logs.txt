@@ -1,4 +1,4 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:gqe-for-qsci]$ python train.py molecule=n2 trainer.max_iters=2
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ HYDRA_FULL_ERROR=1 python train.py molecule=n2 trainer.max_iters=2
 /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   import pkg_resources
 wandb: WARNING The anonymous setting has no effect and will be removed in a future version.
@@ -9,120 +9,10 @@ wandb: Enter your choice: 3
 wandb: You chose "Don't visualize my results"
 wandb: Using W&B in offline mode.
 wandb: W&B API key is configured. Use `wandb login --relogin` to force relogin
-wandb: WARNING `resume` will be ignored since W&B syncing is set to `offline`. Starting a new run with run id e52rytbp.
+wandb: WARNING `resume` will be ignored since W&B syncing is set to `offline`. Starting a new run with run id sawafk3k.
 wandb: Tracking run with wandb version 0.28.0
 wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
-wandb: Run data is saved locally in outputs/gqe-for-qsci/default-2026-07-09-00-12-50/wandb/offline-run-20260709_001254-e52rytbp
-wandb: View this run in the terminal with `wandb leet`
-Illegal instruction (core dumped)
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:gqe-for-qsci]$ nvidia-smi
-python -c "import torch; print(torch.__version__); print(torch.version.cuda); print(torch.cuda.get_device_name(0)); print(torch.cuda.get_device_capability(0))"
-Thu Jul  9 00:16:05 2026       
-+-----------------------------------------------------------------------------------------+
-| NVIDIA-SMI 580.126.09             Driver Version: 580.126.09     CUDA Version: 13.0     |
-+-----------------------------------------+------------------------+----------------------+
-| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
-| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
-|                                         |                        |               MIG M. |
-|=========================================+========================+======================|
-|   0  NVIDIA GeForce RTX 4070 ...    Off |   00000000:06:00.0 Off |                  N/A |
-|  0%   32C    P8             12W /  285W |      44MiB /  16376MiB |      0%      Default |
-|                                         |                        |                  N/A |
-+-----------------------------------------+------------------------+----------------------+
-
-+-----------------------------------------------------------------------------------------+
-| Processes:                                                                              |
-|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
-|        ID   ID                                                               Usage      |
-|=========================================================================================|
-|  No running processes found                                                             |
-+-----------------------------------------------------------------------------------------+
-2.9.1+cu128
-12.8
-NVIDIA GeForce RTX 4070 Ti SUPER
-(8, 9)
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:gqe-for-qsci]$ lscpu
-cat /proc/cpuinfo | grep -m1 flags
-Architecture:                x86_64
-  CPU op-mode(s):            32-bit, 64-bit
-  Address sizes:             43 bits physical, 48 bits virtual
-  Byte Order:                Little Endian
-CPU(s):                      24
-  On-line CPU(s) list:       0-23
-Vendor ID:                   AuthenticAMD
-  Model name:                AMD Ryzen Threadripper 1920X 12-Core Processor
-    CPU family:              23
-    Model:                   1
-    Thread(s) per core:      2
-    Core(s) per socket:      12
-    Socket(s):               1
-    Stepping:                1
-    Frequency boost:         enabled
-    CPU(s) scaling MHz:      60%
-    CPU max MHz:             3500.0000
-    CPU min MHz:             2200.0000
-    BogoMIPS:                6986.18
-    Flags:                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl nonstop_tsc cpuid extd_apicid amd_d
-                             cm aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw skinit wdt tce t
-                             opoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb hw_pstate ssbd ibpb vmmcall fsgsbase bmi1 avx2 smep bmi2 rdseed adx smap clflushopt sha_ni xsaveopt xsavec xgetbv1 clzero xsaveerptr arat npt lbrv s
-                             vm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif overflow_recov succor smca sme sev ibpb_exit_to_user
-Virtualization features:     
-  Virtualization:            AMD-V
-Caches (sum of all):         
-  L1d:                       384 KiB (12 instances)
-  L1i:                       768 KiB (12 instances)
-  L2:                        6 MiB (12 instances)
-  L3:                        32 MiB (4 instances)
-NUMA:                        
-  NUMA node(s):              1
-  NUMA node0 CPU(s):         0-23
-Vulnerabilities:             
-  Gather data sampling:      Not affected
-  Indirect target selection: Not affected
-  Itlb multihit:             Not affected
-  L1tf:                      Not affected
-  Mds:                       Not affected
-  Meltdown:                  Not affected
-  Mmio stale data:           Not affected
-  Reg file data sampling:    Not affected
-  Retbleed:                  Mitigation; untrained return thunk; SMT vulnerable
-  Spec rstack overflow:      Mitigation; safe RET
-  Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl and seccomp
-  Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
-  Spectre v2:                Mitigation; Retpolines; IBPB conditional; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected
-  Srbds:                     Not affected
-  Tsa:                       Not affected
-  Tsx async abort:           Not affected
-  Vmscape:                   Mitigation; IBPB before exit to userspace
-flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl nonstop_tsc cpuid extd_apicid amd_dcm aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy svm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb hw_pstate ssbd ibpb vmmcall fsgsbase bmi1 avx2 smep bmi2 rdseed adx smap clflushopt sha_ni xsaveopt xsavec xgetbv1 clzero xsaveerptr arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif overflow_recov succor smca sme sev ibpb_exit_to_user
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:gqe-for-qsci]$ python -c "import cudaq; print('cudaq ok')"
-python -c "import torch; print('torch ok')"
-python -c "import pyscf; print('pyscf ok')"
-python -c "import tequila; print('tequila ok')"
-cudaq ok
-torch ok
-pyscf ok
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
-tequila ok
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:gqe-for-qsci]$ 
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ python train.py molecule=n2 trainer.max_iters=2
-^[[A^[[A^[[B/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
-wandb: WARNING The anonymous setting has no effect and will be removed in a future version.
-wandb: (1) Create a W&B account
-wandb: (2) Use an existing W&B account
-wandb: (3) Don't visualize my results
-wandb: Enter your choice: 3
-wandb: WARNING Invalid choice
-wandb: Enter your choice: 3
-wandb: You chose "Don't visualize my results"
-wandb: Using W&B in offline mode.
-wandb: W&B API key is configured. Use `wandb login --relogin` to force relogin
-wandb: WARNING `resume` will be ignored since W&B syncing is set to `offline`. Starting a new run with run id ya47v358.
-wandb: Tracking run with wandb version 0.28.0
-wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
-wandb: Run data is saved locally in outputs/gqe-for-qsci/default-2026-07-09-00-13-11/wandb/offline-run-20260709_001322-ya47v358
+wandb: Run data is saved locally in outputs/gqe-for-qsci/default-2026-07-09-00-29-05/wandb/offline-run-20260709_002910-sawafk3k
 wandb: View this run in the terminal with `wandb leet`
 converged SCF energy = -106.616959082769
 Vocab size: 188
@@ -132,7 +22,7 @@ Using 16bit Automatic Mixed Precision (AMP)
 GPU available: True (cuda), used: True
 TPU available: False, using: 0 TPU cores
 💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
-Checkpoint outputs/gqe-for-qsci/default-2026-07-09-00-13-11/models/last.ckpt does not exist. Training from scratch.
+Checkpoint outputs/gqe-for-qsci/default-2026-07-09-00-29-05/models/last.ckpt does not exist. Training from scratch.
 LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
 /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/pytorch_lightning/utilities/model_summary/model_summary.py:242: Precision 16-mixed is not supported by the model summary.  Estimated model size in MB will not be accurate. Using 32 bits instead.
 
@@ -149,262 +39,54 @@ LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
 0         Total Flops
 Error executing job with overrides: ['molecule=n2', 'trainer.max_iters=2']
 RuntimeError: architecture mismatch
+wandb: 
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync outputs/gqe-for-qsci/default-2026-07-09-00-29-05/wandb/offline-run-20260709_002910-sawafk3k
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ export CUDAQ_DEFAULT_SIMULATOR=qpp-cpu
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ python train.py molecule=n2 trainer.max_iters=2
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+wandb: WARNING The anonymous setting has no effect and will be removed in a future version.
+wandb: (1) Create a W&B account
+wandb: (2) Use an existing W&B account
+wandb: (3) Don't visualize my results
+wandb: Enter your choice: 3
+wandb: You chose "Don't visualize my results"
+wandb: Using W&B in offline mode.
+wandb: W&B API key is configured. Use `wandb login --relogin` to force relogin
+wandb: WARNING `resume` will be ignored since W&B syncing is set to `offline`. Starting a new run with run id b455d861.
+wandb: Tracking run with wandb version 0.28.0
+wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+wandb: Run data is saved locally in outputs/gqe-for-qsci/default-2026-07-09-00-31-20/wandb/offline-run-20260709_003124-b455d861
+wandb: View this run in the terminal with `wandb leet`
+converged SCF energy = -106.616959082769
+Vocab size: 188
+CASCI Energy: -107.44040897497159
+CCSD Energy: -106.98408522634637
+Using 16bit Automatic Mixed Precision (AMP)
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+Checkpoint outputs/gqe-for-qsci/default-2026-07-09-00-31-20/models/last.ckpt does not exist. Training from scratch.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/pytorch_lightning/utilities/model_summary/model_summary.py:242: Precision 16-mixed is not supported by the model summary.  Estimated model size in MB will not be accurate. Using 32 bits instead.
+
+  | Name  | Type      | Params | Mode  | FLOPs
+----------------------------------------------------
+0 | model | GPT2Model | 42.7 M | train | 0    
+----------------------------------------------------
+42.7 M    Trainable params
+0         Non-trainable params
+42.7 M    Total params
+170.726   Total estimated model params size (MB)
+86        Modules in train mode
+0         Modules in eval mode
+0         Total Flops
+Error executing job with overrides: ['molecule=n2', 'trainer.max_iters=2']
+TypeError: cannot pickle 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult' object
 
 Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
 wandb: 
 wandb: You can sync this run to the cloud by running:
-wandb: wandb sync outputs/gqe-for-qsci/default-2026-07-09-00-13-11/wandb/offline-run-20260709_001322-ya47v358
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ nvidia-smi
-python -c "import torch; print(torch.__version__); print(torch.version.cuda); print(torch.cuda.get_device_name(0)); print(torch.cuda.get_device_capability(0))"
-Thu Jul  9 00:16:10 2026       
-+-----------------------------------------------------------------------------------------+
-| NVIDIA-SMI 580.126.09             Driver Version: 580.126.09     CUDA Version: 13.0     |
-+-----------------------------------------+------------------------+----------------------+
-| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
-| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
-|                                         |                        |               MIG M. |
-|=========================================+========================+======================|
-|   0  NVIDIA TITAN V                 On  |   00000000:61:00.0 Off |                  N/A |
-| 28%   31C    P8             25W /  150W |       1MiB /  12288MiB |      0%      Default |
-|                                         |                        |                  N/A |
-+-----------------------------------------+------------------------+----------------------+
-
-+-----------------------------------------------------------------------------------------+
-| Processes:                                                                              |
-|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
-|        ID   ID                                                               Usage      |
-|=========================================================================================|
-|  No running processes found                                                             |
-+-----------------------------------------------------------------------------------------+
-2.9.1+cu128
-12.8
-NVIDIA TITAN V
-(7, 0)
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ lscpu
-cat /proc/cpuinfo | grep -m1 flags
-Architecture:                x86_64
-  CPU op-mode(s):            32-bit, 64-bit
-  Address sizes:             46 bits physical, 48 bits virtual
-  Byte Order:                Little Endian
-CPU(s):                      32
-  On-line CPU(s) list:       0-31
-Vendor ID:                   GenuineIntel
-  Model name:                Intel(R) Xeon(R) Silver 4108 CPU @ 1.80GHz
-    CPU family:              6
-    Model:                   85
-    Thread(s) per core:      2
-    Core(s) per socket:      8
-    Socket(s):               2
-    Stepping:                4
-    CPU(s) scaling MHz:      31%
-    CPU max MHz:             3000.0000
-    CPU min MHz:             800.0000
-    BogoMIPS:                3600.00
-    Flags:                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep
-                             _good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_tim
-                             er aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l3 cdp_l3 invpcid_single pti intel_ppin ssbd mba ibrs ibpb stibp tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsba
-                             se tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm cqm mpx rdt_a avx512f avx512dq rdseed adx smap clflushopt clwb intel_pt avx512cd avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_ll
-                             c cqm_occup_llc cqm_mbm_total cqm_mbm_local dtherm ida arat pln pts hwp hwp_act_window hwp_epp hwp_pkg_req pku ospke md_clear flush_l1d arch_capabilities ibpb_exit_to_user
-Virtualization features:     
-  Virtualization:            VT-x
-Caches (sum of all):         
-  L1d:                       512 KiB (16 instances)
-  L1i:                       512 KiB (16 instances)
-  L2:                        16 MiB (16 instances)
-  L3:                        22 MiB (2 instances)
-NUMA:                        
-  NUMA node(s):              2
-  NUMA node0 CPU(s):         0-7,16-23
-  NUMA node1 CPU(s):         8-15,24-31
-Vulnerabilities:             
-  Gather data sampling:      Mitigation; Microcode
-  Indirect target selection: Not affected
-  Itlb multihit:             KVM: Mitigation: VMX disabled
-  L1tf:                      Mitigation; PTE Inversion; VMX conditional cache flushes, SMT vulnerable
-  Mds:                       Mitigation; Clear CPU buffers; SMT vulnerable
-  Meltdown:                  Mitigation; PTI
-  Mmio stale data:           Mitigation; Clear CPU buffers; SMT vulnerable
-  Reg file data sampling:    Not affected
-  Retbleed:                  Mitigation; IBRS
-  Spec rstack overflow:      Not affected
-  Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl and seccomp
-  Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
-  Spectre v2:                Mitigation; IBRS; IBPB conditional; STIBP conditional; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected
-  Srbds:                     Not affected
-  Tsa:                       Not affected
-  Tsx async abort:           Mitigation; Clear CPU buffers; SMT vulnerable
-  Vmscape:                   Mitigation; IBPB before exit to userspace
-flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l3 cdp_l3 invpcid_single pti intel_ppin ssbd mba ibrs ibpb stibp tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm cqm mpx rdt_a avx512f avx512dq rdseed adx smap clflushopt clwb intel_pt avx512cd avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local dtherm ida arat pln pts hwp hwp_act_window hwp_epp hwp_pkg_req pku ospke md_clear flush_l1d arch_capabilities ibpb_exit_to_user
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ python -c "import cudaq; print('cudaq ok')"
-python -c "import torch; print('torch ok')"
-python -c "import pyscf; print('pyscf ok')"
-python -c "import tequila; print('tequila ok')"
-cudaq ok
-torch ok
-pyscf ok
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
-tequila ok
-
-
-
-
-
-
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ python -c "import numpy ; numpy.show_config()"
-Build Dependencies:
-  blas:
-    detection method: pkgconfig
-    found: true
-    include directory: /opt/_internal/cpython-3.11.10/lib/python3.11/site-packages/scipy_openblas64/include
-    lib directory: /opt/_internal/cpython-3.11.10/lib/python3.11/site-packages/scipy_openblas64/lib
-    name: scipy-openblas
-    openblas configuration: OpenBLAS 0.3.29  USE64BITINT DYNAMIC_ARCH NO_AFFINITY
-      Haswell MAX_THREADS=64
-    pc file directory: /project/.openblas
-    version: 0.3.29
-  lapack:
-    detection method: pkgconfig
-    found: true
-    include directory: /opt/_internal/cpython-3.11.10/lib/python3.11/site-packages/scipy_openblas64/include
-    lib directory: /opt/_internal/cpython-3.11.10/lib/python3.11/site-packages/scipy_openblas64/lib
-    name: scipy-openblas
-    openblas configuration: OpenBLAS 0.3.29  USE64BITINT DYNAMIC_ARCH NO_AFFINITY
-      Haswell MAX_THREADS=64
-    pc file directory: /project/.openblas
-    version: 0.3.29
-Compilers:
-  c:
-    commands: cc
-    linker: ld.bfd
-    name: gcc
-    version: 10.2.1
-  c++:
-    commands: c++
-    linker: ld.bfd
-    name: gcc
-    version: 10.2.1
-  cython:
-    commands: cython
-    linker: cython
-    name: cython
-    version: 3.1.0
-Machine Information:
-  build:
-    cpu: x86_64
-    endian: little
-    family: x86_64
-    system: linux
-  host:
-    cpu: x86_64
-    endian: little
-    family: x86_64
-    system: linux
-Python Information:
-  path: /tmp/build-env-nx8g0bo7/bin/python
-  version: '3.11'
-SIMD Extensions:
-  baseline:
-  - SSE
-  - SSE2
-  - SSE3
-  found:
-  - SSSE3
-  - SSE41
-  - POPCNT
-  - SSE42
-  - AVX
-  - F16C
-  - FMA3
-  - AVX2
-  - AVX512F
-  - AVX512CD
-  - AVX512_SKX
-  not found:
-  - AVX512_KNL
-  - AVX512_KNM
-  - AVX512_CLX
-  - AVX512_CNL
-  - AVX512_ICL
-
+wandb: wandb sync outputs/gqe-for-qsci/default-2026-07-09-00-31-20/wandb/offline-run-20260709_003124-b455d861
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ 
-
-
-
-
-
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ python -c "import numpy ; numpy.show_config()"
-Build Dependencies:
-  blas:
-    detection method: pkgconfig
-    found: true
-    include directory: /opt/_internal/cpython-3.11.10/lib/python3.11/site-packages/scipy_openblas64/include
-    lib directory: /opt/_internal/cpython-3.11.10/lib/python3.11/site-packages/scipy_openblas64/lib
-    name: scipy-openblas
-    openblas configuration: OpenBLAS 0.3.29  USE64BITINT DYNAMIC_ARCH NO_AFFINITY
-      Haswell MAX_THREADS=64
-    pc file directory: /project/.openblas
-    version: 0.3.29
-  lapack:
-    detection method: pkgconfig
-    found: true
-    include directory: /opt/_internal/cpython-3.11.10/lib/python3.11/site-packages/scipy_openblas64/include
-    lib directory: /opt/_internal/cpython-3.11.10/lib/python3.11/site-packages/scipy_openblas64/lib
-    name: scipy-openblas
-    openblas configuration: OpenBLAS 0.3.29  USE64BITINT DYNAMIC_ARCH NO_AFFINITY
-      Haswell MAX_THREADS=64
-    pc file directory: /project/.openblas
-    version: 0.3.29
-Compilers:
-  c:
-    commands: cc
-    linker: ld.bfd
-    name: gcc
-    version: 10.2.1
-  c++:
-    commands: c++
-    linker: ld.bfd
-    name: gcc
-    version: 10.2.1
-  cython:
-    commands: cython
-    linker: cython
-    name: cython
-    version: 3.1.0
-Machine Information:
-  build:
-    cpu: x86_64
-    endian: little
-    family: x86_64
-    system: linux
-  host:
-    cpu: x86_64
-    endian: little
-    family: x86_64
-    system: linux
-Python Information:
-  path: /tmp/build-env-nx8g0bo7/bin/python
-  version: '3.11'
-SIMD Extensions:
-  baseline:
-  - SSE
-  - SSE2
-  - SSE3
-  found:
-  - SSSE3
-  - SSE41
-  - POPCNT
-  - SSE42
-  - AVX
-  - F16C
-  - FMA3
-  - AVX2
-  not found:
-  - AVX512F
-  - AVX512CD
-  - AVX512_KNL
-  - AVX512_KNM
-  - AVX512_SKX
-  - AVX512_CLX
-  - AVX512_CNL
-  - AVX512_ICL
