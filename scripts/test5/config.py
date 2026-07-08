@@ -24,7 +24,7 @@ BLOCKEXE_WRAPPER = os.path.expanduser("~/block2main_wrapper.sh")
 # ═══════════════════════════════════════════════════════════════════════════════
 # Molecule Selection
 # ═══════════════════════════════════════════════════════════════════════════════
-MOLECULE = "CuFeS2"
+MOLECULE = "NiO"
 CHARGE   = 0
 SPIN     = 0    # 2S: 0=singlet, 2=triplet, 4=quintet
 BASIS    = "def2-svp"
@@ -215,7 +215,7 @@ CORE_OCC_THRESHOLD = 1.95
 # ═══════════════════════════════════════════════════════════════════════════════
 BATH_TOLERANCE = 1e-8
 MIN_BATH_ORBS  = 0
-MAX_EMBED_ORBS = 48
+MAX_EMBED_ORBS = 24
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # Fermion-to-Qubit Mapping
@@ -229,7 +229,7 @@ FERMION_TO_QUBIT = "jw"    # "jw" | "bk" (use JW for LUCJ as ffsim uses JW encod
 # Quantum Solver
 # ═══════════════════════════════════════════════════════════════════════════════
 QUANTUM_SOLVER = "sqd"      # "sqd" | "skqd" | "sqdrift"
-BACKEND        = "ibm"      # "local" | "mps" | "ibm"
+BACKEND        = "local"      # "local" | "mps" | "ibm"
 
 # --- Ansatz selection for SQD ---
 # "su2"  — EfficientSU2: general, does NOT conserve particle number
@@ -242,15 +242,15 @@ ANSATZ           = "lucj"          # switch from "su2"
 
 
 # LUCJ parameters
-LUCJ_NUM_LAYERS     = 9     # number of orbital rotation + Jastrow layers
+LUCJ_NUM_LAYERS     = 3     # number of orbital rotation + Jastrow layers
 LUCJ_MAX_ITERATIONS = 10    # optimization iterations (if variational)
 
 # SU2 parameters (used only when ANSATZ="su2")
 ANSATZ_REPS = 4
 
 # Shared SQD
-N_SHOTS   =  4096
-SQD_ITERS = 10
+N_SHOTS   =  1024
+SQD_ITERS = 5
 
 # SKQD
 SKQD_KRYLOV_DIM   = 5
