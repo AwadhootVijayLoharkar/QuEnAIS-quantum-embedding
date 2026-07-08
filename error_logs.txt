@@ -67,3 +67,74 @@ wandb: Run data is saved locally in outputs/gqe-for-qsci/default-2026-07-09-00-4
 wandb: View this run in the terminal with `wandb leet`
 Illegal instruction (core dumped)
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:gqe-for-qsci]$ 
+
+
+
+
+
+
+
+
+
+seed: 32
+max_iters: 100
+num_samples: 10     # number of samples to generate in each iteration
+batch_size: 10       # batch size should be equal to num_samples for online training
+step_per_epoch: 30   # number of policy updates in each iteration
+warmup_size: 10
+buffer_size: 10      # buffer size should be equal to num_samples for online training
+load_checkpoint: true
+checkpoint_every_n_iters: 10
+optimizer: 
+  lr: 5e-6
+  cls: AdamW
+  weight_decay: 0.01
+loss:
+  type: "grpo"
+  clip_grpo_low: 0.2
+  clip_grpo_high: 0.28
+temperature_scheduler:
+  _target_: gqe_qsci.gqe.scheduler.VarBasedScheduler
+  initial: 0.5
+  delta: 0.02
+  target_var: 1e-5
+
+
+  (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ gdb -q --args python train.py molecule=n2 trainer.max_iters=2
+Reading symbols from python...
+(gdb) bt
+No stack.
+(gdb) run
+Starting program: /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/bin/python train.py molecule=n2 trainer.max_iters=2
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/bin/python: can't open file '/home/loharkar/QuEnAIS-quantum-embedding/train.py': [Errno 2] No such file or directory
+[Inferior 1 (process 11789) exited with code 02]
+(gdb) bt
+No stack.
+(gdb) run
+Starting program: /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/bin/python train.py molecule=n2 trainer.max_iters=2
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/bin/python: can't open file '/home/loharkar/QuEnAIS-quantum-embedding/train.py': [Errno 2] No such file or directory
+[Inferior 1 (process 11862) exited with code 02]
+(gdb) bt
+No stack.
+(gdb) Quit
+(gdb) 
+No stack.
+(gdb) quit
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ 
+
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+wandb: WARNING The anonymous setting has no effect and will be removed in a future version.
+Error executing job with overrides: ['molecule=n2', 'trainer.max_iters=2']
+wandb.errors.errors.UsageError: No API key configured. Use `wandb login` to log in.
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ python train.py molecule=n2 trainer.max_iters=2 2>&1 | tee full_run.log
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+wandb: WARNING The anonymous setting has no effect and will be removed in a future version.
+Error executing job with overrides: ['molecule=n2', 'trainer.max_iters=2']
+wandb.errors.errors.UsageError: No API key configured. Use `wandb login` to log in.
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ 
