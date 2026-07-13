@@ -14,3 +14,16 @@
 33-Error executing job with overrides: ['molecule=n2', 'trainer.max_iters=2']
 34-TypeError: cannot pickle 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult' object
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ 
+
+python -c "
+import cudaq
+print('before sample:', cudaq.mpi.is_initialized())
+
+@cudaq.kernel
+def k():
+    q = cudaq.qvector(1)
+    x(q[0])
+
+cudaq.sample(k, shots_count=10)
+print('after sample:', cudaq.mpi.is_initialized())
+"
