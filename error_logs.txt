@@ -5,3 +5,13 @@
 33-Error executing job with overrides: ['molecule=n2', 'trainer.max_iters=2']
 34-TypeError: cannot pickle 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult' object
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ 
+
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ sed -n '81,87p' /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/train_pipeline.py 
+            try :
+                qsci_result = self.qsci_pipeline.process(state)
+            except Exception:
+                import traceback
+                print("=== collect_rollout: process() raised ===", flush=True)
+                traceback.print_exc()
+                raise
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$
