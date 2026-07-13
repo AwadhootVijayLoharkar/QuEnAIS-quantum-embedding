@@ -27,3 +27,17 @@ def k():
 cudaq.sample(k, shots_count=10)
 print('after sample:', cudaq.mpi.is_initialized())
 "
+
+
+# which libmpi.so does mpi4py actually link against?
+python -c "from mpi4py import MPI; print(MPI.__file__)"
+ldd $(python -c "from mpi4py import MPI; print(MPI.__file__)") | grep -i mpi
+
+# which libmpi.so did the custom cudaq distributed-interface plugin link against?
+find "$CONDA_PREFIX" -iname "*distributed_interface_mpi*" 2>/dev/null
+ldd $(find "$CONDA_PREFIX" -iname "*distributed_interface_mpi*.so" 2>/dev/null | head -1) | grep -i mpi
+
+# confirm what's actually on PATH inside the activated env
+which -a mpiexec mpirun
+ldd /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/bin/mpiexec 2>/dev/null | grep -i mpi
+ldd /usr/bin/mpiexec | grep -i mpi
