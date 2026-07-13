@@ -22,3 +22,11 @@ def collect_rollout(self, log=False):
             raise
         energies = torch.tensor(qsci_result.energies, device=self.device)
         ...
+
+
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ WANDB_MODE=disabled python train.py molecule=n2 trainer.max_iters=2 > run2.log 2>&1
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ grep -n 'collect_rollout: process' -A 40 run2.log
+31:=== collect_rollout: process() raised ===
+32-Error executing job with overrides: ['molecule=n2', 'trainer.max_iters=2']
+33-UnboundLocalError: cannot access local variable 'qsci_result' where it is not associated with a value
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$
