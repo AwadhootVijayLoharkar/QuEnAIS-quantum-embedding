@@ -41,3 +41,53 @@ ldd $(find "$CONDA_PREFIX" -iname "*distributed_interface_mpi*.so" 2>/dev/null |
 which -a mpiexec mpirun
 ldd /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/bin/mpiexec 2>/dev/null | grep -i mpi
 ldd /usr/bin/mpiexec | grep -i mpi
+
+
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ python -c "from mpi4py import MPI; print(MPI.__file__)"
+ldd $(python -c "from mpi4py import MPI; print(MPI.__file__)") | grep -i mpi
+
+# which libmpi.so did the custom cudaq distributed-interface plugin link against?
+find "$CONDA_PREFIX" -iname "*distributed_interface_mpi*" 2>/dev/null
+ldd $(find "$CONDA_PREFIX" -iname "*distributed_interface_mpi*.so" 2>/dev/null | head -1) | grep -i mpi
+
+# confirm what's actually on PATH inside the activated env
+which -a mpiexec mpirun
+ldd /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/bin/mpiexec 2>/dev/null | grep -i mpi
+ldd /usr/bin/mpiexec | grep -i mpi
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/MPI.cpython-311-x86_64-linux-gnu.so
+        libmpi.so.40 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libmpi.so.40 (0x00007f40d3d10000)
+        libucc.so.1 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libucc.so.1 (0x00007f40d3aca000)
+        libopen-pal.so.80 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libopen-pal.so.80 (0x00007f40d3994000)
+        libfabric.so.1 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libfabric.so.1 (0x00007f40d37d1000)
+        libucp.so.0 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libucp.so.0 (0x00007f40d36e4000)
+        libucs.so.0 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libucs.so.0 (0x00007f40d3679000)
+        libucm.so.0 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libucm.so.0 (0x00007f40d365b000)
+        libuct.so.0 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libuct.so.0 (0x00007f40d361c000)
+        libnl-route-3.so.200 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libnl-route-3.so.200 (0x00007f40d3587000)
+        libnl-3.so.200 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libnl-3.so.200 (0x00007f40d3562000)
+        libevent_core-2.1.so.7 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libevent_core-2.1.so.7 (0x00007f40d3429000)
+        libevent_pthreads-2.1.so.7 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libevent_pthreads-2.1.so.7 (0x00007f40d3424000)
+        libhwloc.so.15 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libhwloc.so.15 (0x00007f40d33c2000)
+        libpmix.so.2 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libpmix.so.2 (0x00007f40d319a000)
+        librdmacm.so.1 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../.././librdmacm.so.1 (0x00007f40d3179000)
+        libefa.so.1 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../.././libefa.so.1 (0x00007f40d3168000)
+        libibverbs.so.1 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../.././libibverbs.so.1 (0x00007f40d3143000)
+        libatomic.so.1 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../.././libatomic.so.1 (0x00007f40d3137000)
+        libxml2.so.16 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../.././libxml2.so.16 (0x00007f40d2ff3000)
+        libz.so.1 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../././libz.so.1 (0x00007f40d2fd6000)
+        libiconv.so.2 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../././libiconv.so.2 (0x00007f40d2ec4000)
+        libicuuc.so.78 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../././libicuuc.so.78 (0x00007f40d2c93000)
+        libicudata.so.78 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../.././././libicudata.so.78 (0x00007f40d0cfe000)
+        libstdc++.so.6 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../.././././libstdc++.so.6 (0x00007f40d0a7f000)
+        libgcc_s.so.1 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../.././././libgcc_s.so.1 (0x00007f40d0a50000)
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/distributed_interfaces/libcudaq_distributed_interface_mpi.so
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/cuquantum/distributed_interfaces/cudensitymat_distributed_interface_mpi.c
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/cuquantum/distributed_interfaces/cutensornet_distributed_interface_mpi.c
+        libmpi.so.40 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/libmpi.so.40 (0x00007fc8d20c4000)
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/bin/mpiexec
+/usr/bin/mpiexec
+/bin/mpiexec
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/bin/mpirun
+/usr/bin/mpirun
+/bin/mpirun
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ 
