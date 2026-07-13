@@ -51,3 +51,18 @@ TypeError: cannot pickle 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.Sam
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ WANDB_MODE=disabled python train.py molecule=n2 trainer.max_iters=2 > run5.log 2>&1
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ grep -n 'collect_rollout: process' -A 40 run5.log
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ 
+
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ sed -n '81,92p' gqe_qsci/train_pipeline.py 
+            try :
+                qsci_result = self.qsci_pipeline.process(state)
+            except Exception as e:
+                import traceback
+                print(f"=== process() raised : {type(e).__name__}: {e} ===", flush=True)
+                tb = e.__traceback__
+                while tb is not None:
+                    frame = tb.tb_frame
+                    print(f" File  \"{frame.f_code.co_filename}\",line {tb.tb_lineno}, in {frame.f_code.co_name}", flush=True)
+                    tb=tb.tb_next
+                raise
+            energies = torch.tensor(qsci_result.energies, device=self.device)
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ 
