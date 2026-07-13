@@ -1,3 +1,79 @@
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ sed -n '1,20p' train.py 
+import os
+import functools
+
+import torch
+import hydra, wandb
+from omegaconf import DictConfig, OmegaConf
+from pytorch_lightning import Trainer
+from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.callbacks import ModelCheckpoint
+
+from gqe_qsci.train_pipeline import TrainPipeline
+from gqe_qsci.factory import Factory
+
+torch.load = functools.partial(torch.load, weights_only=False)
+
+os.environ["OMP_NUM_THREADS"] = "1"
+torch.set_float32_matmul_precision("medium")
+
+
+def setup_callbacks(cfg):
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ sed -n '78,92p' gqe_qsci/train_pipeline.py 
+                )
+                state = self.update_state(state, next_tokens)
+
+            qsci_result = self.qsci_pipeline.process(state)
+            energies = torch.tensor(qsci_result.energies, device=self.device)
+            
+            # log-probs under the behavior policy at rollout time
+            old_log_probs = self.model.log_prob(
+                state["idx"], self.scheduler.get_inverse_temperature()
+            )
+            for seq, energy, olp in zip(state["idx"], energies, old_log_probs):
+                self.buffer.push(
+                    seq.detach().cpu(),
+                    energy.detach().cpu(),
+                    olp.detach().cpu(),
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ sed -n '38,73p' gqe_qsci/gqe/sampler.py 
+        idx_output = state["idx"]
+        pool = self.pool  
+
+        if self.mpi and cudaq.mpi.is_initialized():  
+            rank = cudaq.mpi.rank()  
+            numRanks = cudaq.mpi.num_ranks()  
+            total_elements = len(idx_output)  
+            elements_per_rank = total_elements // numRanks  
+            remainder = total_elements % numRanks  
+            start = rank * elements_per_rank + min(rank, remainder)  
+            end = start + elements_per_rank + (1 if rank < remainder else 0)  
+
+            res = [  
+                self.sample_state([pool[j] for j in row],   
+                                shots_count=self.shots_count,  
+                                qpu_id=i % self.numQPUs)  
+                for i, row in enumerate(idx_output[start:end])  
+            ]  
+        else:  
+            res = [  
+                self.sample_state([pool[j] for j in row],  
+                                shots_count=self.shots_count,  
+                                qpu_id=i % self.numQPUs)  
+                for i, row in enumerate(idx_output)  
+            ]  
+
+        # Handle async results if using MPI  
+        if self.mpi and isinstance(res[0], tuple) and len(res[0]) == 2:  
+            res = [getResultFunctor(handle) for (handle, getResultFunctor) in res]  
+
+        # Gather results from all MPI ranks  
+        if self.mpi and cudaq.mpi.is_initialized():  
+            res = MPI.COMM_WORLD.allgather(res)  
+            res = [x for xs in res for x in xs]  
+
+        return res
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ WANDB_MODE=disabled python train.py molecule=n2 trainer.max_iters=2 > run_final.log 2>&1
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ tail -40 run_final.log 
 /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   import pkg_resources
 wandb: WARNING The anonymous setting has no effect and will be removed in a future version.
@@ -9,7 +85,7 @@ Using 16bit Automatic Mixed Precision (AMP)
 GPU available: True (cuda), used: True
 TPU available: False, using: 0 TPU cores
 💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
-Checkpoint outputs/gqe-for-qsci/default-2026-07-13-16-55-35/models/last.ckpt does not exist. Training from scratch.
+Checkpoint outputs/gqe-for-qsci/default-2026-07-13-17-17-03/models/last.ckpt does not exist. Training from scratch.
 LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
 /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/pytorch_lightning/utilities/model_summary/model_summary.py:242: Precision 16-mixed is not supported by the model summary.  Estimated model size in MB will not be accurate. Using 32 bits instead.
 
@@ -24,45 +100,8 @@ LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
 86        Modules in train mode
 0         Modules in eval mode
 0         Total Flops
-=== PICKLE FAILURE: live call stack ===
-=== Offending object: <class 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult'> -> <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f1f46110af0> ===
-=== PICKLE FAILURE: live call stack ===
-=== Offending object: <class 'list'> -> [<cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f1f46110af0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f2001af2430>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f2001af2bf0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f1f44fb7bb0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f2001af3870>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f2001ae9670>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f2001af37b0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f2001af10f0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f1f44f7eaf0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f2001ae95b0>] ===
-=== process() raised : TypeError: cannot pickle 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult' object ===
- File  "/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/train_pipeline.py",line 82, in collect_rollout
- File  "/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/qsci/pipeline.py",line 58, in process
- File  "/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/torch/utils/_contextlib.py",line 120, in decorate_context
- File  "/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/gqe/sampler.py",line 70, in run
- File  "src/mpi4py/MPI.src/Comm.pyx",line 2155, in mpi4py.MPI.Comm.allgather
- File  "src/mpi4py/MPI.src/msgpickle.pxi",line 875, in mpi4py.MPI.PyMPI_allgather
- File  "src/mpi4py/MPI.src/msgpickle.pxi",line 168, in mpi4py.MPI.pickle_dump
- File  "src/mpi4py/MPI.src/msgpickle.pxi",line 159, in mpi4py.MPI.cdumps
- File  "/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/train.py",line 22, in _traced_dumps
- File  "/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/pickle.py",line 487, in dump
- File  "/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/train.py",line 11, in _traced_save
- File  "/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/pickle.py",line 560, in save
- File  "/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/pickle.py",line 932, in save_list
- File  "/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/pickle.py",line 956, in _batch_appends
- File  "/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/train.py",line 11, in _traced_save
- File  "/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/pickle.py",line 578, in save
-Error executing job with overrides: ['molecule=n2', 'trainer.max_iters=2']
-TypeError: cannot pickle 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult' object
-
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ WANDB_MODE=disabled python train.py molecule=n2 trainer.max_iters=2 > run5.log 2>&1
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ grep -n 'collect_rollout: process' -A 40 run5.log
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ 
-
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ sed -n '81,92p' gqe_qsci/train_pipeline.py 
-            try :
-                qsci_result = self.qsci_pipeline.process(state)
-            except Exception as e:
-                import traceback
-                print(f"=== process() raised : {type(e).__name__}: {e} ===", flush=True)
-                tb = e.__traceback__
-                while tb is not None:
-                    frame = tb.tb_frame
-                    print(f" File  \"{frame.f_code.co_filename}\",line {tb.tb_lineno}, in {frame.f_code.co_name}", flush=True)
-                    tb=tb.tb_next
-                raise
-            energies = torch.tensor(qsci_result.energies, device=self.device)
+SLURM auto-requeueing enabled. Setting signal handlers.
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/pytorch_lightning/trainer/connectors/data_connector.py:434: The 'train_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=23` in the `DataLoader` to improve performance.
+Epoch 1: 100%|██████████| 30/30 [00:01<00:00, 17.14it/s, v_num=y1fd]`Trainer.fit` stopped: `max_epochs=2` reached.
+Epoch 1: 100%|██████████| 30/30 [00:01<00:00, 17.10it/s, v_num=y1fd]
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ 
