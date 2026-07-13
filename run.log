@@ -56,3 +56,10 @@ def _traced_save(self, obj, save_persistent_id=True):
             print(f"=== Offending object: {type(obj)} -> {obj!r} ===", flush=True)
         raise
 pickle.Pickler.save = _traced_save
+
+
+Traceback (most recent call last):
+  File "/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/train.py", line 4, in <module>
+    _orig_save = pickle.Pickler.save
+                 ^^^^^^^^^^^^^^^^^^^
+AttributeError: type object '_pickle.Pickler' has no attribute 'save'
