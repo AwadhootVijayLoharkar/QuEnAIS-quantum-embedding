@@ -1,8 +1,16 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ python -c "import gqe_qsci.train_pipeline as m; print(m.__file__)"
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
-/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/train_pipeline.py
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ find /home/loharkar/QuEnAIS-quantum-embedding -path "*gqe_qsci*__pycache__*" -newer /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/train_pipeline.py 
-/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/__pycache__
-/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/__pycache__/train_pipeline.cpython-311.pyc
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ sed -n '81,88p' gqe_qsci/train_pipeline.py 
+            try :
+                qsci_result = self.qsci_pipeline.process(state)
+            except Exception:
+                import traceback
+                print("=== collect_rollout: process() raised ===", flush=True)
+                traceback.print_exc(file=sys.stdout)
+                sys.stdout.flush()
+                raise
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ WANDB_MODE=disabled python train.py molecule=n2 trainer.max_iters=2 > run4.log 2>&1
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ grep -n 'collect_rollout: process' -A 40 run4.log
+31:=== collect_rollout: process() raised ===
+32-TypeError: cannot pickle 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult' object
+33-Error executing job with overrides: ['molecule=n2', 'trainer.max_iters=2']
+34-TypeError: cannot pickle 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult' object
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ 
