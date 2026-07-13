@@ -1,14 +1,35 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ python train.py molecule=n2 trainer.max_iters=2 > run.log 2>&1
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ grep -n 'PICKLE FAILURE; -A 30 run.log
-> ^C
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ grep -n 'PICKLE FAILURE' -A 30 run.log
-32:=== PICKLE FAILURE: live call stack ===
-33-=== Offending object: <class 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult'> -> <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f32b455d1f0> ===
-34:=== PICKLE FAILURE: live call stack ===
-35-=== Offending object: <class 'list'> -> [<cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f32b455d1f0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f32b4565c30>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f32b45673b0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f32b4530f30>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f32b45642f0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f31f7535330>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f32b4513370>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f31f72ae9b0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f32b45651b0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f31f72aedf0>] ===
-36-Error executing job with overrides: ['molecule=n2', 'trainer.max_iters=2']
-37-TypeError: cannot pickle 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult' object
-38-wandb: 
-39-wandb: You can sync this run to the cloud by running:
-40-wandb: wandb sync outputs/gqe-for-qsci/default-2026-07-13-15-23-02/wandb/offline-run-20260713_152302-cro8gqgg
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ WANDB_MODE=disabled python train.py molecule=n2 trainer.max_iters=2 > run_nowandb.log 2>&1
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ tail -60 run_nowandb.log
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+wandb: WARNING The anonymous setting has no effect and will be removed in a future version.
+converged SCF energy = -106.616959082769
+Vocab size: 188
+CASCI Energy: -107.44040897497159
+CCSD Energy: -106.98408522634637
+Using 16bit Automatic Mixed Precision (AMP)
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+Checkpoint outputs/gqe-for-qsci/default-2026-07-13-15-28-20/models/last.ckpt does not exist. Training from scratch.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/pytorch_lightning/utilities/model_summary/model_summary.py:242: Precision 16-mixed is not supported by the model summary.  Estimated model size in MB will not be accurate. Using 32 bits instead.
+
+  | Name  | Type      | Params | Mode  | FLOPs
+----------------------------------------------------
+0 | model | GPT2Model | 42.7 M | train | 0    
+----------------------------------------------------
+42.7 M    Trainable params
+0         Non-trainable params
+42.7 M    Total params
+170.726   Total estimated model params size (MB)
+86        Modules in train mode
+0         Modules in eval mode
+0         Total Flops
+=== PICKLE FAILURE: live call stack ===
+=== Offending object: <class 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult'> -> <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f9543b106f0> ===
+=== PICKLE FAILURE: live call stack ===
+=== Offending object: <class 'list'> -> [<cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f9543b106f0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f94871097f0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f9543b856b0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f9543b7b530>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f9543b12ef0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f948704fb30>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f9543b885f0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f9543b882b0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f9543b7a970>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f94871c9470>] ===
+Error executing job with overrides: ['molecule=n2', 'trainer.max_iters=2']
+TypeError: cannot pickle 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult' object
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ 
