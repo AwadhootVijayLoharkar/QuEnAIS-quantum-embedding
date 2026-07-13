@@ -40,3 +40,19 @@ TypeError: cannot pickle 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.Sam
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ python train.py molecule=n2 trainer.max_iters=2 > run.log 2>&1
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ grep -n 'File"' run.log
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ 
+
+
+
+import pickle, traceback
+
+_orig_save = pickle.Pickler.save
+def _traced_save(self, obj, save_persistent_id=True):
+    try:
+        return _orig_save(self, obj, save_persistent_id)
+    except TypeError as e:
+        if "cannot pickle" in str(e):
+            print("=== PICKLE FAILURE: live call stack ===", flush=True)
+            traceback.print_stack()
+            print(f"=== Offending object: {type(obj)} -> {obj!r} ===", flush=True)
+        raise
+pickle.Pickler.save = _traced_save
