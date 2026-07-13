@@ -14,4 +14,4 @@
                 print("=== collect_rollout: process() raised ===", flush=True)
                 traceback.print_exc()
                 raise
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci
