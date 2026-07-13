@@ -1,93 +1,53 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ sed -n '81,88p' gqe_qsci/train_pipeline.py 
-            try :
-                qsci_result = self.qsci_pipeline.process(state)
-            except Exception:
-                import traceback
-                print("=== collect_rollout: process() raised ===", flush=True)
-                traceback.print_exc(file=sys.stdout)
-                sys.stdout.flush()
-                raise
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ WANDB_MODE=disabled python train.py molecule=n2 trainer.max_iters=2 > run4.log 2>&1
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ grep -n 'collect_rollout: process' -A 40 run4.log
-31:=== collect_rollout: process() raised ===
-32-TypeError: cannot pickle 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult' object
-33-Error executing job with overrides: ['molecule=n2', 'trainer.max_iters=2']
-34-TypeError: cannot pickle 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult' object
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ 
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+wandb: WARNING The anonymous setting has no effect and will be removed in a future version.
+converged SCF energy = -106.616959082769
+Vocab size: 188
+CASCI Energy: -107.44040897497159
+CCSD Energy: -106.98408522634637
+Using 16bit Automatic Mixed Precision (AMP)
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+Checkpoint outputs/gqe-for-qsci/default-2026-07-13-16-55-35/models/last.ckpt does not exist. Training from scratch.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/pytorch_lightning/utilities/model_summary/model_summary.py:242: Precision 16-mixed is not supported by the model summary.  Estimated model size in MB will not be accurate. Using 32 bits instead.
 
-python -c "
-import cudaq
-print('before sample:', cudaq.mpi.is_initialized())
+  | Name  | Type      | Params | Mode  | FLOPs
+----------------------------------------------------
+0 | model | GPT2Model | 42.7 M | train | 0    
+----------------------------------------------------
+42.7 M    Trainable params
+0         Non-trainable params
+42.7 M    Total params
+170.726   Total estimated model params size (MB)
+86        Modules in train mode
+0         Modules in eval mode
+0         Total Flops
+=== PICKLE FAILURE: live call stack ===
+=== Offending object: <class 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult'> -> <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f1f46110af0> ===
+=== PICKLE FAILURE: live call stack ===
+=== Offending object: <class 'list'> -> [<cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f1f46110af0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f2001af2430>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f2001af2bf0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f1f44fb7bb0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f2001af3870>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f2001ae9670>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f2001af37b0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f2001af10f0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f1f44f7eaf0>, <cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult object at 0x7f2001ae95b0>] ===
+=== process() raised : TypeError: cannot pickle 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult' object ===
+ File  "/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/train_pipeline.py",line 82, in collect_rollout
+ File  "/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/qsci/pipeline.py",line 58, in process
+ File  "/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/torch/utils/_contextlib.py",line 120, in decorate_context
+ File  "/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/gqe/sampler.py",line 70, in run
+ File  "src/mpi4py/MPI.src/Comm.pyx",line 2155, in mpi4py.MPI.Comm.allgather
+ File  "src/mpi4py/MPI.src/msgpickle.pxi",line 875, in mpi4py.MPI.PyMPI_allgather
+ File  "src/mpi4py/MPI.src/msgpickle.pxi",line 168, in mpi4py.MPI.pickle_dump
+ File  "src/mpi4py/MPI.src/msgpickle.pxi",line 159, in mpi4py.MPI.cdumps
+ File  "/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/train.py",line 22, in _traced_dumps
+ File  "/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/pickle.py",line 487, in dump
+ File  "/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/train.py",line 11, in _traced_save
+ File  "/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/pickle.py",line 560, in save
+ File  "/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/pickle.py",line 932, in save_list
+ File  "/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/pickle.py",line 956, in _batch_appends
+ File  "/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/train.py",line 11, in _traced_save
+ File  "/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/pickle.py",line 578, in save
+Error executing job with overrides: ['molecule=n2', 'trainer.max_iters=2']
+TypeError: cannot pickle 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult' object
 
-@cudaq.kernel
-def k():
-    q = cudaq.qvector(1)
-    x(q[0])
-
-cudaq.sample(k, shots_count=10)
-print('after sample:', cudaq.mpi.is_initialized())
-"
-
-
-# which libmpi.so does mpi4py actually link against?
-python -c "from mpi4py import MPI; print(MPI.__file__)"
-ldd $(python -c "from mpi4py import MPI; print(MPI.__file__)") | grep -i mpi
-
-# which libmpi.so did the custom cudaq distributed-interface plugin link against?
-find "$CONDA_PREFIX" -iname "*distributed_interface_mpi*" 2>/dev/null
-ldd $(find "$CONDA_PREFIX" -iname "*distributed_interface_mpi*.so" 2>/dev/null | head -1) | grep -i mpi
-
-# confirm what's actually on PATH inside the activated env
-which -a mpiexec mpirun
-ldd /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/bin/mpiexec 2>/dev/null | grep -i mpi
-ldd /usr/bin/mpiexec | grep -i mpi
-
-
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ python -c "from mpi4py import MPI; print(MPI.__file__)"
-ldd $(python -c "from mpi4py import MPI; print(MPI.__file__)") | grep -i mpi
-
-# which libmpi.so did the custom cudaq distributed-interface plugin link against?
-find "$CONDA_PREFIX" -iname "*distributed_interface_mpi*" 2>/dev/null
-ldd $(find "$CONDA_PREFIX" -iname "*distributed_interface_mpi*.so" 2>/dev/null | head -1) | grep -i mpi
-
-# confirm what's actually on PATH inside the activated env
-which -a mpiexec mpirun
-ldd /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/bin/mpiexec 2>/dev/null | grep -i mpi
-ldd /usr/bin/mpiexec | grep -i mpi
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/MPI.cpython-311-x86_64-linux-gnu.so
-        libmpi.so.40 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libmpi.so.40 (0x00007f40d3d10000)
-        libucc.so.1 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libucc.so.1 (0x00007f40d3aca000)
-        libopen-pal.so.80 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libopen-pal.so.80 (0x00007f40d3994000)
-        libfabric.so.1 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libfabric.so.1 (0x00007f40d37d1000)
-        libucp.so.0 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libucp.so.0 (0x00007f40d36e4000)
-        libucs.so.0 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libucs.so.0 (0x00007f40d3679000)
-        libucm.so.0 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libucm.so.0 (0x00007f40d365b000)
-        libuct.so.0 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libuct.so.0 (0x00007f40d361c000)
-        libnl-route-3.so.200 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libnl-route-3.so.200 (0x00007f40d3587000)
-        libnl-3.so.200 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libnl-3.so.200 (0x00007f40d3562000)
-        libevent_core-2.1.so.7 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libevent_core-2.1.so.7 (0x00007f40d3429000)
-        libevent_pthreads-2.1.so.7 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libevent_pthreads-2.1.so.7 (0x00007f40d3424000)
-        libhwloc.so.15 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libhwloc.so.15 (0x00007f40d33c2000)
-        libpmix.so.2 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../libpmix.so.2 (0x00007f40d319a000)
-        librdmacm.so.1 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../.././librdmacm.so.1 (0x00007f40d3179000)
-        libefa.so.1 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../.././libefa.so.1 (0x00007f40d3168000)
-        libibverbs.so.1 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../.././libibverbs.so.1 (0x00007f40d3143000)
-        libatomic.so.1 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../.././libatomic.so.1 (0x00007f40d3137000)
-        libxml2.so.16 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../.././libxml2.so.16 (0x00007f40d2ff3000)
-        libz.so.1 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../././libz.so.1 (0x00007f40d2fd6000)
-        libiconv.so.2 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../././libiconv.so.2 (0x00007f40d2ec4000)
-        libicuuc.so.78 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../../././libicuuc.so.78 (0x00007f40d2c93000)
-        libicudata.so.78 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../.././././libicudata.so.78 (0x00007f40d0cfe000)
-        libstdc++.so.6 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../.././././libstdc++.so.6 (0x00007f40d0a7f000)
-        libgcc_s.so.1 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/mpi4py/../../.././././libgcc_s.so.1 (0x00007f40d0a50000)
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/distributed_interfaces/libcudaq_distributed_interface_mpi.so
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/cuquantum/distributed_interfaces/cudensitymat_distributed_interface_mpi.c
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/cuquantum/distributed_interfaces/cutensornet_distributed_interface_mpi.c
-        libmpi.so.40 => /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/libmpi.so.40 (0x00007fc8d20c4000)
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/bin/mpiexec
-/usr/bin/mpiexec
-/bin/mpiexec
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/bin/mpirun
-/usr/bin/mpirun
-/bin/mpirun
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ WANDB_MODE=disabled python train.py molecule=n2 trainer.max_iters=2 > run5.log 2>&1
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ grep -n 'collect_rollout: process' -A 40 run5.log
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ 
