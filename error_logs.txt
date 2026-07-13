@@ -1,114 +1,36 @@
-Makaria 10 logs
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:gqe-for-qsci]$ gdb -q --args python train.py molecule=n2 trainer.max_iters=2
-Reading symbols from python...
-(gdb) run
-Starting program: /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/bin/python train.py molecule=n2 trainer.max_iters=2
-[Thread debugging using libthread_db enabled]
-Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
-[New Thread 0x7ffebe9ff6c0 (LWP 14722)]
-[New Thread 0x7ffebe1fe6c0 (LWP 14723)]
-[New Thread 0x7ffebd9fd6c0 (LWP 14724)]
-[New Thread 0x7ffebd1fc6c0 (LWP 14725)]
-[New Thread 0x7ffebc9fb6c0 (LWP 14726)]
-[New Thread 0x7ffebc1fa6c0 (LWP 14727)]
-[New Thread 0x7ffebb9f96c0 (LWP 14728)]
-[New Thread 0x7ffebb1f86c0 (LWP 14729)]
-[New Thread 0x7ffeba9f76c0 (LWP 14730)]
-[New Thread 0x7ffeba1f66c0 (LWP 14731)]
-[New Thread 0x7ffeb99f56c0 (LWP 14732)]
-[New Thread 0x7ffeb91f46c0 (LWP 14733)]
-[New Thread 0x7ffeb89f36c0 (LWP 14734)]
-[New Thread 0x7ffeb81f26c0 (LWP 14735)]
-[New Thread 0x7ffeb79f16c0 (LWP 14736)]
-[New Thread 0x7ffeb71f06c0 (LWP 14737)]
-[New Thread 0x7ffeb69ef6c0 (LWP 14738)]
-[New Thread 0x7ffeb61ee6c0 (LWP 14739)]
-[New Thread 0x7ffeb59ed6c0 (LWP 14740)]
-[New Thread 0x7ffe0dea06c0 (LWP 14782)]
-[New Thread 0x7ffe0d69f6c0 (LWP 14783)]
-[New Thread 0x7ffe0ce9e6c0 (LWP 14784)]
-[New Thread 0x7ffe0c69d6c0 (LWP 14785)]
-[New Thread 0x7ffe0be9c6c0 (LWP 14786)]
-[New Thread 0x7ffe0b69b6c0 (LWP 14787)]
-[New Thread 0x7ffe0ae9a6c0 (LWP 14788)]
-[New Thread 0x7ffe0a6996c0 (LWP 14789)]
-[New Thread 0x7ffe09e986c0 (LWP 14790)]
-[New Thread 0x7ffe096976c0 (LWP 14791)]
-[New Thread 0x7ffe08e966c0 (LWP 14792)]
-[New Thread 0x7ffe086956c0 (LWP 14793)]
-[New Thread 0x7ffe07e946c0 (LWP 14794)]
-[New Thread 0x7ffe076936c0 (LWP 14795)]
-[New Thread 0x7ffe06e926c0 (LWP 14796)]
-[New Thread 0x7ffe066916c0 (LWP 14797)]
-[New Thread 0x7ffe05e906c0 (LWP 14798)]
-[New Thread 0x7ffe0568f6c0 (LWP 14799)]
-[New Thread 0x7ffe04e8e6c0 (LWP 14800)]
-[Detaching after vfork from child process 14890]
-[Detaching after vfork from child process 14921]
-[Detaching after vfork from child process 14924]
-[New Thread 0x7ffda41c66c0 (LWP 14928)]
-[New Thread 0x7ffda25116c0 (LWP 14929)]
-[Thread 0x7ffda25116c0 (LWP 14929) exited]
-[New Thread 0x7ffda25116c0 (LWP 14930)]
-[New Thread 0x7ffd7fe486c0 (LWP 14967)]
-[New Thread 0x7ffd7f6476c0 (LWP 14968)]
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ pip install pyscf==2.11.0 --no-binary pyscf --force-reinstall --no-deps
+Collecting pyscf==2.11.0
+  Downloading pyscf-2.11.0.tar.gz (10.3 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.3/10.3 MB 5.8 MB/s  0:00:01
+  Installing build dependencies ... done
+  Getting requirements to build wheel ... done
+  Preparing metadata (pyproject.toml) ... done
+Building wheels for collected packages: pyscf
+  Building wheel for pyscf (pyproject.toml) ... done
+  Created wheel for pyscf: filename=pyscf-2.11.0-py3-none-linux_x86_64.whl size=72126491 sha256=0aaf17a3f02c27f1a90e48c3e90d28e16c966740afe6020980a7b4eb585acf74
+  Stored in directory: /home/loharkar/.cache/pip/wheels/48/69/3d/b35859fabb6fc2db59f202c5e01e1200c2594cb38b3849a0b5
+Successfully built pyscf
+Installing collected packages: pyscf
+  Attempting uninstall: pyscf
+    Found existing installation: pyscf 2.11.0
+    Uninstalling pyscf-2.11.0:
+      Successfully uninstalled pyscf-2.11.0
+Successfully installed pyscf-2.11.0
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ python train.py molecule=n2 trainer.max_iters=2
 /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   import pkg_resources
 wandb: WARNING The anonymous setting has no effect and will be removed in a future version.
-[New Thread 0x7ffd4e6ff6c0 (LWP 15071)]
-[Detaching after vfork from child process 15072]
-[Detaching after vfork from child process 15073]
-[Detaching after vfork from child process 15074]
-[Detaching after vfork from child process 15075]
-[Detaching after vfork from child process 15076]
-[Detaching after vfork from child process 15115]
-wandb: WARNING `resume` will be ignored since W&B syncing is set to `offline`. Starting a new run with run id qymd6lhr.
+wandb: (1) Create a W&B account
+wandb: (2) Use an existing W&B account
+wandb: (3) Don't visualize my results
+wandb: Enter your choice: 3
+wandb: You chose "Don't visualize my results"
+wandb: Using W&B in offline mode.
+wandb: W&B API key is configured. Use `wandb login --relogin` to force relogin
+wandb: WARNING `resume` will be ignored since W&B syncing is set to `offline`. Starting a new run with run id 5l7hvp37.
 wandb: Tracking run with wandb version 0.28.0
 wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
-wandb: Run data is saved locally in outputs/gqe-for-qsci/default-2026-07-09-01-04-45/wandb/offline-run-20260709_010445-qymd6lhr
-wandb: View this run in the terminal with `wandb leet`
-
-Thread 1 "python" received signal SIGILL, Illegal instruction.
-0x00007ffdef653adf in GTOint2c () from /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/pyscf/lib/libcgto.so
-(gdb) bt
-#0  0x00007ffdef653adf in GTOint2c () from /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/pyscf/lib/libcgto.so
-#1  0x00007ffff774802a in ffi_call_unix64 () from /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/lib-dynload/../../libffi.so.8
-#2  0x00007ffff77474a9 in ffi_call_int () from /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/lib-dynload/../../libffi.so.8
-#3  0x00007ffff7747bbd in ffi_call () from /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/lib-dynload/../../libffi.so.8
-#4  0x00007ffff775643a in _call_function_pointer (flags=<optimized out>, pProc=0x7ffdef653a80 <GTOint2c>, avalues=<optimized out>, atypes=<optimized out>, restype=<optimized out>, resmem=0x7fffffff9cd0, argcount=12, 
-    argtypecount=<optimized out>) at /usr/local/src/conda/python-3.11.15/Modules/_ctypes/callproc.c:923
-#5  _ctypes_callproc (pProc=pProc@entry=0x7ffdef653a80 <GTOint2c>, argtuple=argtuple@entry=0x7ffd4dbe79a0, flags=<optimized out>, argtypes=<optimized out>, restype=<optimized out>, checker=0x0)
-    at /usr/local/src/conda/python-3.11.15/Modules/_ctypes/callproc.c:1262
-#6  0x00007ffff775572a in PyCFuncPtr_call (self=<optimized out>, inargs=<optimized out>, kwds=<optimized out>) at /usr/local/src/conda/python-3.11.15/Modules/_ctypes/_ctypes.c:4201
-#7  0x000055555572d3fb in _PyObject_MakeTpCall (tstate=0x555555acdf98 <_PyRuntime+166328>, callable=0x7ffd4da2a340, args=0x7ffff7fbc490, nargs=<optimized out>, keywords=<optimized out>)
-    at /usr/local/src/conda/python-3.11.15/Objects/call.c:214
-#8  0x000055555573b755 in _PyEval_EvalFrameDefault (tstate=tstate@entry=0x555555acdf98 <_PyRuntime+166328>, frame=<optimized out>, frame@entry=0x7ffff7fbbde8, throwflag=throwflag@entry=0)
-    at /usr/local/src/conda/python-3.11.15/Python/ceval.c:4769
-#9  0x0000555555780bf9 in _PyEval_EvalFrame (tstate=0x555555acdf98 <_PyRuntime+166328>, frame=0x7ffff7fbbde8, throwflag=0) at /usr/local/src/conda/python-3.11.15/Include/internal/pycore_ceval.h:73
-#10 _PyEval_Vector (tstate=0x555555acdf98 <_PyRuntime+166328>, func=0x7ffdef7caac0, locals=0x0, args=0x7fffffffa220, argcount=2, kwnames=<optimized out>) at /usr/local/src/conda/python-3.11.15/Python/ceval.c:6434
-#11 _PyFunction_Vectorcall (func=0x7ffdef7caac0, stack=0x7fffffffa220, nargsf=<optimized out>, kwnames=<optimized out>) at /usr/local/src/conda/python-3.11.15/Objects/call.c:393
-#12 _PyObject_VectorcallTstate (tstate=0x555555acdf98 <_PyRuntime+166328>, callable=0x7ffdef7caac0, args=0x7fffffffa220, nargsf=<optimized out>, kwnames=<optimized out>)
---Type <RET> for more, q to quit, c to continue without paging--q
-Quit
-(gdb) quit
-A debugging session is active.
-
-        Inferior 1 [process 14685] will be killed.
-
-Quit anyway? (y or n) y
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:gqe-for-qsci]$
-
-
-Cerebus TITAN logs
-
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ python train.py molecule=n2 trainer.max_iters=2 2>&1 | tee full_run.log
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
-wandb: WARNING The anonymous setting has no effect and will be removed in a future version.
-wandb: WARNING `resume` will be ignored since W&B syncing is set to `offline`. Starting a new run with run id k6n66yb5.
-wandb: Tracking run with wandb version 0.28.0
-wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
-wandb: Run data is saved locally in outputs/gqe-for-qsci/default-2026-07-09-01-03-55/wandb/offline-run-20260709_010356-k6n66yb5
+wandb: Run data is saved locally in outputs/gqe-for-qsci/default-2026-07-13-11-25-02/wandb/offline-run-20260713_112506-5l7hvp37
 wandb: View this run in the terminal with `wandb leet`
 converged SCF energy = -106.616959082769
 Vocab size: 188
@@ -118,7 +40,73 @@ Using 16bit Automatic Mixed Precision (AMP)
 GPU available: True (cuda), used: True
 TPU available: False, using: 0 TPU cores
 💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
-Checkpoint outputs/gqe-for-qsci/default-2026-07-09-01-03-55/models/last.ckpt does not exist. Training from scratch.
+Checkpoint outputs/gqe-for-qsci/default-2026-07-13-11-25-02/models/last.ckpt does not exist. Training from scratch.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/pytorch_lightning/utilities/model_summary/model_summary.py:242: Precision 16-mixed is not supported by the model summary.  Estimated model size in MB will not be accurate. Using 32 bits instead.
+
+  | Name  | Type      | Params | Mode  | FLOPs
+----------------------------------------------------
+0 | model | GPT2Model | 42.7 M | train | 0    
+----------------------------------------------------
+42.7 M    Trainable params
+0         Non-trainable params
+42.7 M    Total params
+170.726   Total estimated model params size (MB)
+86        Modules in train mode
+0         Modules in eval mode
+0         Total Flops
+Error executing job with overrides: ['molecule=n2', 'trainer.max_iters=2']
+RuntimeError: Unable to open distributed interface library '/home/loharkar/TNN_bench/CuTen/cudaq_cuten/distributed_interfaces/libcudaq_distributed_interface_mpi.so': /home/loharkar/TNN_bench/CuTen/cudaq_cuten/distributed_interfaces/libcudaq_distributed_interface_mpi.so: cannot open shared object file: No such file or directory
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+wandb: 
+wandb: You can sync this run to the cloud by running:
+wandb: wandb sync outputs/gqe-for-qsci/default-2026-07-13-11-25-02/wandb/offline-run-20260713_112506-5l7hvp37
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ source $CONDA_PREFIX/lib/python3.11/site-packages/distributed_interfaces/activate_custom_mpi.sh
+Using x86_64-conda-linux-gnu-c++ to build the MPI plugin for MPI installation in /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2.
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ source $CONDA_PREFIX/lib/python3.11/site-packages/distributed_interfaces/activate_custom_mpi.sh
+Using x86_64-conda-linux-gnu-c++ to build the MPI plugin for MPI installation in /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2.
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ python train.py molecule=n2 trainer.max_iters=2
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+^C CTRL-C caught in cudaq runtime.
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ conda env config vars set -p /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/ LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
+To make your changes take effect please reactivate your environment
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ mamba deactivate
+(base) [loharkar@erebos05:gqe-for-qsci]$ mamba activate /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/
+warning  libmamba WARNING: overwriting environment variables set in the machine
+warning  libmamba Overwriting variables: LD_LIBRARY_PATH
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ conda env config vars set -p /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/ MPI_PATH=$CONDA_PREFIX
+To make your changes take effect please reactivate your environment
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ mamba deactivate
+(base) [loharkar@erebos05:gqe-for-qsci]$ mamba activate /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/
+warning  libmamba WARNING: overwriting environment variables set in the machine
+warning  libmamba Overwriting variables: LD_LIBRARY_PATH
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ python train.py molecule=n2 trainer.max_iters=2
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+wandb: WARNING The anonymous setting has no effect and will be removed in a future version.
+wandb: (1) Create a W&B account
+wandb: (2) Use an existing W&B account
+wandb: (3) Don't visualize my results
+wandb: Enter your choice: 3
+wandb: You chose "Don't visualize my results"
+wandb: Using W&B in offline mode.
+wandb: W&B API key is configured. Use `wandb login --relogin` to force relogin
+wandb: WARNING `resume` will be ignored since W&B syncing is set to `offline`. Starting a new run with run id 6za2xs2q.
+wandb: Tracking run with wandb version 0.28.0
+wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+wandb: Run data is saved locally in outputs/gqe-for-qsci/default-2026-07-13-11-29-38/wandb/offline-run-20260713_112942-6za2xs2q
+wandb: View this run in the terminal with `wandb leet`
+converged SCF energy = -106.616959082769
+Vocab size: 188
+CASCI Energy: -107.44040897497159
+CCSD Energy: -106.98408522634637
+Using 16bit Automatic Mixed Precision (AMP)
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+Checkpoint outputs/gqe-for-qsci/default-2026-07-13-11-29-38/models/last.ckpt does not exist. Training from scratch.
 LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
 /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/pytorch_lightning/utilities/model_summary/model_summary.py:242: Precision 16-mixed is not supported by the model summary.  Estimated model size in MB will not be accurate. Using 32 bits instead.
 
@@ -135,7 +123,9 @@ LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
 0         Total Flops
 Error executing job with overrides: ['molecule=n2', 'trainer.max_iters=2']
 TypeError: cannot pickle 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.SampleResult' object
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
 wandb: 
 wandb: You can sync this run to the cloud by running:
-wandb: wandb sync outputs/gqe-for-qsci/default-2026-07-09-01-03-55/wandb/offline-run-20260709_010356-k6n66yb5
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ 
+wandb: wandb sync outputs/gqe-for-qsci/default-2026-07-13-11-29-38/wandb/offline-run-20260713_112942-6za2xs2q
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:gqe-for-qsci]$ 
