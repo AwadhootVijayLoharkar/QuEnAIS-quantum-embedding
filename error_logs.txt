@@ -34,3 +34,34 @@ TypeError: cannot pickle 'cudaq.mlir._mlir_libs._quakeDialects.cudaq_runtime.Sam
 [1;34mwandb[0m: 
 [1;34mwandb[0m: You can sync this run to the cloud by running:
 [1;34mwandb[0m: [1mwandb sync outputs/gqe-for-qsci/default-2026-07-13-15-07-06/wandb/offline-run-20260713_150706-6i3wutde[0m
+
+
+import pickle
+import io
+import traceback
+
+# Force pure-Python pickler so it's patchable, and patch every entry point
+pickle.Pickler = pickle._Pickler
+
+_orig_save = pickle.Pickler.save
+def _traced_save(self, obj, save_persistent_id=True):
+    try:
+        return _orig_save(self, obj, save_persistent_id)
+    except TypeError as e:
+        if "cannot pickle" in str(e):
+            print("=== PICKLE FAILURE: live call stack ===", flush=True)
+            traceback.print_stack()
+            print(f"=== Offending object: {type(obj)} -> {obj!r} ===", flush=True)
+        raise
+pickle.Pickler.save = _traced_save
+
+def _traced_dumps(obj, protocol=None, *, fix_imports=True, buffer_callback=None):
+    f = io.BytesIO()
+    pickle.Pickler(f, protocol, fix_imports=fix_imports, buffer_callback=buffer_callback).dump(obj)
+    return f.getvalue()
+
+def _traced_dump(obj, file, protocol=None, *, fix_imports=True, buffer_callback=None):
+    pickle.Pickler(file, protocol, fix_imports=fix_imports, buffer_callback=buffer_callback).dump(obj)
+
+pickle.dump = _traced_dump
+pickle.dumps = _traced_dumps
