@@ -1,29 +1,5 @@
-cd /home/loharkar/QuEnAIS-quantum-embedding
-
-# the three Python files go into gqe-for-qsci's root, next to train.py
-mv scripts/test6/dmet_molecule_adapter.py gqe-for-qsci/
-mv scripts/test6/dmet_excitation_pool.py gqe-for-qsci/
-mv scripts/test6/validate_excitation_generator.py gqe-for-qsci/
-
-# the config goes into gqe-for-qsci's own Hydra config tree
-mv scripts/test6/dmet_embedding.yaml gqe-for-qsci/configs/molecule/
-
-ls gqe-for-qsci/dmet_*.py gqe-for-qsci/validate_excitation_generator.py gqe-for-qsci/configs/molecule/dmet_embedding.yaml
-
-
-sed -i 's#step2_pickle_path:.*#step2_pickle_path: /home/loharkar/QuEnAIS-quantum-embedding/scripts/test5/results/step2_hamiltonian.pkl#' gqe-for-qsci/configs/molecule/dmet_embedding.yaml
-cat gqe-for-qsci/configs/molecule/dmet_embedding.yaml
-
-grep -n "dmet_pauli_evolution\|dmet_excitation\|DMETPauliEvolutionPool\|DMETExcitationPool" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/factory.py
-
-
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria11:QuEnAIS-quantum-embedding]$ sed -i 's#step2_pickle_path:.*#step2_pickle_path: /home/loharkar/QuEnAIS-quantum-embedding/scripts/test5/results/step2_hamiltonian.pkl#' gqe-for-qsci/configs/molecule/dmet_embedding.yaml
-cat gqe-for-qsci/configs/molecule/dmet_embedding.yaml
-_target_: dmet_molecule_adapter.load_from_dmet_pickle
-step2_pickle_path: /home/loharkar/QuEnAIS-quantum-embedding/scripts/test5/results/step2_hamiltonian.pkl(/home/loh(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria11:QuEnAIS-quantum-embedding]$ grep -n "dmet_pauli_evolution\|dmet_excitation\|DMETPauliEvolutionPool\|DMETExcitationPool" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/factory.py
-18:from dmet_excitation_pool import DMETPauliEvolutionPool, DMETExcitationPool
-87:            case "dmet_pauli_evolution":
-88:                operator_pool = DMETPauliEvolutionPool(
-95:            case "dmet_excitation":
-96:                operator_pool = DMETExcitationPool(molecule, params=cfg.operator_pool.params, threshold=cfg.operator_pool.ccsd_threshold)
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria11:QuEnAIS-quantum-embedding]$ 
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria11:gqe-for-qsci]$ WANDB_MODE=offline python train.py molecule=dmet_embedding operator_pool.spec=dmet_excitation trainer.max_iters=2 > dmet_test.log 2>&1
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria11:gqe-for-qsci]$ grep -oE '\[epoch [0-9]+\] \{[^}]*\}'  dmet_test.log 
+[epoch 0] {'GQE-optimized/energy/min': -997.8163963125027, 'GQE-optimized/energy/mean': np.float64(-997.7847622907888), 'GQE-optimized/energy/std': np.float64(0.010620207554479101), 'GQE-optimized/subspace_dim/max': 9, 'GQE-optimized/cx_count/max': 992, 'GQE-optimized/total_gates/max': 1968, 'GQE-optimized(best_so_far)/energy - R-CASCI': np.float64(0.17157722724641644), 'GQE-optimized(best_so_far)/energy - R-CCSD': np.float64(0.15532487701023), 'GQE-optimized(best_so_far)/subspace_dim': 10, 'GQE-optimized(best_so_far)/num_sampled_basis': 4, 'GQE-optimized(best_so_far)/num_symmetry_preserving_basis': 4, 'GQE-optimized(best_so_far)/cx_count': 992, 'GQE-optimized(best_so_far)/total_gates': 1942, 'Local-refined(best_so_far)/energy - R-CASCI': np.float64(0.17090288279382548), 'Local-refined(best_so_far)/energy - R-CCSD': np.float64(0.15465053255763905), 'Local-refined(best_so_far)/subspace_dim': 49, 'Global-refined(best_so_far)/energy - R-CASCI': np.float64(0.09004136412409025), 'Global-refined(best_so_far)/energy - R-CCSD': np.float64(0.07378901388790382), 'Global-refined(best_so_far)/subspace_dim': 79}
+[epoch 1] {'GQE-optimized/energy/min': -997.8163922882705, 'GQE-optimized/energy/mean': np.float64(-997.789899719286), 'GQE-optimized/energy/std': np.float64(0.013732494497586553), 'GQE-optimized/subspace_dim/max': 4, 'GQE-optimized/cx_count/max': 1136, 'GQE-optimized/total_gates/max': 2072, 'GQE-optimized(best_so_far)/energy - R-CASCI': np.float64(0.17157722724641644), 'GQE-optimized(best_so_far)/energy - R-CCSD': np.float64(0.15532487701023), 'GQE-optimized(best_so_far)/subspace_dim': 10, 'GQE-optimized(best_so_far)/num_sampled_basis': 4, 'GQE-optimized(best_so_far)/num_symmetry_preserving_basis': 4, 'GQE-optimized(best_so_far)/cx_count': 992, 'GQE-optimized(best_so_far)/total_gates': 1942, 'Local-refined(best_so_far)/energy - R-CASCI': np.float64(0.17022865722412917), 'Local-refined(best_so_far)/energy - R-CCSD': np.float64(0.15397630698794273), 'Local-refined(best_so_far)/subspace_dim': 48, 'Global-refined(best_so_far)/energy - R-CASCI': np.float64(0.0828292447675949), 'Global-refined(best_so_far)/energy - R-CCSD': np.float64(0.06657689453140847), 'Global-refined(best_so_far)/subspace_dim': 82}
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria11:gqe-for-qsci]$
