@@ -1,41 +1,11 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria11:test6]$ python validate_excitation_generator.py 
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
+cd /home/loharkar/QuEnAIS-quantum-embedding
 
-======================================================================
-Test case: single excitation (alpha, 0->1)   indices=[(0, 2)]
-======================================================================
-  '0X,1Z,2Y'            tequila=-0.500000   mine=-0.500000+0.000000j   ratio(mine/tequila)=1.000000-0.000000j
-  '0Y,1Z,2X'            tequila=0.500000   mine=0.500000+0.000000j   ratio(mine/tequila)=1.000000+0.000000j
+# the three Python files go into gqe-for-qsci's root, next to train.py
+mv scripts/test6/dmet_molecule_adapter.py gqe-for-qsci/
+mv scripts/test6/dmet_excitation_pool.py gqe-for-qsci/
+mv scripts/test6/validate_excitation_generator.py gqe-for-qsci/
 
-  PASS: identical Pauli-string set, consistent ratio = 1.000000-0.000000j
+# the config goes into gqe-for-qsci's own Hydra config tree
+mv scripts/test6/dmet_embedding.yaml gqe-for-qsci/configs/molecule/
 
-======================================================================
-Test case: single excitation (beta, 0->1)   indices=[(1, 3)]
-======================================================================
-  '1X,2Z,3Y'            tequila=-0.500000   mine=-0.500000+0.000000j   ratio(mine/tequila)=1.000000-0.000000j
-  '1Y,2Z,3X'            tequila=0.500000   mine=0.500000+0.000000j   ratio(mine/tequila)=1.000000+0.000000j
-
-  PASS: identical Pauli-string set, consistent ratio = 1.000000-0.000000j
-
-======================================================================
-Test case: double excitation (alpha-beta)   indices=[(1, 3), (0, 2)]
-======================================================================
-  '0X,1X,2X,3Y'         tequila=-0.125000   mine=-0.125000+0.000000j   ratio(mine/tequila)=1.000000-0.000000j
-  '0X,1X,2Y,3X'         tequila=-0.125000   mine=-0.125000+0.000000j   ratio(mine/tequila)=1.000000-0.000000j
-  '0X,1Y,2X,3X'         tequila=0.125000   mine=0.125000+0.000000j   ratio(mine/tequila)=1.000000+0.000000j
-  '0X,1Y,2Y,3Y'         tequila=-0.125000   mine=-0.125000+0.000000j   ratio(mine/tequila)=1.000000-0.000000j
-  '0Y,1X,2X,3X'         tequila=0.125000   mine=0.125000+0.000000j   ratio(mine/tequila)=1.000000+0.000000j
-  '0Y,1X,2Y,3Y'         tequila=-0.125000   mine=-0.125000+0.000000j   ratio(mine/tequila)=1.000000-0.000000j
-  '0Y,1Y,2X,3Y'         tequila=0.125000   mine=0.125000+0.000000j   ratio(mine/tequila)=1.000000+0.000000j
-  '0Y,1Y,2Y,3X'         tequila=0.125000   mine=0.125000+0.000000j   ratio(mine/tequila)=1.000000+0.000000j
-
-  PASS: identical Pauli-string set, consistent ratio = 1.000000-0.000000j
-
-======================================================================
-If all cases above say PASS with a consistent ratio (ideally 1.0,
-or note the fixed scale factor to apply), the generator
-construction in dmet_excitation_pool.py is confirmed correct and
-safe to use on DMET's embedding Hamiltonian.
-======================================================================
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria11:test6]$
+ls gqe-for-qsci/dmet_*.py gqe-for-qsci/validate_excitation_generator.py gqe-for-qsci/configs/molecule/dmet_embedding.yaml
