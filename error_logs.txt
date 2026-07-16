@@ -10,4 +10,4 @@ def on_train_epoch_start(self):
             log_inputs.append({"result": self.best_global_refined, "prefix": "Global-refined(best_so_far)"})
         metrics = self.metric_logger.log_result(self, log_inputs)
         print(f"[epoch {self.current_epoch}] {metrics}", flush=True)
-        super().on_train_epoch_start()
+        super().on_train_epoch_start() 
