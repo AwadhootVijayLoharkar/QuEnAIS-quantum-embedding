@@ -1,2 +1,0 @@
-_target_: dmet_molecule_adapter.load_from_dmet_pickle
-step2_pickle_path: results/step2_hamiltonian.pkl
