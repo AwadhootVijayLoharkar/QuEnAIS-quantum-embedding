@@ -9,3 +9,9 @@ mv scripts/test6/validate_excitation_generator.py gqe-for-qsci/
 mv scripts/test6/dmet_embedding.yaml gqe-for-qsci/configs/molecule/
 
 ls gqe-for-qsci/dmet_*.py gqe-for-qsci/validate_excitation_generator.py gqe-for-qsci/configs/molecule/dmet_embedding.yaml
+
+
+sed -i 's#step2_pickle_path:.*#step2_pickle_path: /home/loharkar/QuEnAIS-quantum-embedding/scripts/test5/results/step2_hamiltonian.pkl#' gqe-for-qsci/configs/molecule/dmet_embedding.yaml
+cat gqe-for-qsci/configs/molecule/dmet_embedding.yaml
+
+grep -n "dmet_pauli_evolution\|dmet_excitation\|DMETPauliEvolutionPool\|DMETExcitationPool" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/factory.py
