@@ -15,3 +15,15 @@ sed -i 's#step2_pickle_path:.*#step2_pickle_path: /home/loharkar/QuEnAIS-quantum
 cat gqe-for-qsci/configs/molecule/dmet_embedding.yaml
 
 grep -n "dmet_pauli_evolution\|dmet_excitation\|DMETPauliEvolutionPool\|DMETExcitationPool" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/factory.py
+
+
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria11:QuEnAIS-quantum-embedding]$ sed -i 's#step2_pickle_path:.*#step2_pickle_path: /home/loharkar/QuEnAIS-quantum-embedding/scripts/test5/results/step2_hamiltonian.pkl#' gqe-for-qsci/configs/molecule/dmet_embedding.yaml
+cat gqe-for-qsci/configs/molecule/dmet_embedding.yaml
+_target_: dmet_molecule_adapter.load_from_dmet_pickle
+step2_pickle_path: /home/loharkar/QuEnAIS-quantum-embedding/scripts/test5/results/step2_hamiltonian.pkl(/home/loh(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria11:QuEnAIS-quantum-embedding]$ grep -n "dmet_pauli_evolution\|dmet_excitation\|DMETPauliEvolutionPool\|DMETExcitationPool" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/factory.py
+18:from dmet_excitation_pool import DMETPauliEvolutionPool, DMETExcitationPool
+87:            case "dmet_pauli_evolution":
+88:                operator_pool = DMETPauliEvolutionPool(
+95:            case "dmet_excitation":
+96:                operator_pool = DMETExcitationPool(molecule, params=cfg.operator_pool.params, threshold=cfg.operator_pool.ccsd_threshold)
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria11:QuEnAIS-quantum-embedding]$ 
