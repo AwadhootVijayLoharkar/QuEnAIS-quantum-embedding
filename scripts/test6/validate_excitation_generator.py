@@ -81,17 +81,20 @@ def compare(name, indices, tq_molecule):
             print(f"  MISMATCH  {w!r:20s}  tequila={rv}   mine={mv}   <-- present in only one!")
             ok = False
             continue
-        ratio = mv / rv if abs(rv) > 1e-14 else float("nan")
+        ratio = mv / rv if abs(rv) > 1e-14 else complex("nan")
         ratios.append(ratio)
         print(f"  {w!r:20s}  tequila={rv:.6f}   mine={mv:.6f}   ratio(mine/tequila)={ratio:.6f}")
 
     if ok and ratios:
-        spread = max(ratios) - min(ratios)
+        # compare as complex numbers -- ratios can legitimately be
+        # complex (e.g. a fixed factor of +i/-i), not just real
+        first = ratios[0]
+        spread = max(abs(r - first) for r in ratios)
         if spread < 1e-8:
-            print(f"\n  PASS: identical Pauli-string set, consistent ratio = {ratios[0]:.6f}")
-            if abs(ratios[0] - 1.0) > 1e-8:
+            print(f"\n  PASS: identical Pauli-string set, consistent ratio = {first:.6f}")
+            if abs(first - 1.0) > 1e-8:
                 print(f"  NOTE: ratio is not 1.0 -- multiply excitation_generator_qubit_op()'s")
-                print(f"        result by {ratios[0]:.6f} to match tequila's convention exactly.")
+                print(f"        generator by {first:.6f} to match tequila's convention exactly.")
         else:
             print(f"\n  FAIL: ratios are inconsistent across terms (spread={spread:.6f}).")
             print(f"        Do not trust dmet_excitation_pool.py yet -- report this output.")

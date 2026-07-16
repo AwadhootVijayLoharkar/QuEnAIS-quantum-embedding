@@ -64,7 +64,13 @@ def excitation_generator_qubit_op(indices: list[tuple[int, int]]):
     for (p, q) in indices:
         forward *= FermionOperator(((q, 1), (p, 0)))   # a_q^dag a_p
         backward *= FermionOperator(((p, 1), (q, 0)))  # a_p^dag a_q
-    generator = forward - backward
+    # (forward - backward) is the standard anti-Hermitian UCC generator.
+    # tequila stores its generator already converted to Hermitian form
+    # (H = -i * (T - T^dag), ready for exp(-i*theta*H)) -- confirmed via
+    # validate_excitation_generator.py, which found a consistent ratio of
+    # exactly +i between the raw anti-Hermitian form and tequila's output.
+    # Multiplying by -1j here matches that convention exactly.
+    generator = -1j * (forward - backward)
     return jordan_wigner(generator)
 
 
