@@ -1,0 +1,93 @@
+#------------------------------------------------------------------------------
+#$Date: 2024-04-18 18:56:43 +0300 (Thu, 18 Apr 2024) $
+#$Revision: 291269 $
+#$URL: file:///home/coder/svn-repositories/_RELOADED_COD/cod-reloaded/cif/9/00/05/9000547.cif $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Crystallography Open Database (COD),
+# http://www.crystallography.net/. The original data for this entry
+# were provided the American Mineralogist Crystal Structure Database,
+# http://rruff.geo.arizona.edu/AMS/amcsd.php
+#
+# The file may be used within the scientific community so long as
+# proper attribution is given to the journal article from which the
+# data were obtained.
+#
+data_9000547
+loop_
+_publ_author_name
+'Anderson, J. B.'
+'Shoemaker, G. L.'
+'Kostiner, E.'
+'Ruszala, F. A.'
+_publ_section_title
+;
+ The crystal structure of synthetic Cu5(PO4)2(OH)4, a polymorph of
+ pseudomalachite
+;
+_journal_name_full               'American Mineralogist'
+_journal_page_first              115
+_journal_page_last               121
+_journal_volume                  62
+_journal_year                    1977
+_chemical_formula_sum            'Cu5 O12 P2'
+_chemical_name_mineral           Reichenbachite
+_space_group_IT_number           14
+_symmetry_space_group_name_Hall  '-P 2yab'
+_symmetry_space_group_name_H-M   'P 1 21/a 1'
+_cell_angle_alpha                90
+_cell_angle_beta                 92.31
+_cell_angle_gamma                90
+_cell_length_a                   9.186
+_cell_length_b                   10.684
+_cell_length_c                   4.461
+_cell_formula_units_Z            2
+_cell_volume                     437.461
+_database_code_amcsd             0000558
+_exptl_crystal_density_diffrn    4.340
+_cod_original_formula_sum        'Cu5 P2 O12'
+_cod_database_code               9000547
+loop_
+_space_group_symop_operation_xyz
+x,y,z
+1/2+x,1/2-y,z
+1/2-x,1/2+y,-z
+-x,-y,-z
+loop_
+_atom_site_aniso_label
+_atom_site_aniso_U_11
+_atom_site_aniso_U_22
+_atom_site_aniso_U_33
+_atom_site_aniso_U_12
+_atom_site_aniso_U_13
+_atom_site_aniso_U_23
+Cu1 0.00697 0.00532 0.01735 0.00000 0.00507 0.00000
+Cu2 0.00329 0.00468 0.01773 0.00114 -0.00025 -0.00253
+Cu3 0.00481 0.00444 0.01532 0.00190 -0.00215 -0.00177
+P 0.00304 0.00418 0.01127 -0.00088 0.00025 -0.00038
+O1 0.00646 0.00912 0.01697 0.00114 0.00000 -0.00393
+O2 0.00393 0.00557 0.01393 -0.00025 -0.00228 -0.00215
+O3 0.01317 0.00823 0.02077 0.00266 0.00608 -0.00418
+O4 0.00608 0.00747 0.01406 -0.00240 -0.00266 0.00228
+O5 0.00532 0.00367 0.01621 -0.00101 0.00203 -0.00013
+O6 0.00443 0.00076 0.01659 -0.00228 0.00190 -0.00279
+loop_
+_atom_site_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+Cu1 0.00000 0.00000 0.00000
+Cu2 0.36470 0.07582 0.02040
+Cu3 0.13548 0.26393 0.03540
+P 0.38740 0.29890 0.47930
+O1 -0.00230 0.12820 0.29970
+O2 0.29320 0.21550 0.25600
+O3 0.28960 0.38260 0.65700
+O4 0.47250 0.20510 0.68340
+O5 0.07240 0.42020 0.16250
+O6 0.16870 0.08900 -0.16460
+loop_
+_cod_related_entry_id
+_cod_related_entry_database
+_cod_related_entry_code
+1 AMCSD 0000558
