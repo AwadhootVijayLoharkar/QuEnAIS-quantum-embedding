@@ -1,32 +1,13 @@
 # DMET.py — test7 — DMET Embedding Hamiltonian
 """
-Same core Schmidt-decomposition / core-potential / integral-transform
-logic as test5's DMET.py, with three functional changes:
-
-1. Pluggable reference density (config.DMET_REFERENCE = "mp2" | "casci").
-   "mp2" now reads Step 1's saved DM instead of recomputing MP2 (removes
-   a redundant O(N^5) solve). "casci" runs a plain CASCI/FCI -- no orbital
-   optimization -- INSIDE the already-small ASF active space to get a
-   correlated reference density instead of a perturbative one. This does
-   NOT solve the impurity+bath problem (that's still the quantum solver's
-   job downstream) -- it only improves what goes into building the bath,
-   at a cost already bounded by the active-space sizes (~10-16 orbitals)
-   this pipeline already treats as classically tractable elsewhere.
-
-2. Chemical-potential (mu) bisection correction (config.MU_CORRECTION),
-   reinstated from the algorithm your own test3_documentation/hamiltonian.md
-   describes but which was missing from test5's actual DMET.py. Shifts
-   h1e_emb by -mu*I so the number of negative eigenvalues matches the
-   target electron count per spin channel, fixing one-shot DMET's
-   grand-canonical fractional-occupation symptom. mu is then added back
-   into ecore so the total energy bookkeeping stays correct.
-
-3. Saves `ref_occ_alpha` / `ref_occ_beta` -- the embedding-space
-   occupations implied by the reference density used to build the bath --
-   so a downstream solver (Step 3 / gqe_for_qsci.py) can call
-   `embedding_consistency_score()` below and get a free diagnostic of
-   whether the one-shot bath is still a good approximation, without
-   rebuilding anything.
+UPDATE (this revision): get_reference_density / chemical_potential_correction /
+embedding_consistency_score no longer live in this file -- they're imported
+from dmet_lib.py, which has no module-level side effects. That fixes the
+bug where `import DMET` from gqe_for_qsci.py silently killed the whole
+process via this script's own cache-check sys.exit(0). Also now saves the
+FULL Schmidt singular-value spectrum (`sv_all`) in addition to the kept
+bath SVs, so visualization.py can actually plot the gap that adaptive_bath()
+used to pick n_bath, not just the orbitals it kept.
 
 Rename to DMET.py when you drop this into your own test7/ folder.
 """
@@ -40,6 +21,11 @@ import warnings
 import numpy as np
 
 import config
+from dmet_lib import (
+    get_reference_density,
+    chemical_potential_correction,
+    embedding_consistency_score,  # re-exported for convenience; not called here
+)
 
 parser = argparse.ArgumentParser(description="Step 2: DMET Embedding Hamiltonian")
 parser.add_argument("--force", action="store_true")
@@ -59,7 +45,7 @@ with open(config.STEP1_FILE, "rb") as f:
 nel, mo_list, mo_coeff = step1["nel"], step1["mo_list"], step1["mo_coeff"]
 n_imp, mol_info = step1["n_active_orbs"], step1["mol_info"]
 
-from pyscf import gto, scf, ao2mo, fci
+from pyscf import gto, scf, ao2mo
 from pyscf.scf import hf as pyscf_hf
 
 
@@ -118,165 +104,6 @@ def _symmetrize_h2e(h2e):
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# NEW 1: pluggable reference density
-# ═══════════════════════════════════════════════════════════════════════
-
-def get_reference_density(mf, mol, step1, method):
-    """
-    Returns (dm_ao_total, dm_ao_alpha, dm_ao_beta, info) -- the density
-    matrix used to drive the Schmidt decomposition.
-    """
-    if method == "mp2":
-        for key in ("dm_ao_total_mp2", "dm_ao_alpha_mp2", "dm_ao_beta_mp2"):
-            if key not in step1:
-                raise KeyError(
-                    f"step1 pickle missing '{key}'. Re-run ASF.py (test7 "
-                    f"version) with --force -- it now saves the MP2 DM "
-                    f"so this function never recomputes MP2."
-                )
-        return (step1["dm_ao_total_mp2"], step1["dm_ao_alpha_mp2"],
-                step1["dm_ao_beta_mp2"], {"method": "mp2", "recomputed": False})
-
-    elif method == "casci":
-        nel_active = step1["nel"]
-        n_active   = len(mo_list)
-        n_alpha    = nel_active // 2 + nel_active % 2
-        n_beta     = nel_active // 2
-
-        C_active = mo_coeff[:, mo_list]
-        h1e_ao   = mol.intor("int1e_kin") + mol.intor("int1e_nuc")
-        h1e_act  = C_active.T @ h1e_ao @ C_active
-        h2e_act  = ao2mo.kernel(mol, C_active, compact=False).reshape(
-            n_active, n_active, n_active, n_active
-        )
-
-        cisolver = fci.direct_spin1.FCI()
-        cisolver.verbose = 0
-        e_cas, civec = cisolver.kernel(h1e_act, h2e_act, n_active, (n_alpha, n_beta))
-        dm_active_a, dm_active_b = cisolver.make_rdm1s(civec, n_active, (n_alpha, n_beta))
-
-        # Embed back into the FULL ASF natural-orbital basis: active block
-        # gets the CASCI-correlated occupations, everything else keeps its
-        # Step-1 MP2 natural-orbital occupation (already reasonable there
-        # -- it's only unreliable inside the active space, which is
-        # exactly the block we're replacing).
-        n_mo_total = mo_coeff.shape[1]
-        no_occ = step1["no_occ"]
-        dm_full_a = np.diag([no_occ[i] / 2.0 for i in range(n_mo_total)])
-        dm_full_b = np.diag([no_occ[i] / 2.0 for i in range(n_mo_total)])
-        for a_i, i in enumerate(mo_list):
-            for a_j, j in enumerate(mo_list):
-                dm_full_a[i, j] = dm_active_a[a_i, a_j]
-                dm_full_b[i, j] = dm_active_b[a_i, a_j]
-
-        dm_ao_alpha = mo_coeff @ dm_full_a @ mo_coeff.T
-        dm_ao_beta  = mo_coeff @ dm_full_b @ mo_coeff.T
-        dm_ao_total = dm_ao_alpha + dm_ao_beta
-
-        return (dm_ao_total, dm_ao_alpha, dm_ao_beta,
-                {"method": "casci", "e_cas": float(e_cas),
-                 "n_active": n_active, "nel_active": nel_active})
-
-    else:
-        raise ValueError(f"Unknown DMET_REFERENCE='{method}'. Use 'mp2' or 'casci'.")
-
-
-# ═══════════════════════════════════════════════════════════════════════
-# NEW 2: chemical-potential (mu) bisection correction
-# ═══════════════════════════════════════════════════════════════════════
-
-def chemical_potential_correction(h1e_emb, n_emb, n_alpha, n_beta,
-                                   mu_range, max_iter, tol):
-    """
-    One-shot DMET grand-canonical fix, exactly the algorithm documented in
-    hamiltonian.md: find mu such that the number of eigenvalues of
-    (h1e_emb - mu*I) below zero equals the target electron count, then
-    return the mu-shifted h1e plus mu itself (needed to correct ecore).
-
-    Assumes a closed-shell embedding (n_alpha == n_beta); for open-shell
-    embeddings, run this twice with separate alpha/beta h1e blocks.
-
-    Cost: repeated eigh() of an (n_emb x n_emb) matrix -- negligible.
-    """
-    if n_alpha != n_beta:
-        warnings.warn(
-            f"chemical_potential_correction assumes n_alpha==n_beta "
-            f"(got {n_alpha},{n_beta}); using n_alpha as the target and "
-            f"applying the same shift to both spins. Verify this is "
-            f"appropriate for open-shell embeddings.", RuntimeWarning,
-        )
-    target = n_alpha
-
-    def n_below_zero(mu):
-        evals = np.linalg.eigvalsh(h1e_emb - mu * np.eye(n_emb))
-        return int(np.sum(evals < 0.0))
-
-    lo, hi = mu_range
-    n_lo, n_hi = n_below_zero(lo), n_below_zero(hi)
-    if not (n_lo <= target <= n_hi):
-        warnings.warn(
-            f"mu search range {mu_range} does not bracket target electron "
-            f"count {target} (n(mu={lo})={n_lo}, n(mu={hi})={n_hi}). "
-            f"Widen MU_SEARCH_RANGE in config.py, or check h1e_emb for "
-            f"numerical issues. Skipping mu correction.", RuntimeWarning,
-        )
-        return h1e_emb, 0.0
-
-    for _ in range(max_iter):
-        mid = 0.5 * (lo + hi)
-        if n_below_zero(mid) < target:
-            lo = mid
-        else:
-            hi = mid
-        if hi - lo < tol:
-            break
-    mu = 0.5 * (lo + hi)
-
-    h1e_shifted = h1e_emb - mu * np.eye(n_emb)
-    # <H_shifted> = <H> - mu*N for any state in the fixed-N sector, so the
-    # solver's output energy on h1e_shifted must have +mu*N_target added
-    # back. We fold that into ecore instead, so nothing downstream needs
-    # to remember to do this manually:
-    #   ecore_corrected = ecore + mu * (n_alpha + n_beta)
-    return h1e_shifted, mu
-
-
-# ═══════════════════════════════════════════════════════════════════════
-# NEW 3: embedding self-consistency diagnostic (no bath rebuild)
-# ═══════════════════════════════════════════════════════════════════════
-
-def embedding_consistency_score(step2_result, avg_occs, threshold=0.10):
-    """
-    Compare the electron distribution implied by the density matrix used
-    to build the bath (ref_occ_alpha/beta, saved below) against the
-    distribution the solver actually found (avg_occs, e.g. from
-    qiskit_addon_sqd.solve_fermion or a GQE/QSCI subspace diagonalization).
-
-    This is a DIAGNOSTIC ONLY -- it does not rebuild the bath or loop.
-    Large mismatch means the one-shot approximation likely broke down for
-    this molecule (try DMET_REFERENCE="casci" if you're on "mp2", or a
-    genuine self-consistent DMET loop if it's still large).
-
-    Call this from Step 3 / gqe_for_qsci.py after the solver returns.
-    """
-    ref_a = step2_result.get("ref_occ_alpha")
-    ref_b = step2_result.get("ref_occ_beta")
-    if ref_a is None or ref_b is None:
-        raise KeyError(
-            "step2 pickle has no 'ref_occ_alpha'/'ref_occ_beta' -- re-run "
-            "DMET.py (test7 version)."
-        )
-    occ_a, occ_b = avg_occs
-    mismatch_a = float(np.mean(np.abs(np.asarray(occ_a) - ref_a)))
-    mismatch_b = float(np.mean(np.abs(np.asarray(occ_b) - ref_b)))
-    score = 0.5 * (mismatch_a + mismatch_b)
-    return {
-        "mismatch_alpha": mismatch_a, "mismatch_beta": mismatch_b,
-        "mismatch_score": score, "flag": score > threshold,
-    }
-
-
-# ═══════════════════════════════════════════════════════════════════════
 # Main
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -298,7 +125,7 @@ if not mf.converged:
 
 print(f"\n-- Phase B: Reference Density ({config.DMET_REFERENCE}) --")
 dm_ao_total, dm_ao_alpha, dm_ao_beta, ref_info = get_reference_density(
-    mf, mol, step1, config.DMET_REFERENCE
+    mf, mol, step1, mo_list, mo_coeff, config.DMET_REFERENCE
 )
 print(f"  {ref_info}")
 
@@ -371,7 +198,6 @@ delta_hf = (e_hf_emb + ecore) - float(mf.e_tot)
 assert abs(delta_hf) < 1e-6, f"ecore self-consistency failed: delta={delta_hf:.6e} Ha"
 print(f"  ecore (self-consistent) = {ecore:.8f} Ha   [check OK, delta={delta_hf:.2e}]")
 
-# ── NEW: chemical-potential correction ───────────────────────────────────
 mu = 0.0
 if config.MU_CORRECTION:
     print(f"\n-- Phase F: Chemical Potential Correction --")
@@ -379,12 +205,11 @@ if config.MU_CORRECTION:
         h1e_emb, n_emb, n_alpha, n_beta,
         config.MU_SEARCH_RANGE, config.MU_MAX_ITER, config.MU_TOL,
     )
-    ecore += mu * (n_alpha + n_beta)   # compensate the energy shift, see docstring
+    ecore += mu * (n_alpha + n_beta)
     print(f"  mu = {mu:.6f} Ha   ecore corrected -> {ecore:.8f} Ha")
 else:
     print(f"\n-- Phase F: Chemical Potential Correction -- SKIPPED (MU_CORRECTION=False)")
 
-# ── NEW: save reference occupations for the consistency check ───────────
 dm_emb_alpha_mo = C_emb.T @ S @ dm_ao_alpha @ S @ C_emb
 dm_emb_beta_mo  = C_emb.T @ S @ dm_ao_beta  @ S @ C_emb
 ref_occ_alpha = np.clip(np.diag(dm_emb_alpha_mo), 0.0, 1.0)
@@ -397,7 +222,9 @@ results = {
     "h1e": h1e_emb, "h2e": h2e_emb, "ecore": ecore, "mu": mu,
     "n_emb": n_emb, "n_imp": n_imp, "n_bath": n_bath,
     "n_alpha": n_alpha, "n_beta": n_beta,
-    "sv": sv[:n_bath], "sv_gap": sv_gap, "sv2_cov": sv2_cov,
+    "sv": sv[:n_bath],
+    "sv_all": sv,          # NEW: full spectrum, for visualization.py's gap plot
+    "sv_gap": sv_gap, "sv2_cov": sv2_cov,
     "uhf_energy": float(mf.e_tot), "reference_density_info": ref_info,
     "ref_occ_alpha": ref_occ_alpha, "ref_occ_beta": ref_occ_beta,
     "mol_info": mol_info,

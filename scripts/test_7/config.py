@@ -6,23 +6,19 @@ CHANGE FROM test5: crystal/mineral CIFs (TiO2, NiO, VO2, CuCl2, CuFeS2, ...)
 are intentionally NOT auto-accepted anymore. A bulk solid has no natural
 finite cutoff -- pulling its asymmetric unit (or even a symmetry-expanded
 cell) out of the CIF and calling it "a molecule" produces a fragment with
-dangling bonds and no real chemistry (that was test5's CIF bug: it silently
-did exactly this). There is no automatic fix for that -- a periodic solid
-genuinely isn't a molecule -- so this file instead:
+dangling bonds and no real chemistry (that was test5's CIF bug). This file:
 
   1. Makes explicit, hand-specified finite geometries (`geometries` dict,
      same pattern as FeN6) the primary and recommended path.
   2. Still allows loading a CIF, but only if it looks like a genuine
-     discrete-molecule crystal structure (organic-capped compound with a
-     real CCDC/PubChem entry) -- `assert_not_periodic_solid()` below is a
-     heuristic tripwire that rejects anything that looks like a bare
-     metal-oxide/halide extended solid instead of silently accepting it
-     the way test5 did.
+     discrete-molecule crystal structure -- `assert_not_periodic_solid()`
+     below rejects anything that looks like a bare metal-oxide/halide
+     extended solid.
 
-If you actually need TiO2/NiO/etc.-like local-site chemistry: that is a
-periodic-embedding or hand-built-capped-cluster modeling problem, which is
-a domain decision a chemist has to make explicitly -- it is not something
-this loader should ever infer automatically from a mineral CIF.
+UPDATE (this revision): MU_SEARCH_RANGE now defaults to "auto" instead of
+a fixed (-5, 5) Ha guess -- your N2 run showed the fixed guess doesn't
+bracket the true chemical potential once Phase D's core mean-field
+potential shifts h1e_emb's eigenvalues. See dmet_lib.py.
 """
 
 import os
@@ -34,11 +30,17 @@ import numpy as np
 # ═══════════════════════════════════════════════════════════════════════
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 RESULTS_DIR = os.path.join(PROJECT_DIR, "results")
+PLOTS_DIR   = os.path.join(RESULTS_DIR, "plots")
 CIF_DIR     = os.path.join(PROJECT_DIR, "cif_files")
 STEP0_FILE  = os.path.join(RESULTS_DIR, "step0_classical.pkl")
 STEP1_FILE  = os.path.join(RESULTS_DIR, "step1_asf.pkl")
 STEP2_FILE  = os.path.join(RESULTS_DIR, "step2_hamiltonian.pkl")
 STEP3_FILE  = os.path.join(RESULTS_DIR, "step3_results.pkl")
+
+# Point this at the .log file produced by `python train.py ... > this.log`
+# (external gqe-for-qsci repo) -- visualization.py parses the
+# "[epoch N] {...}" lines out of it. Leave as None to skip GQE plots.
+GQE_LOG_FILE = os.path.join(PROJECT_DIR, "gqe_train.log")
 
 BLOCKEXE_WRAPPER = os.path.expanduser("~/block2main_wrapper.sh")
 
@@ -63,22 +65,19 @@ HOMO_LUMO_TIER2_THRESHOLD_EV         = 1.0
 # ═══════════════════════════════════════════════════════════════════════
 # Molecule selection — explicit finite geometries (recommended path)
 # ═══════════════════════════════════════════════════════════════════════
-MOLECULE = "FeN6"
+MOLECULE = "N2"
 CHARGE   = 0
-SPIN     = 4          # 2S; set per molecule (FeN6 model: high-spin Fe(II))
+SPIN     = 0
 BASIS    = "sto-3g"
 
-# Each entry: list of (symbol, (x, y, z)) in Angstrom -- a genuine,
-# finite, chemically well-defined molecule. Add your own here.
 geometries = {
     "LiH": [("Li", (0.0, 0.0, 0.0)), ("H", (0.0, 0.0, 1.5949))],
     "H2O": [("O", (0.0, 0.0, 0.1173)),
             ("H", (0.0, 0.7572, -0.4692)),
             ("H", (0.0, -0.7572, -0.4692))],
     "N2":  [("N", (0.0, 0.0, 0.0)), ("N", (0.0, 0.0, 1.0977))],
-    # Hand-built octahedral model complex -- a real finite molecule.
-    # Replace bond lengths / ligands with a literature-vetted geometry
-    # for production use; this is a placeholder template.
+    # Placeholder template -- replace with a literature-vetted geometry
+    # and the correct ground-state spin before trusting FeN6 results.
     "FeN6": [
         ("Fe", (0.0, 0.0, 0.0)),
         ("N", (2.10, 0.0, 0.0)), ("N", (-2.10, 0.0, 0.0)),
@@ -94,20 +93,6 @@ FRAC_KEYS = {"_atom_site_fract_x", "_atom_site_fract_y", "_atom_site_fract_z"}
 
 
 def assert_not_periodic_solid(cif_path, atoms, has_symmetry_block, z_units):
-    """
-    Heuristic tripwire against silently treating a bulk crystal (mineral /
-    extended inorganic solid) as a molecule -- this is exactly the bug
-    test5 had: it parsed only the CIF's asymmetric-unit atom loop (e.g. 3
-    atoms for TiO2's Z=8 rutile/brookite cell) and fed that straight to
-    PySCF's gto.M() as if it were a complete, finite molecule.
-
-    This is NOT a rigorous classifier. It catches the common, obvious
-    failure mode: a bare metal-oxide/halide composition (no organic
-    capping atoms) with a 3D space group and Z > 1 formula units -- the
-    signature of an extended solid, not a discrete compound. A genuine
-    molecular-crystal CIF (an actual compound with ligands) will almost
-    always include C/H/N/P/S atoms from those ligands.
-    """
     symbols = {a[0] for a in atoms}
     organic_markers = {"C", "H", "N", "P", "S"} & symbols
     if has_symmetry_block and z_units and z_units >= 2 and not organic_markers:
@@ -115,28 +100,16 @@ def assert_not_periodic_solid(cif_path, atoms, has_symmetry_block, z_units):
             f"'{cif_path}' looks like a periodic solid / mineral, not a "
             f"finite molecule (3D space group present, Z={z_units}, no "
             f"organic capping atoms found -- only {sorted(symbols)}).\n\n"
-            f"A bulk solid has no natural finite cutoff: its asymmetric "
-            f"unit is NOT a molecule, and expanding it by symmetry just "
-            f"gives you a piece of an infinite lattice with dangling "
-            f"bonds, not a chemically meaningful finite system.\n\n"
             f"Options:\n"
             f"  1. Add a real, explicit finite geometry to `geometries` "
-            f"in config.py (see FeN6 for the pattern).\n"
-            f"  2. Point MOLECULE at a genuine discrete-molecule CIF (an "
-            f"actual compound with a CCDC/PubChem entry), not a mineral "
-            f"CIF from a crystallography database.\n"
-            f"  3. If you specifically need periodic-solid physics, this "
-            f"pipeline (gto.M molecular PySCF) is the wrong tool -- that "
-            f"requires periodic embedding methods, not this codepath."
+            f"in config.py.\n"
+            f"  2. Point MOLECULE at a genuine discrete-molecule CIF.\n"
+            f"  3. If you need periodic-solid physics, this pipeline "
+            f"(gto.M molecular PySCF) is the wrong tool."
         )
 
 
 def load_geometry_from_cif(molecule_name):
-    """
-    Parse a genuine finite-molecule CIF into Cartesian atom coordinates.
-    Raises via assert_not_periodic_solid() if the file looks like a bulk
-    mineral/solid instead of a molecule.
-    """
     cif_path = os.path.join(CIF_DIR, f"{molecule_name}.cif")
     if not os.path.exists(cif_path):
         raise FileNotFoundError(f"CIF file not found: {cif_path}")
@@ -146,7 +119,6 @@ def load_geometry_from_cif(molecule_name):
     z_units = None
     has_symmetry_block = False
     atoms = []
-
     in_atom_loop, loop_has_frac, atom_keys, in_multiline = False, False, [], False
 
     with open(cif_path) as f:
@@ -157,7 +129,6 @@ def load_geometry_from_cif(molecule_name):
                 continue
             if in_multiline or not line or line.startswith("#"):
                 continue
-
             if line.startswith("_cell_length_a"):
                 cell_a = _parse_cif_number(line.split()[-1])
             elif line.startswith("_cell_length_b"):
@@ -206,11 +177,9 @@ def load_geometry_from_cif(molecule_name):
     if not atoms:
         raise ValueError(f"No atoms parsed from {cif_path}")
 
-    # Tripwire BEFORE doing anything else with the geometry.
     assert_not_periodic_solid(cif_path, atoms, has_symmetry_block, z_units)
 
-    frac_to_cart = _build_cell_matrix(cell_a, cell_b, cell_c,
-                                       cell_alpha, cell_beta, cell_gamma)
+    frac_to_cart = _build_cell_matrix(cell_a, cell_b, cell_c, cell_alpha, cell_beta, cell_gamma)
     geometry = []
     for symbol, fx, fy, fz in atoms:
         cart = frac_to_cart @ np.array([fx, fy, fz])
@@ -245,7 +214,6 @@ def _build_cell_matrix(a, b, c, alpha, beta, gamma):
 
 
 def load_geometry(molecule_name):
-    """Primary entry point: explicit geometry first, CIF as a fallback."""
     if molecule_name in geometries:
         return geometries[molecule_name]
     warnings.warn(
@@ -272,40 +240,32 @@ BATH_TOLERANCE = 1e-8
 MIN_BATH_ORBS  = 0
 MAX_EMBED_ORBS = 18
 
-# ── NEW: reference density for the Schmidt decomposition ────────────────
-# "mp2"   -- reuse Step 1's MP2 1-RDM (fast, but unreliable exactly where
-#            static correlation is strong -- the systems this pipeline
-#            targets). No recomputation: Step 2 reads Step 1's saved DM.
-# "casci" -- run a plain CASCI (no orbital optimization) inside the
-#            ASF-selected active space to get a correlated reference DM.
-#            Bounded by the SAME active-space size (~10-16 orbitals) the
-#            pipeline already treats as tractable elsewhere -- this does
-#            not solve the impurity+bath problem, only refines what goes
-#            into building the bath. Recommended default.
+# "mp2" -- reuse Step 1's MP2 1-RDM (fast, unreliable exactly where static
+#          correlation is strong).
+# "casci" -- plain CASCI (no orbital optimization) inside the ASF active
+#            space; recommended default. See dmet_lib.get_reference_density.
 DMET_REFERENCE = "casci"   # "mp2" | "casci"
 
-# ── NEW: one-shot grand-canonical chemical-potential correction ─────────
-MU_CORRECTION       = True
-MU_SEARCH_RANGE     = (-5.0, 5.0)   # Ha
-MU_MAX_ITER         = 60
-MU_TOL              = 1e-10
+# One-shot grand-canonical chemical-potential correction.
+MU_CORRECTION   = True
+MU_SEARCH_RANGE = "auto"   # was (-5.0, 5.0); "auto" derives from h1e_emb's
+                            # own eigenvalue spectrum -- see dmet_lib.py
+MU_MAX_ITER     = 60
+MU_TOL          = 1e-10
 
-# ── NEW: embedding self-consistency diagnostic threshold ────────────────
-# mismatch_score above this flags that the bath was built from a density
-# that doesn't resemble what the correlated/quantum solver actually found
-# -- a signal the one-shot approximation may be breaking down.
 CONSISTENCY_MISMATCH_THRESHOLD = 0.10
 
 # ═══════════════════════════════════════════════════════════════════════
 # Quantum solver / GQE-for-QSCI
 # ═══════════════════════════════════════════════════════════════════════
-QUANTUM_SOLVER   = "gqe_qsci"   # driven separately via gqe_for_qsci.py
+QUANTUM_SOLVER   = "gqe_qsci"
 FERMION_TO_QUBIT = "jw"
 
 # ═══════════════════════════════════════════════════════════════════════
-# Classical reference methods (step0_classical.py)
+# Classical reference methods (classical_methods.py)
 # ═══════════════════════════════════════════════════════════════════════
 CLASSICAL_METHODS = ["HF", "MP2", "CCSD", "CASSCF"]
+# CLASSICAL_METHODS = ["HF", "MP2", "CCSD", "CCSD_T", "CASSCF", "NEVPT2"]  # full
 
 # ═══════════════════════════════════════════════════════════════════════
 # Resolve geometry at import time
