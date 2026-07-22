@@ -14,6 +14,9 @@
   [diag] reference density electron count: 13.990083  (should equal mol.nelectron = 14)
 
 -- Phase C: Schmidt Decomposition --
+  [diag] mo_coeff.T @ S @ mo_coeff vs I (raw-AO-basis convention, expected by the rest of this code): 2.44e-15
+  [diag] mo_coeff.T @ mo_coeff vs I (already-orthonormal/Lowdin-basis convention): 4.87e+00
+  [diag] whichever of the two lines above is near zero (~1e-10) tells us which basis convention mo_coeff is actually in.
   Impurity: 4  Bath: 4  Total emb: 8 -> 16 qubits
   sv2 coverage: 1.0000
   [diag] C_emb orthonormality error (C_emb.T @ S @ C_emb vs I): 8.31e-01  (should be ~1e-10 or smaller)
