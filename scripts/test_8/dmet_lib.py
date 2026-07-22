@@ -227,3 +227,5 @@ def embedding_consistency_score(step2_result, avg_occs, threshold=0.10):
         "mismatch_alpha": mismatch_a, "mismatch_beta": mismatch_b,
         "mismatch_score": score, "flag": score > threshold,
     }
+
+
