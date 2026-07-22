@@ -116,18 +116,22 @@ def classify(mol, mf):
     return tier, indicators
 
 
-def compute_mp2_deviations(mf, mol):
+def compute_mp2_density(mf, mol):
     """
-    Returns (deviation, no_occ, e_corr, mp2_ok, dm_ao_alpha, dm_ao_beta).
+    Returns (e_corr, mp2_ok, dm_ao_alpha, dm_ao_beta) -- the MP2
+    spin-separated AO-basis 1-RDM (so DMET.py can use it directly with no
+    recompute).
 
-    Returns the spin-separated AO-basis DMs (not just the combined total)
-    so DMET.py can use them directly with no recompute.
+    FIX vs the old compute_mp2_deviations: this no longer also returns
+    deviation/no_occ. Those depend on WHICH MO basis you want them
+    expressed in, and this function only has access to the canonical UHF
+    basis (mf.mo_coeff) -- but the active-space basis that actually gets
+    used and saved (mo_coeff, from ASF or FORCE_ACTIVE_SPACE) can be a
+    DIFFERENT basis. Computing deviation/no_occ here and then indexing
+    them with indices into a different basis (mo_list, from ASF) was a
+    real, silent bug -- see project_occupations() below for the fix and
+    why it matters.
     """
-    S = mol.intor("int1e_ovlp")
-    evals, evecs = np.linalg.eigh(S)
-    mask = evals > 1e-15
-    S_invsqrt = (evecs[:, mask] / np.sqrt(evals[mask])) @ evecs[:, mask].T
-
     mp2_ok, e_corr = False, 0.0
     Ca, Cb = np.asarray(mf.mo_coeff[0]), np.asarray(mf.mo_coeff[1])
 
@@ -156,16 +160,38 @@ def compute_mp2_deviations(mf, mol):
         else:
             dm_ao_alpha = dm_ao_beta = 0.5 * np.asarray(dm_raw)
 
-    dm_ao = dm_ao_alpha + dm_ao_beta
-    dm_lo = S_invsqrt @ dm_ao @ S_invsqrt.T
-    dm_lo = 0.5 * (dm_lo + dm_lo.T)
+    return e_corr, mp2_ok, dm_ao_alpha, dm_ao_beta
 
-    C = Ca
-    dm_mo = C.T @ S @ dm_ao @ S @ C
+
+def project_occupations(mo_coeff, dm_ao_total, S):
+    """
+    Projects an AO-basis density matrix's diagonal occupation numbers
+    onto whatever MO basis mo_coeff actually is.
+
+    THIS is the real fix for why the degeneracy-aware gap cutoff still
+    split N2's pi-orbital pair on the first attempt: deviation/no_occ
+    used to always be computed in the canonical UHF basis (mf.mo_coeff),
+    then indexed using mo_list -- indices into ASF's OWN, DIFFERENT
+    natural-orbital basis (active_space.mo_coeff). Those two bases are
+    not the same orbitals in the same order, so `deviation[i] for i in
+    mo_list` was quietly reading values off the wrong orbitals. This
+    bites hardest exactly in a degenerate subspace: the true,
+    basis-independent occupation numbers for a genuinely symmetric pair
+    ARE equal (forced by the density matrix restricted to that subspace
+    being proportional to identity), but the canonical-basis array
+    didn't reflect that because it wasn't the same basis ASF was using.
+
+    This also matters beyond the printed active space: dmet_lib.py's
+    CASCI reference-density path fills in "core" occupations using
+    step1["no_occ"], indexed against step1["mo_coeff"] -- if those two
+    aren't in the same basis, that reference density is quietly wrong
+    too, which plausibly explains part of the large mismatch_score /
+    oversized mu correction you've been seeing.
+    """
+    dm_mo = mo_coeff.T @ S @ dm_ao_total @ S @ mo_coeff
     no_occ = np.clip(np.diag(dm_mo), 0.0, 2.0)
     deviation = np.minimum(no_occ, 2.0 - no_occ)
-
-    return deviation, no_occ, e_corr, mp2_ok, dm_ao_alpha, dm_ao_beta
+    return deviation, no_occ
 
 
 def find_gap_cutoff(values, min_n, max_n, degeneracy_tol=1e-3):
@@ -266,6 +292,7 @@ mol = gto.M(atom=config.GEOMETRY, basis=config.BASIS,
             charge=config.CHARGE, spin=config.SPIN, verbose=3)
 print(f"  Atoms: {config.N_ATOMS} {config.ATOM_SYMS}  Basis: {config.BASIS}")
 print(f"  Electrons: {mol.nelectron}  AOs: {mol.nao_nr()}")
+S = mol.intor("int1e_ovlp")
 
 print(f"\n-- Phase A: UHF + Classification --")
 mf = run_uhf(mol)
@@ -274,10 +301,10 @@ if not mf.converged:
     warnings.warn("UHF did not converge. Downstream results unreliable.", RuntimeWarning)
 tier, indicators = classify(mol, mf)
 
-print(f"\n-- Phase B: MP2 Deviations + ASF --")
-deviation, no_occ, e_corr, mp2_ok, dm_ao_alpha_mp2, dm_ao_beta_mp2 = \
-    compute_mp2_deviations(mf, mol)
+print(f"\n-- Phase B: MP2 Density + ASF --")
+e_corr, mp2_ok, dm_ao_alpha_mp2, dm_ao_beta_mp2 = compute_mp2_density(mf, mol)
 print(f"  MP2 used: {mp2_ok}  E_corr: {e_corr:.6f} Ha")
+dm_ao_total_mp2 = dm_ao_alpha_mp2 + dm_ao_beta_mp2
 
 if config.FORCE_ACTIVE_SPACE is not None:
     print(f"  FORCE_ACTIVE_SPACE is set in config.py -- skipping ASF/DMRG "
@@ -301,7 +328,11 @@ else:
         raise RuntimeError("ASF returned 0 candidates. Lower entropy_threshold.")
 
     print(f"\n-- Phase C: Gap Detection --")
-    cand_devs = np.array([deviation[i] if i < len(deviation) else 0.0 for i in mo_list])
+    # Deviation computed IN ASF's own basis (mo_coeff), not the canonical
+    # UHF basis -- see project_occupations()'s docstring for why that
+    # distinction is exactly what was breaking N2's degenerate pi pair.
+    deviation_asf, _ = project_occupations(mo_coeff, dm_ao_total_mp2, S)
+    cand_devs = np.array([deviation_asf[i] for i in mo_list])
     n_final, gap_val, selected_k = find_gap_cutoff(
         cand_devs, config.GAP_MIN_NORB, config.GAP_MAX_NORB,
         degeneracy_tol=config.GAP_DEGENERACY_TOL,
@@ -309,10 +340,16 @@ else:
     final_mo_list = sorted(mo_list[k] for k in selected_k)
     print(f"  Gap detected: {gap_val:.4f} at position {n_final} -> orbitals {final_mo_list}")
 
+# Always (re)compute deviation/no_occ in the SAME basis as the mo_coeff
+# that's about to be saved -- required for consistency with mo_list
+# indexing everywhere downstream (corr_strength here, and critically
+# dmet_lib.py's CASCI reference-density path, which fills in "core"
+# occupations using step1["no_occ"] indexed against step1["mo_coeff"]).
+deviation, no_occ = project_occupations(mo_coeff, dm_ao_total_mp2, S)
+
 nel = count_active_electrons(mol, mf, final_mo_list)
 
 print(f"\n-- Phase D: Loewdin Population --")
-S = mol.intor("int1e_ovlp")
 ao_labels = mol.ao_labels(fmt=None)
 weights = lowdin_population(mo_coeff, final_mo_list, S, ao_labels, config.N_ATOMS)
 dominant_atoms = np.argmax(weights, axis=1).astype(int)
