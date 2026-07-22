@@ -97,3 +97,8 @@ bash: greo: command not found
 
 
 grep -n "Embedding:\|CASCI (this embedding)\|_last_casci_civec\|casci_avg_occs\|run_consistency_check\|def main\|__main__" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/train.py
+
+(base) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ grep -n "Embedding:\|CASCI (this embedding)\|_last_casci_civec\|casci_avg_occs\|run_consistency_check\|def main\|__main__" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/train.py
+92:def main(cfg: DictConfig) -> None:
+101:if __name__ == "__main__":
+(base) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ 
