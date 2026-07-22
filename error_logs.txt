@@ -4,7 +4,7 @@
 [Step 2] DMET Embedding — N2
 ============================================================
   Active space (Step 1): (4e, 4orb) MOs=[5, 6, 7, 8]
-  DMET_REFERENCE: casci   MU_CORRECTION: False
+  DMET_REFERENCE: casci   MU_CORRECTION: True
 
 -- Phase A: Restore UHF from Step 1 --
   UHF energy = -107.49589331 Ha (restored, no recomputation)
@@ -21,7 +21,8 @@
 -- Phase E: Integral Transformation --
   ecore (self-consistent) = -97.28352122 Ha   [check OK, delta=1.42e-14]
 
--- Phase F: Chemical Potential Correction -- SKIPPED (MU_CORRECTION=False)
+-- Phase F: Chemical Potential Correction --
+  mu = -7.039696 Ha   ecore corrected -> -125.44230433 Ha
 
   h1e shape: (8, 8)  h2e shape: (8, 8, 8, 8)  Time: 0.0s
 
@@ -30,18 +31,8 @@
 /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   import pkg_resources
 Embedding: 8 orbitals, nelec=(2, 2), spin=0
+Embedding-space HF (real SCF, independent check) = -128.25468258 Ha
+  vs full-molecule UHF energy = -107.49589331 Ha   (diff = -20.7588 Ha)
 CASCI (this embedding) = -128.34575434 Ha
 [Consistency check] mismatch_score=0.4498 (threshold=0.1)  flagged=True
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python visualization.py 
-  [skip] GQE log: /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/gqe_train.log not found (run run_gqe_training.py first)
-
-============================================================
-[Visualization] N2
-============================================================
-  Saved /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/plots/fig1_asf_deviation_spectrum.png
-  Saved /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/plots/fig2_dmet_schmidt_spectrum.png
-  Saved /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/plots/fig5_method_comparison.png
-  Saved /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/results_summary.csv
-
-[Visualization] Done. See /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/plots and /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
