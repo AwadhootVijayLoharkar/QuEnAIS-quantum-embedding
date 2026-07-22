@@ -102,3 +102,60 @@ grep -n "Embedding:\|CASCI (this embedding)\|_last_casci_civec\|casci_avg_occs\|
 92:def main(cfg: DictConfig) -> None:
 101:if __name__ == "__main__":
 (base) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ 
+
+
+
+(base) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ sed -n '190, 260p' /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/dmet_molecule_adapter.py 
+    def compute_ccsd(self):
+        cache_path = self._cache_dir / f"{self._cache_key}_ccsd.npz"
+        if cache_path.exists():
+            with np.load(cache_path, allow_pickle=False) as data:
+                self._ccsd_amplitude = {"t1": data["t1"], "t2": data["t2"]}
+                return data["energy"]
+
+        if self.spin == 0:
+            mycc = cc.RCCSD(self.hf)
+        else:
+            mycc = cc.UCCSD(self.hf)
+        mycc.verbose = 0
+        mycc.kernel()
+        e_tot = self.hf.e_tot + mycc.e_corr
+
+        # UCCSD returns (t1a, t1b) / (t2aa, t2ab, t2bb); the excitation
+        # pool code expects closed-shell-style t1/t2 (single array each).
+        # For a closed-shell embedding (n_alpha == n_beta) RCCSD already
+        # gives that directly. For open-shell embeddings, DMETExcitationPool
+        # must be used in its open-shell mode -- see dmet_excitation_pool.py.
+        if self.spin == 0:
+            t1, t2 = mycc.t1, mycc.t2
+        else:
+            t1, t2 = mycc.t1, mycc.t2  # tuples; open-shell pool handles this
+
+        self._ccsd_amplitude = {"t1": t1, "t2": t2}
+        np.savez(
+            cache_path,
+            energy=e_tot,
+            t1=np.asarray(t1, dtype=object) if self.spin != 0 else t1,
+            t2=np.asarray(t2, dtype=object) if self.spin != 0 else t2,
+            allow_pickle=True,
+        )
+        return e_tot
+
+
+def load_from_dmet_pickle(step2_pickle_path: str, **kwargs) -> DMETEmbeddingMolecule:
+    """
+    Convenience constructor: load directly from a DMET.py (step2_hamiltonian.py)
+    output pickle, using its exact key names.
+    """
+    with open(step2_pickle_path, "rb") as f:
+        step2 = pickle.load(f)
+
+    return DMETEmbeddingMolecule(
+        h1e_emb=step2["h1e"],
+        h2e_emb=step2["h2e"],
+        ecore=step2["ecore"],
+        n_alpha=step2["n_alpha"],
+        n_beta=step2["n_beta"],
+        cache_key_extra=step2.get("mol_info", {}).get("molecule", ""),
+        **kwargs,
+    )(base) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ 
