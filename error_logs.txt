@@ -1,8 +1,6 @@
-grep -n "_last_casci_civec\|compute_casci" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/train.py
+(base) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ grep -n "_last_casci_civec\|compute_casci" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/train.py
 grep -rn "_last_casci_civec\|compute_casci" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/*.py
-
-
-
-
-grep -n "_last_casci_civec\|compute_casci" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/train.py
-grep -rn "_last_casci_civec\|compute_casci" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/*.py
+/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/dmet_molecule_adapter.py:54:      .compute_casci()
+/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/dmet_molecule_adapter.py:173:    def compute_casci(self):
+(base) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ rm -rf /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/.cache/
+(base) [loharkar@makaria10:QuEnAIS-quantum-embedding]$
