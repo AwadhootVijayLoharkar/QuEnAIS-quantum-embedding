@@ -20,23 +20,43 @@
   [diag] whichever of the two lines above is near zero (~1e-10) tells us which basis convention mo_coeff is actually in.
   [diag] Schmidt singular values (all 4, before bath-count selection): [0. 0. 0. 0.]
   [diag] max |Q_imp.T @ U_env[:, :n_imp]| (should be ~1e-10 if the first n_imp SVD vectors are genuinely orthogonal to Q_imp): 8.17e-01
-  Impurity: 4  Bath: 4  Total emb: 8 -> 16 qubits
-  sv2 coverage: 1.0000
-  [diag] C_emb orthonormality error (C_emb.T @ S @ C_emb vs I): 8.17e-01  (should be ~1e-10 or smaller)
+  Impurity: 4  Bath: 0  Total emb: 4 -> 8 qubits
+  sv2 coverage: 0.0000
+  [diag] C_emb orthonormality error (C_emb.T @ S @ C_emb vs I): 4.00e-15  (should be ~1e-10 or smaller)
 
 -- Phase D: Core Mean-Field Potential --
-  [diag] core density electron count: 8.274090  (expect ~= mol.nelectron - active nel = 10)   
+  [diag] core density electron count: 9.990083  (expect ~= mol.nelectron - active nel = 10)
 
 -- Phase E: Integral Transformation --
-  [diag] h1e_emb eigenvalues (Ha, before mu): [-13.209  -7.405  -6.299  -3.956  -3.124  -2.9    -0.688  -0.008]
+  [diag] h1e_emb eigenvalues (Ha, before mu): [-2.222 -2.222 -1.775 -1.775]
   [diag] for comparison, full UHF valence orbital energies (Ha): [-15.518 -15.516  -1.443  -0.723  -0.573  -0.573  -0.539   0.281   0.281
    1.123]
-  ecore (self-consistent) = -96.53570117 Ha   [check OK, delta=0.00e+00]
+  ecore (self-consistent) = -101.89739531 Ha   [check OK, delta=0.00e+00]
 
 -- Phase F: Chemical Potential Correction --
-  mu = -7.405053 Ha   ecore corrected -> -126.15591126 Ha
+  mu = -2.222190 Ha   ecore corrected -> -110.78615638 Ha
 
-  h1e shape: (8, 8)  h2e shape: (8, 8, 8, 8)  Time: 0.0s
+  h1e shape: (4, 4)  h2e shape: (4, 4, 4, 4)  Time: 0.0s
 
 [Step 2] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step2_hamiltonian.pkl
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python gqe_for_qsci.py 
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+Embedding: 4 orbitals, nelec=(2, 2), spin=0
+Embedding-space HF (real SCF, independent check) = -107.49589331 Ha
+  vs full-molecule UHF energy = -107.49589331 Ha   (diff = +0.0000 Ha)
+CASCI (this embedding) = -107.59840611 Ha
+[Consistency check] mismatch_score=0.0000 (threshold=0.1)  flagged=False
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python visualization.py 
+  [skip] GQE log: /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/gqe_train.log not found (run run_gqe_training.py first)
+
+============================================================
+[Visualization] N2
+============================================================
+  Saved /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/plots/fig1_asf_deviation_spectrum.png
+  Saved /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/plots/fig2_dmet_schmidt_spectrum.png
+  Saved /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/plots/fig5_method_comparison.png
+  Saved /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/results_summary.csv
+
+[Visualization] Done. See /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/plots and /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
