@@ -1,74 +1,3 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python ASF.py --force
-
-============================================================
-[Step 1] Active Space Finder — N2
-============================================================
-  Atoms: 2 ['N', 'N']  Basis: sto-3g
-  Electrons: 14  AOs: 10
-
--- Phase A: UHF + Classification --
-converged SCF energy = -107.495893307834  <S^2> = 7.9580786e-13  2S+1 = 1
-  UHF energy = -107.49589331 Ha (converged: True)
-  Spin  : 0.0000  contaminated=False
-  Gap   : min=22.3316 eV
-  TM    : False  ->  Tier 1
-
--- Phase B: MP2 Density + ASF --
-  MP2 used: True  E_corr: -0.154090 Ha
-  ASF (Tier 1): entropy_threshold=0.05, max_norb=12, min_norb=2
-
---------------------------------------------------------------------------------
-Calculating MP2 natural orbitals
---------------------------------------------------------------------------------
-
-
--> Selected initial orbital window of 14 electrons in 10 MP2 natural orbitals.
-
---------------------------------------------------------------------------------
-Running calculation
---------------------------------------------------------------------------------
-
-spin = 0, number of roots = 1
-total number of roots calculated = 1
-
-CASCI E = -107.652828729957  E(CI) = -131.274659225612  S^2 = 0.0000000
-
-Orbital selection for state 0:
-
- MO    w( )    w(↑)    w(↓)    w(⇅)       S  sel
-  0   0.000   0.000   0.000   1.000   0.000     
-  1   0.000   0.000   0.000   1.000   0.000     
-  2   0.001   0.001   0.001   0.996   0.030     
-  3   0.006   0.000   0.000   0.993   0.046     
-  4   0.002   0.007   0.007   0.984   0.096     
-  5   0.020   0.014   0.014   0.952   0.246    a
-  6   0.020   0.014   0.014   0.952   0.246    a
-  7   0.947   0.014   0.014   0.024   0.262    a
-  8   0.947   0.014   0.014   0.024   0.262    a
-  9   0.983   0.007   0.007   0.003   0.103     
-
-
---------------------------------------------------------------------------------
-Active space selection finished
---------------------------------------------------------------------------------
-
--> Selected an active space of 4 electrons in 4 orbitals.
-  ASF candidates: 4 orbitals -> [5, 6, 7, 8]
-
--- Phase C: Gap Detection --
-  Gap detected: 0.0602 at position 4 -> orbitals [5, 6, 7, 8]
-  Total electrons: 14  Core MOs: 5  Raw active: 4
-  Final active electrons: 4
-
--- Phase D: Loewdin Population --
-
-============================================================
-[Step 1] Summary — N2
-  Tier: 1  Active space: (4e, 4orb)  Orbitals: [5, 6, 7, 8]
-  Correlation strength: 0.0626
-============================================================
-
-[Step 1] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step1_asf.pkl
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python DMET.py --force
 
 ============================================================
@@ -81,7 +10,7 @@ Active space selection finished
   UHF energy = -107.49589331 Ha (restored, no recomputation)
 
 -- Phase B: Reference Density (casci) --
-  {'method': 'casci', 'e_cas': -29.10660604833547, 'n_active': 4, 'nel_active': 4}
+  {'method': 'casci', 'e_cas': -5.701011064579681, 'n_active': 4, 'nel_active': 4}
 
 -- Phase C: Schmidt Decomposition --
   Impurity: 4  Bath: 4  Total emb: 8 -> 16 qubits
@@ -90,10 +19,10 @@ Active space selection finished
 -- Phase D: Core Mean-Field Potential --
 
 -- Phase E: Integral Transformation --
-  ecore (self-consistent) = -97.43454164 Ha   [check OK, delta=0.00e+00]
+  ecore (self-consistent) = -97.28352122 Ha   [check OK, delta=1.42e-14]
 
 -- Phase F: Chemical Potential Correction --
-  mu = -6.873186 Ha   ecore corrected -> -124.92728681 Ha
+  mu = -7.039696 Ha   ecore corrected -> -125.44230433 Ha
 
   h1e shape: (8, 8)  h2e shape: (8, 8, 8, 8)  Time: 0.0s
 
@@ -102,8 +31,8 @@ Active space selection finished
 /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   import pkg_resources
 Embedding: 8 orbitals, nelec=(2, 2), spin=0
-CASCI (this embedding) = -127.51428719 Ha
-[Consistency check] mismatch_score=0.4424 (threshold=0.1)  flagged=True
+CASCI (this embedding) = -128.34575434 Ha
+[Consistency check] mismatch_score=0.4498 (threshold=0.1)  flagged=True
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python visualization.py 
   [skip] GQE log: /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/gqe_train.log not found (run run_gqe_training.py first)
 
@@ -116,4 +45,4 @@ CASCI (this embedding) = -127.51428719 Ha
   Saved /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/results_summary.csv
 
 [Visualization] Done. See /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/plots and /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$
