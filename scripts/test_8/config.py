@@ -303,7 +303,13 @@ FORCE_ACTIVE_SPACE = None   # e.g. [3, 4, 5, 6, 7, 8] for a manual N2 space
 DMET_REFERENCE = "casci"   # "mp2" | "casci"
 
 # One-shot grand-canonical chemical-potential correction.
-MU_CORRECTION   = True
+# TEMPORARILY False -- diagnostic step. mu was found to be the dominant
+# contributor to the huge, unphysical ecore/CASCI energies on N2 (mu=-7 Ha
+# is not a small correction; it shifted ecore by -28 Ha on its own). Turn
+# this off to check whether the embedding energy looks sane WITHOUT mu,
+# which tells us whether the bisection itself (or the "auto" range it
+# searches) is the real bug, vs. something upstream in Phase C/D/E.
+MU_CORRECTION   = False
 MU_SEARCH_RANGE = "auto"   # derives the bracket from h1e_emb's own
                             # eigenvalue spectrum -- see dmet_lib.py
 MU_MAX_ITER     = 60
