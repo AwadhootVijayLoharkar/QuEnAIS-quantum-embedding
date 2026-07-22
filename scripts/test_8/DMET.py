@@ -266,4 +266,4 @@ results = {
 
 with open(config.STEP2_FILE, "wb") as f:
     pickle.dump(results, f)
-print(f"\n[Step 2] Saved -> {config.STEP2_FILE}")
+print(f"\n[Step 2] Saved -> {config.STEP2_FILE}") 
