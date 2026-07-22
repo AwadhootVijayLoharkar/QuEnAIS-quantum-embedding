@@ -1,372 +1,361 @@
-# gqe_for_qsci.py — test_8
+# visualization.py — test_8
 """
-Consolidated DMET -> GQE-for-QSCI bridge (dmet_molecule_adapter.py +
-dmet_excitation_pool.py merged into one file).
+Turns everything the pipeline has produced so far into PNG plots and CSV
+tables, using only what's actually saved to disk:
 
-FIX #1 (carried over from test7): `import DMET as dmet_step2` is gone.
-DMET.py is a script -- importing it ran its argparse + cache-check code as
-a side effect, and on a cache hit it called sys.exit(0) at module level,
-silently killing this whole process before any of this file's own code
-ran. This imports `dmet_lib` instead, which has zero module-level side
-effects.
+  step0_classical.pkl  -- HF/MP2/CCSD/CASSCF/NEVPT2 on the full molecule
+  step1_asf.pkl         -- active space, deviation spectrum, tier
+  step2_hamiltonian.pkl -- Schmidt SV spectrum, bath quality, ecore, mu
+  <config.GQE_LOG_FILE> -- stdout/log from run_gqe_training.py (or a
+                           manual `python train.py ... > log` in the
+                           external repo) -- the "[epoch N] {...}" format.
 
-FIX #2 (new in test_8): this file used to require the external gqe_qsci
-package to already be importable -- in practice that meant cd-ing into
-that repo's own folder before running Python so it landed on sys.path (or
-relying on a stale PYTHONPATH). That's exactly the "go to the
-gqe-for-qsci folder to run this" annoyance. Fixed by explicitly adding
-config.GQE_QSCI_REPO_PATH to sys.path at import time, below -- so this
-script works from test_8/ (or anywhere else) regardless of cwd, as long
-as config.GQE_QSCI_REPO_PATH points at the right place.
+Each output is generated independently and skipped with a printed reason
+if its input is missing -- this never hard-fails just because you haven't
+run every step yet.
 
-FIX #3 (new in test_8): `import config` now happens FIRST, before numpy /
-pyscf -- needed both for the OpenBLAS/OpenMP env-var fix (see config.py)
-and so GQE_QSCI_REPO_PATH is available before the gqe_qsci imports below.
+CHANGE vs test7: `import config` now happens FIRST, before numpy/
+matplotlib -- see config.py's docstring.
 
-Needs: pyscf, cudaq, openfermion, tequila (ClosedShellAmplitudes only),
-and the external gqe_qsci package (path taken from config.py).
+Outputs (config.PLOTS_DIR / config.RESULTS_DIR):
+  fig1_asf_deviation_spectrum.png
+  fig2_dmet_schmidt_spectrum.png
+  fig3_gqe_energy_convergence.png
+  fig4_gqe_circuit_resources.png
+  fig5_method_comparison.png
+  results_summary.csv
+  gqe_epoch_log.csv
+
+Usage: python visualization.py
 """
-
-from __future__ import annotations
 
 import config
 
-import sys
-if config.GQE_QSCI_REPO_PATH not in sys.path:
-    sys.path.insert(0, config.GQE_QSCI_REPO_PATH)
-
-import hashlib
-import json
+import os
+import re
+import ast
+import csv
 import pickle
-from abc import ABC
-from collections import Counter
-from dataclasses import dataclass
-from pathlib import Path
+import warnings
 
 import numpy as np
-from pyscf import gto, scf, ao2mo, cc, mcscf, lib
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
-import cudaq
-from openfermion import FermionOperator, jordan_wigner
-from tequila.quantumchemistry.chemistry_tools import ClosedShellAmplitudes
-
-from gqe_qsci.gqe.operator_pool import OperatorPool
-from gqe_qsci.gqe.utils import convert_pauli_to_cudaq_spin, get_pauli_evolution_gate_count
-
-import dmet_lib
+os.makedirs(config.PLOTS_DIR, exist_ok=True)
 
 
-# ═══════════════════════════════════════════════════════════════════════
-# Part 1 — DMETEmbeddingMolecule
-# ═══════════════════════════════════════════════════════════════════════
-
-@dataclass(frozen=True, slots=True)
-class Hamiltonian:
-    h1: np.ndarray
-    h2: np.ndarray
-    e_core: float | np.floating
+def _load(path, label):
+    if not os.path.exists(path):
+        print(f"  [skip] {label}: {path} not found")
+        return None
+    with open(path, "rb") as f:
+        return pickle.load(f)
 
 
-class DMETEmbeddingMolecule:
-    def __init__(self, h1e_emb: np.ndarray, h2e_emb: np.ndarray, ecore: float,
-                 n_alpha: int, n_beta: int, num_threads: int | None = 1,
-                 cache_key_extra: str = ""):
-        lib.num_threads(num_threads)
-
-        n_emb = h1e_emb.shape[0]
-        assert h1e_emb.shape == (n_emb, n_emb)
-        assert h2e_emb.shape == (n_emb, n_emb, n_emb, n_emb)
-
-        self.norb = n_emb
-        self.nelec = (n_alpha, n_beta)
-        self.spin = n_alpha - n_beta
-        self._ecore = float(ecore)
-        self._h1e_emb = np.asarray(h1e_emb)
-        self._h2e_emb = np.asarray(h2e_emb)
-
-        self.geometry = None
-        self.basis = None
-        self.active_indices = list(range(n_emb))
-
-        self.mol = self._build_fake_mol(n_alpha, n_beta)
-        self.hf = self._run_embedding_scf()
-        self.mc = mcscf.CASCI(self.hf, self.norb, self.nelec)
-        self.cas_hamiltonian = Hamiltonian(h1=self._h1e_emb, h2=self._h2e_emb,
-                                            e_core=self._ecore)
-
-        self._ccsd_amplitude = None
-        self._cache_key = self._build_cache_key(cache_key_extra)
-        self._cache_dir = Path(".cache") / "pyscf_dmet"
-        self._cache_dir.mkdir(parents=True, exist_ok=True)
-
-    def _build_fake_mol(self, n_alpha, n_beta):
-        mol = gto.M(verbose=0)
-        mol.nelectron = n_alpha + n_beta
-        mol.spin = n_alpha - n_beta
-        mol.incore_anyway = True
-        mol.build(dump_input=False, parse_arg=False)
-        return mol
-
-    def _run_embedding_scf(self):
-        n_emb = self.norb
-        h1e = self._h1e_emb
-        eri8 = ao2mo.restore(8, self._h2e_emb, n_emb)
-
-        mf = scf.RHF(self.mol) if self.spin == 0 else scf.UHF(self.mol)
-        mf.get_hcore = lambda *a, **k: h1e
-        mf.get_ovlp  = lambda *a, **k: np.eye(n_emb)
-        mf._eri = eri8
-        mf.energy_nuc = lambda *a, **k: self._ecore
-        mf.max_cycle = 200
-        mf.conv_tol = 1e-10
-        mf.kernel()
-
-        if not mf.converged:
-            raise RuntimeError(
-                "Embedding-space SCF did not converge. Check h1e_emb/h2e_emb "
-                "for numerical issues before trusting downstream results."
-            )
-        return mf
-
-    def _build_cache_key(self, extra):
-        payload = {
-            "h1_hash": hashlib.sha256(self._h1e_emb.tobytes()).hexdigest(),
-            "h2_hash": hashlib.sha256(self._h2e_emb.tobytes()).hexdigest(),
-            "ecore": self._ecore, "nelec": self.nelec, "extra": extra,
-        }
-        return hashlib.sha256(json.dumps(payload, sort_keys=True, default=str)
-                               .encode("utf-8")).hexdigest()
-
-    @property
-    def ccsd_amplitude(self):
-        if self._ccsd_amplitude is None:
-            _ = self.compute_ccsd()
-        return self._ccsd_amplitude
-
-    def compute_casci(self):
-        cache_path = self._cache_dir / f"{self._cache_key}_casci.npz"
-        if cache_path.exists():
-            with np.load(cache_path, allow_pickle=False) as data:
-                return data["energy"]
-        e_fci, civec = self.mc.fcisolver.kernel(
-            self.cas_hamiltonian.h1, self.cas_hamiltonian.h2, self.norb,
-            self.nelec, ecore=self.cas_hamiltonian.e_core,
-        )
-        self._last_casci_civec = civec
-        np.savez(cache_path, energy=e_fci)
-        return e_fci
-
-    def compute_ccsd(self):
-        cache_path = self._cache_dir / f"{self._cache_key}_ccsd.npz"
-        if cache_path.exists():
-            with np.load(cache_path, allow_pickle=False) as data:
-                self._ccsd_amplitude = {"t1": data["t1"], "t2": data["t2"]}
-                return data["energy"]
-
-        mycc = cc.RCCSD(self.hf) if self.spin == 0 else cc.UCCSD(self.hf)
-        mycc.verbose = 0
-        mycc.kernel()
-        e_tot = self.hf.e_tot + mycc.e_corr
-        t1, t2 = mycc.t1, mycc.t2
-        self._ccsd_amplitude = {"t1": t1, "t2": t2}
-        np.savez(cache_path, energy=e_tot,
-                 t1=np.asarray(t1, dtype=object) if self.spin != 0 else t1,
-                 t2=np.asarray(t2, dtype=object) if self.spin != 0 else t2,
-                 allow_pickle=True)
-        return e_tot
-
-    def casci_avg_occs(self):
-        if not hasattr(self, "_last_casci_civec"):
-            self.compute_casci()
-        dm_a, dm_b = self.mc.fcisolver.make_rdm1s(
-            self._last_casci_civec, self.norb, self.nelec
-        )
-        return np.clip(np.diag(dm_a), 0.0, 1.0), np.clip(np.diag(dm_b), 0.0, 1.0)
-
-
-def load_from_dmet_pickle(step2_pickle_path: str, **kwargs) -> DMETEmbeddingMolecule:
-    with open(step2_pickle_path, "rb") as f:
-        step2 = pickle.load(f)
-    mol = DMETEmbeddingMolecule(
-        h1e_emb=step2["h1e"], h2e_emb=step2["h2e"], ecore=step2["ecore"],
-        n_alpha=step2["n_alpha"], n_beta=step2["n_beta"],
-        cache_key_extra=step2.get("mol_info", {}).get("molecule", ""),
-        **kwargs,
-    )
-    mol._step2_result = step2
-    return mol
-
-
-def run_consistency_check(mol: DMETEmbeddingMolecule, threshold=None):
-    """Uses dmet_lib now, not DMET -- see module docstring for why that matters."""
-    threshold = config.CONSISTENCY_MISMATCH_THRESHOLD if threshold is None else threshold
-    occ_a, occ_b = mol.casci_avg_occs()
-    result = dmet_lib.embedding_consistency_score(
-        mol._step2_result, (occ_a, occ_b), threshold=threshold
-    )
-    print(f"[Consistency check] mismatch_score={result['mismatch_score']:.4f} "
-          f"(threshold={threshold})  flagged={result['flag']}")
-    return result
+step0 = _load(config.STEP0_FILE, "Step 0 (classical)")
+step1 = _load(config.STEP1_FILE, "Step 1 (ASF)")
+step2 = _load(config.STEP2_FILE, "Step 2 (DMET)")
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Part 2 — DMET-aware operator pools
+# GQE training-log parser
 # ═══════════════════════════════════════════════════════════════════════
 
-def excitation_generator_qubit_op(indices: list[tuple[int, int]]):
-    forward = FermionOperator.identity()
-    backward = FermionOperator.identity()
-    for (p, q) in indices:
-        forward *= FermionOperator(((q, 1), (p, 0)))
-        backward *= FermionOperator(((p, 1), (q, 0)))
-    generator = -1j * (forward - backward)
-    return jordan_wigner(generator)
+EPOCH_RE   = re.compile(r"\[epoch (\d+)\]\s*(\{.*?\})", re.DOTALL)
+FLOAT64_RE = re.compile(r"np\.float64\(([^)]*)\)")
 
 
-def _qubit_op_terms_to_cudaq(qubit_op, remove_z_ladder: bool = False):
-    out = []
-    for term, coeff in qubit_op.terms.items():
-        if len(term) == 0:
+def parse_gqe_log(log_path):
+    """
+    Parses lines like:
+      [epoch 0] {'GQE-optimized/energy/min': -997.78, ...}
+    Strips np.float64(...) wrappers before using ast.literal_eval (never
+    eval()) to parse each dict safely.
+    """
+    if not log_path or not os.path.exists(log_path):
+        print(f"  [skip] GQE log: {log_path} not found (run run_gqe_training.py first)")
+        return []
+
+    rows = []
+    with open(log_path) as f:
+        text = f.read()
+
+    for m in EPOCH_RE.finditer(text):
+        epoch = int(m.group(1))
+        dict_str = FLOAT64_RE.sub(r"\1", m.group(2))
+        try:
+            d = ast.literal_eval(dict_str)
+        except (ValueError, SyntaxError) as e:
+            warnings.warn(f"Could not parse epoch {epoch}: {e}")
             continue
-        pauli_dict = {idx: letter for (idx, letter) in term}
-        if remove_z_ladder:
-            pauli_dict = {k: v for k, v in pauli_dict.items() if v.lower() != "z"}
-            if not pauli_dict:
-                continue
-        cudaq_term = convert_pauli_to_cudaq_spin(pauli_dict)
-        if cudaq_term is None:
-            continue
-        out.append((cudaq_term, coeff))
-    return out
+        d["epoch"] = epoch
+        rows.append(d)
+
+    rows.sort(key=lambda r: r["epoch"])
+    return rows
 
 
-class DMETUCCSDBasedPool(OperatorPool, ABC):
-    def __init__(self, molecule: DMETEmbeddingMolecule, params, threshold: float = 1e-8, **kwargs):
-        super().__init__(molecule, params, threshold=threshold, **kwargs)
-
-    def get_vocab_size(self):
-        raise NotImplementedError
-
-    def build_operator_pool(self):
-        raise NotImplementedError
-
-    def get_gate_count(self, seq):
-        raise NotImplementedError
-
-    def generate_excitations(self, threshold: float):
-        ccsd_amplitudes = ClosedShellAmplitudes(
-            tIjAb=self.molecule.ccsd_amplitude["t2"], tIA=self.molecule.ccsd_amplitude["t1"]
-        )
-        amplitudes_all = ccsd_amplitudes.make_parameter_dictionary(threshold=0.0, screening=False)
-        amplitudes = {k: v for k, v in amplitudes_all.items()
-                      if not np.isclose(v, 0.0, atol=threshold)}
-        amplitudes = dict(sorted(amplitudes.items(), key=lambda x: np.fabs(x[1]), reverse=True))
-        indices = {}
-        for key, t in amplitudes.items():
-            assert len(key) % 2 == 0
-            if not np.isclose(t, 0.0, atol=threshold):
-                if len(key) == 2:
-                    angle = 2.0 * t
-                    indices[(2 * key[0], 2 * key[1])] = angle
-                    indices[(2 * key[0] + 1, 2 * key[1] + 1)] = angle
-                else:
-                    assert len(key) == 4
-                    angle = 2.0 * t
-                    idx_abab = (2 * key[0] + 1, 2 * key[1] + 1, 2 * key[2], 2 * key[3])
-                    indices[idx_abab] = angle
-                    if key[0] != key[2] and key[1] != key[3]:
-                        idx_aaaa = (2 * key[0], 2 * key[1], 2 * key[2], 2 * key[3])
-                        idx_bbbb = (2 * key[0] + 1, 2 * key[1] + 1, 2 * key[2] + 1, 2 * key[3] + 1)
-                        partner = (key[2], key[1], key[0], key[3])
-                        partner_t = amplitudes_all.get(partner, 0.0)
-                        anglex = 2.0 * (t - partner_t)
-                        indices[idx_aaaa] = anglex
-                        indices[idx_bbbb] = anglex
-        return indices
-
-    def generate_excitation_generators(self, threshold: float):
-        screened_indices = self.generate_excitations(threshold=threshold)
-        generators = []
-        for idx, angle in screened_indices.items():
-            converted = [(idx[2 * i], idx[2 * i + 1]) for i in range(len(idx) // 2)]
-            generators.append((angle, excitation_generator_qubit_op(converted)))
-        return generators
+gqe_rows = parse_gqe_log(config.GQE_LOG_FILE)
+if gqe_rows:
+    print(f"  Parsed {len(gqe_rows)} epochs from {config.GQE_LOG_FILE}")
 
 
-class DMETPauliEvolutionPool(DMETUCCSDBasedPool):
-    def __init__(self, molecule, params, threshold: float = 1e-8,
-                 remove_z_ladder: bool = False, only_use_first_pauli: bool = False):
-        super().__init__(molecule, params, threshold=threshold,
-                          remove_z_ladder=remove_z_ladder,
-                          only_use_first_pauli=only_use_first_pauli)
-
-    def get_vocab_size(self):
-        return len(self.pool)
-
-    def build_operator_pool(self, threshold, remove_z_ladder=False, only_use_first_pauli=False):
-        generators = self.generate_excitation_generators(threshold=threshold)
-        seen = set()
-        operator_pool = [self.get_identity_operator()]
-        for angle, qubit_op in generators:
-            for term, _ in _qubit_op_terms_to_cudaq(qubit_op, remove_z_ladder=remove_z_ladder):
-                if str(term) in seen:
-                    continue
-                seen.add(str(term))
-                if self.params is None:
-                    operator_pool.append(angle * cudaq.SpinOperator(term))
-                else:
-                    for p in self.params:
-                        operator_pool.append(p * cudaq.SpinOperator(term))
-                if only_use_first_pauli:
-                    break
-        return operator_pool
-
-    def get_gate_count(self, seq):
-        counts = Counter()
-        for i in seq:
-            for term in self.pool[i]:
-                counts.update(get_pauli_evolution_gate_count(term.get_pauli_word(self.n_qubits)))
-        return counts
-
-
-class DMETExcitationPool(DMETUCCSDBasedPool):
-    def __init__(self, molecule, params, threshold: float = 1e-8):
-        super().__init__(molecule, params)
-
-    def get_vocab_size(self):
-        return len(self.pool)
-
-    def build_operator_pool(self, threshold):
-        generators = self.generate_excitation_generators(threshold=threshold)
-        operator_pool = [self.get_identity_operator()]
-        for angle, qubit_op in generators:
-            operator = None
-            for cudaq_term, coeff in _qubit_op_terms_to_cudaq(qubit_op):
-                weighted = cudaq_term * coeff
-                operator = weighted if operator is None else (operator + weighted)
-            if operator is None:
-                continue
-            if self.params is None:
-                operator_pool.append(angle * cudaq.SpinOperator(operator))
-            else:
-                for p in self.params:
-                    operator_pool.append(p * cudaq.SpinOperator(operator))
-        return operator_pool
-
-    def get_gate_count(self, seq):
-        counts = Counter()
-        for i in seq:
-            for term in self.pool[i]:
-                counts.update(get_pauli_evolution_gate_count(term.get_pauli_word(self.n_qubits)))
-        return counts
+def _col(rows, key):
+    """Extract one column as a numpy array, skipping rows where it's absent."""
+    xs, ys = [], []
+    for r in rows:
+        if key in r and r[key] is not None:
+            xs.append(r["epoch"])
+            ys.append(float(r[key]))
+    return np.array(xs), np.array(ys)
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Smoke test / entry point
+# Fig 1 — ASF deviation spectrum
 # ═══════════════════════════════════════════════════════════════════════
-if __name__ == "__main__":
-    mol = load_from_dmet_pickle(config.STEP2_FILE)
-    print(f"Embedding: {mol.norb} orbitals, nelec={mol.nelec}, spin={mol.spin}")
-    e_casci = mol.compute_casci()
-    print(f"CASCI (this embedding) = {e_casci:.8f} Ha")
-    run_consistency_check(mol)
+
+def plot_asf_spectrum():
+    if step1 is None:
+        return
+    dev = np.asarray(step1["deviation"])
+    active = set(step1["mo_list"])
+    order = np.argsort(-dev)
+    colors = ["#C44E52" if i in active else "#4C72B0" for i in order]
+
+    fig, ax = plt.subplots(figsize=(9, 4))
+    ax.bar(range(len(order)), dev[order], color=colors)
+    ax.set_xlabel("Natural orbital (sorted by deviation)")
+    ax.set_ylabel("deviation = min(n, 2-n)")
+    ax.set_title(f"ASF deviation spectrum — {step1['mol_info']['molecule']} "
+                 f"(Tier {step1['tier']}, red = selected active space)")
+    ax.axhline(0, color="black", linewidth=0.5)
+    fig.tight_layout()
+    path = os.path.join(config.PLOTS_DIR, "fig1_asf_deviation_spectrum.png")
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+    print(f"  Saved {path}")
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Fig 2 — DMET Schmidt singular-value spectrum (the gap adaptive_bath used)
+# ═══════════════════════════════════════════════════════════════════════
+
+def plot_dmet_spectrum():
+    if step2 is None:
+        return
+    sv_all = np.asarray(step2.get("sv_all"))
+    if sv_all is None or sv_all.size == 0:
+        print("  [skip] fig2: step2 pickle has no 'sv_all' -- re-run DMET.py "
+              "to save the full spectrum.")
+        return
+    n_bath = step2["n_bath"]
+
+    fig, ax = plt.subplots(figsize=(9, 4))
+    colors = ["#C44E52" if i < n_bath else "#4C72B0" for i in range(len(sv_all))]
+    ax.bar(range(len(sv_all)), sv_all, color=colors)
+    ax.set_yscale("log")
+    ax.set_xlabel("Schmidt singular value index (sorted descending)")
+    ax.set_ylabel("singular value (log scale)")
+    ax.set_title(f"DMET Schmidt spectrum — {step2['mol_info']['molecule']}  "
+                 f"(red = kept as bath, n_bath={n_bath}, "
+                 f"sv2_cov={step2['sv2_cov']:.4f})")
+    fig.tight_layout()
+    path = os.path.join(config.PLOTS_DIR, "fig2_dmet_schmidt_spectrum.png")
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+    print(f"  Saved {path}")
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Fig 3 — GQE energy convergence vs CASCI / CCSD references
+# ═══════════════════════════════════════════════════════════════════════
+
+def plot_gqe_convergence():
+    if not gqe_rows:
+        return
+    fig, ax = plt.subplots(figsize=(9, 5))
+
+    series = [
+        ("GQE-optimized(best_so_far)/energy - R-CASCI", "GQE-optimized vs CASCI", "#DD8452"),
+        ("Local-refined(best_so_far)/energy - R-CASCI", "Local-refined vs CASCI", "#55A868"),
+        ("Global-refined(best_so_far)/energy - R-CASCI", "Global-refined vs CASCI", "#4C72B0"),
+        ("Global-refined(best_so_far)/energy - R-CCSD", "Global-refined vs CCSD", "#8172B2"),
+    ]
+    plotted = False
+    for key, label, color in series:
+        x, y = _col(gqe_rows, key)
+        if len(x) > 0:
+            ax.plot(x, y, label=label, color=color, linewidth=1.8)
+            plotted = True
+    if not plotted:
+        print("  [skip] fig3: none of the expected energy-error columns found in the log")
+        plt.close(fig)
+        return
+
+    ax.axhline(1.6e-3, color="gray", linestyle="--", linewidth=1,
+               label="chemical accuracy (1.6 mHa)")
+    ax.set_yscale("log")
+    ax.set_xlabel("epoch")
+    ax.set_ylabel("|energy error| (Ha, log scale)")
+    ax.set_title("GQE-for-QSCI convergence vs classical references")
+    ax.legend(fontsize=8)
+    fig.tight_layout()
+    path = os.path.join(config.PLOTS_DIR, "fig3_gqe_energy_convergence.png")
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+    print(f"  Saved {path}")
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Fig 4 — circuit resource growth over training
+# ═══════════════════════════════════════════════════════════════════════
+
+def plot_gqe_resources():
+    if not gqe_rows:
+        return
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4))
+
+    for key, label in [("GQE-optimized/cx_count/max", "cx_count (max)"),
+                        ("GQE-optimized/total_gates/max", "total_gates (max)")]:
+        x, y = _col(gqe_rows, key)
+        if len(x) > 0:
+            ax1.plot(x, y, label=label, linewidth=1.5)
+    ax1.set_xlabel("epoch"); ax1.set_ylabel("gate count")
+    ax1.set_title("Circuit resources per epoch")
+    ax1.legend(fontsize=8)
+
+    for key, label in [("Global-refined(best_so_far)/subspace_dim", "Global-refined subspace_dim"),
+                        ("Local-refined(best_so_far)/subspace_dim", "Local-refined subspace_dim")]:
+        x, y = _col(gqe_rows, key)
+        if len(x) > 0:
+            ax2.plot(x, y, label=label, linewidth=1.5)
+    ax2.set_xlabel("epoch"); ax2.set_ylabel("number of configurations")
+    ax2.set_title("Subspace size growth")
+    ax2.legend(fontsize=8)
+
+    fig.tight_layout()
+    path = os.path.join(config.PLOTS_DIR, "fig4_gqe_circuit_resources.png")
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+    print(f"  Saved {path}")
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Fig 5 — method comparison bar chart (classical vs DMET+GQE, same molecule)
+# ═══════════════════════════════════════════════════════════════════════
+
+def plot_method_comparison():
+    labels, energies, colors = [], [], []
+
+    if step0 is not None:
+        for name, data in step0["methods"].items():
+            e = data.get("energy")
+            if e is not None:
+                labels.append(name); energies.append(e); colors.append("#4C72B0")
+
+    if step2 is not None:
+        ref_info = step2.get("reference_density_info", {})
+        if ref_info.get("method") == "casci":
+            labels.append("DMET+CASCI(active)")
+            energies.append(step2["ecore"] + ref_info["e_cas"])
+            colors.append("#C44E52")
+
+    if gqe_rows:
+        if step2 is not None and step2.get("reference_density_info", {}).get("method") == "casci":
+            e_cas_active = step2["reference_density_info"]["e_cas"]
+            _, err = _col(gqe_rows, "Global-refined(best_so_far)/energy - R-CASCI")
+            if len(err) > 0:
+                labels.append("DMET+GQE (Global-refined, final)")
+                energies.append(step2["ecore"] + e_cas_active + err[-1])
+                colors.append("#55A868")
+
+    if not labels:
+        print("  [skip] fig5: no energies available from any stage yet")
+        return
+
+    fig, ax = plt.subplots(figsize=(max(6, 1.2 * len(labels)), 5))
+    ax.bar(labels, energies, color=colors)
+    ax.set_ylabel("Total energy (Ha)")
+    ax.set_title(f"Method comparison — {config.MOLECULE}")
+    plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
+    fig.tight_layout()
+    path = os.path.join(config.PLOTS_DIR, "fig5_method_comparison.png")
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+    print(f"  Saved {path}")
+
+    return labels, energies
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# CSV outputs
+# ═══════════════════════════════════════════════════════════════════════
+
+def write_results_summary_csv(comparison):
+    path = os.path.join(config.RESULTS_DIR, "results_summary.csv")
+    with open(path, "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["molecule", config.MOLECULE])
+        w.writerow(["basis", config.BASIS])
+        w.writerow([])
+
+        if step1 is not None:
+            w.writerow(["-- Step 1: ASF --"])
+            w.writerow(["tier", step1["tier"]])
+            w.writerow(["active_space_nel", step1["nel"]])
+            w.writerow(["active_space_norb", step1["n_active_orbs"]])
+            w.writerow(["mo_list", step1["mo_list"]])
+            w.writerow(["correlation_strength", step1["corr_strength"]])
+            w.writerow([])
+
+        if step2 is not None:
+            w.writerow(["-- Step 2: DMET --"])
+            w.writerow(["n_imp", step2["n_imp"]])
+            w.writerow(["n_bath", step2["n_bath"]])
+            w.writerow(["n_emb", step2["n_emb"]])
+            w.writerow(["sv2_coverage", step2["sv2_cov"]])
+            w.writerow(["ecore_Ha", step2["ecore"]])
+            w.writerow(["mu_Ha", step2["mu"]])
+            w.writerow(["reference_density_method",
+                        step2.get("reference_density_info", {}).get("method")])
+            w.writerow([])
+
+        if comparison:
+            labels, energies = comparison
+            w.writerow(["-- Method comparison (Ha) --"])
+            for lbl, e in zip(labels, energies):
+                w.writerow([lbl, e])
+
+    print(f"  Saved {path}")
+
+
+def write_gqe_epoch_csv():
+    if not gqe_rows:
+        return
+    all_keys = sorted({k for r in gqe_rows for k in r.keys()})
+    path = os.path.join(config.RESULTS_DIR, "gqe_epoch_log.csv")
+    with open(path, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=all_keys)
+        w.writeheader()
+        for r in gqe_rows:
+            w.writerow(r)
+    print(f"  Saved {path}  ({len(gqe_rows)} epochs, {len(all_keys)} columns)")
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Main
+# ═══════════════════════════════════════════════════════════════════════
+print(f"\n{'='*60}\n[Visualization] {config.MOLECULE}\n{'='*60}")
+
+plot_asf_spectrum()
+plot_dmet_spectrum()
+plot_gqe_convergence()
+plot_gqe_resources()
+comparison = plot_method_comparison()
+
+write_results_summary_csv(comparison)
+write_gqe_epoch_csv()
+
+print(f"\n[Visualization] Done. See {config.PLOTS_DIR} and {config.RESULTS_DIR}")
