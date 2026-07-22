@@ -85,10 +85,36 @@ def get_reference_density(mf, mol, step1, mo_list, mo_coeff, method):
         e_cas, civec = cisolver.kernel(h1e_act, h2e_act, n_active, (n_alpha, n_beta))
         dm_active_a, dm_active_b = cisolver.make_rdm1s(civec, n_active, (n_alpha, n_beta))
 
-        n_mo_total = mo_coeff.shape[1]
-        no_occ = step1["no_occ"]
-        dm_full_a = np.diag([no_occ[i] / 2.0 for i in range(n_mo_total)])
-        dm_full_b = np.diag([no_occ[i] / 2.0 for i in range(n_mo_total)])
+        # REAL FIX (found via the [0. 0. 0. 0.] Schmidt-singular-value
+        # diagnostic): the old version built dm_full as a bare diagonal
+        # (no_occ) for every non-active orbital, then only filled in the
+        # active-active block from CASCI -- leaving every active/
+        # non-active CROSS TERM at exactly zero. That's a block-diagonal
+        # density matrix with NO impurity-environment coupling at all.
+        # DMET's Schmidt decomposition exists specifically to extract
+        # that coupling from the reference density -- hand it a density
+        # with none, and the SVD has nothing real to find (confirmed:
+        # all 4 singular values came back exactly 0.0, and the resulting
+        # "bath" was numerically arbitrary noise, not real physics,
+        # which is exactly why C_emb came out badly non-orthonormal).
+        #
+        # Fixed by starting from the FULL MP2 density (which has genuine
+        # active-core coupling, since real correlated densities aren't
+        # block-diagonal) and only overwriting the active-active block
+        # with the more accurate CASCI values -- preserves the
+        # entanglement structure Schmidt decomposition needs, while
+        # still getting a better active-space density where it matters.
+        for _key in ("dm_ao_alpha_mp2", "dm_ao_beta_mp2"):
+            if _key not in step1:
+                raise KeyError(
+                    f"step1 pickle missing '{_key}' -- needed even for "
+                    f"DMET_REFERENCE='casci' now, to preserve "
+                    f"active-core coupling in the reference density. "
+                    f"Re-run ASF.py with --force."
+                )
+        S = mol.intor("int1e_ovlp")
+        dm_full_a = mo_coeff.T @ S @ step1["dm_ao_alpha_mp2"] @ S @ mo_coeff
+        dm_full_b = mo_coeff.T @ S @ step1["dm_ao_beta_mp2"]  @ S @ mo_coeff
         for a_i, i in enumerate(mo_list):
             for a_j, j in enumerate(mo_list):
                 dm_full_a[i, j] = dm_active_a[a_i, a_j]
