@@ -168,21 +168,53 @@ def compute_mp2_deviations(mf, mol):
     return deviation, no_occ, e_corr, mp2_ok, dm_ao_alpha, dm_ao_beta
 
 
-def find_gap_cutoff(values, min_n, max_n):
+def find_gap_cutoff(values, min_n, max_n, degeneracy_tol=1e-3):
+    """
+    Same adaptive-gap logic as before, now degeneracy-aware. This is the
+    exact spot your N2 run split a true degenerate orbital pair (two pi
+    orbitals with identical entanglement entropy in ASF's own table,
+    S=0.246 each) -- the old version picked orbital 5 but not its
+    degenerate partner 6, breaking the molecule's actual symmetry and
+    leaving a physically incomplete, asymmetric active space. Now, if the
+    chosen cutoff would land strictly inside a block of near-equal
+    values, it's extended to the end of that block instead of splitting it.
+    """
     values = np.asarray(values, dtype=float)
     n = len(values)
     min_n, max_n = max(1, min(min_n, n)), min(max_n, n)
-    if min_n >= max_n:
-        order = np.argsort(-values)
-        return min_n, 0.0, list(order[:min_n])
     order = np.argsort(-values)
     sorted_v = values[order]
-    best_gap, best_n = -1.0, min_n
-    for k in range(min_n, max_n + 1):
-        gap = sorted_v[k - 1] - (sorted_v[k] if k < n else 0.0)
-        if gap > best_gap:
-            best_gap, best_n = gap, k
-    return best_n, float(best_gap), list(order[:best_n])
+
+    if min_n >= max_n:
+        k = min_n
+    else:
+        best_gap, best_n = -1.0, min_n
+        for kk in range(min_n, max_n + 1):
+            gap = sorted_v[kk - 1] - (sorted_v[kk] if kk < n else 0.0)
+            if gap > best_gap:
+                best_gap, best_n = gap, kk
+        k = best_n
+
+    k_before = k
+    while k < n and abs(sorted_v[k - 1] - sorted_v[k]) < degeneracy_tol:
+        k += 1
+    if k != k_before:
+        warnings.warn(
+            f"find_gap_cutoff: extended cutoff from {k_before} to {k} "
+            f"orbitals to avoid splitting a (near-)degenerate pair "
+            f"(values {sorted_v[k_before-1]:.4f} vs {sorted_v[k_before]:.4f}, "
+            f"tol={degeneracy_tol}).", RuntimeWarning,
+        )
+        if k > max_n:
+            warnings.warn(
+                f"Degeneracy-aware extension pushed the active space to "
+                f"{k} orbitals, past GAP_MAX_NORB={max_n}. Consider "
+                f"raising GAP_MAX_NORB in config.py, or setting "
+                f"FORCE_ACTIVE_SPACE for this molecule.", RuntimeWarning,
+            )
+
+    best_gap = sorted_v[k - 1] - (sorted_v[k] if k < n else 0.0)
+    return k, float(best_gap), list(order[:k])
 
 
 def lowdin_population(mo_coeff, mo_list, S, ao_labels, n_atoms):
@@ -247,24 +279,35 @@ deviation, no_occ, e_corr, mp2_ok, dm_ao_alpha_mp2, dm_ao_beta_mp2 = \
     compute_mp2_deviations(mf, mol)
 print(f"  MP2 used: {mp2_ok}  E_corr: {e_corr:.6f} Ha")
 
-asf_p = config.ASF_PARAMS[tier]
-print(f"  ASF (Tier {tier}): entropy_threshold={asf_p['entropy_threshold']}, "
-      f"max_norb={asf_p['max_norb']}, min_norb={asf_p['min_norb']}")
+if config.FORCE_ACTIVE_SPACE is not None:
+    print(f"  FORCE_ACTIVE_SPACE is set in config.py -- skipping ASF/DMRG "
+          f"entirely and using orbitals {sorted(config.FORCE_ACTIVE_SPACE)} "
+          f"directly (indexed in the UHF alpha-MO basis).")
+    mo_coeff = np.asarray(mf.mo_coeff[0])
+    final_mo_list = sorted(config.FORCE_ACTIVE_SPACE)
+    n_final, gap_val = len(final_mo_list), 0.0
+else:
+    asf_p = config.ASF_PARAMS[tier]
+    print(f"  ASF (Tier {tier}): entropy_threshold={asf_p['entropy_threshold']}, "
+          f"max_norb={asf_p['max_norb']}, min_norb={asf_p['min_norb']}")
 
-active_space = find_from_scf(
-    mf, entropy_threshold=asf_p["entropy_threshold"],
-    max_norb=asf_p["max_norb"], min_norb=asf_p["min_norb"], verbose=True,
-)
-mo_list, mo_coeff = list(active_space.mo_list), active_space.mo_coeff
-print(f"  ASF candidates: {len(mo_list)} orbitals -> {mo_list}")
-if len(mo_list) == 0:
-    raise RuntimeError("ASF returned 0 candidates. Lower entropy_threshold.")
+    active_space = find_from_scf(
+        mf, entropy_threshold=asf_p["entropy_threshold"],
+        max_norb=asf_p["max_norb"], min_norb=asf_p["min_norb"], verbose=True,
+    )
+    mo_list, mo_coeff = list(active_space.mo_list), active_space.mo_coeff
+    print(f"  ASF candidates: {len(mo_list)} orbitals -> {mo_list}")
+    if len(mo_list) == 0:
+        raise RuntimeError("ASF returned 0 candidates. Lower entropy_threshold.")
 
-print(f"\n-- Phase C: Gap Detection --")
-cand_devs = np.array([deviation[i] if i < len(deviation) else 0.0 for i in mo_list])
-n_final, gap_val, selected_k = find_gap_cutoff(cand_devs, config.GAP_MIN_NORB, config.GAP_MAX_NORB)
-final_mo_list = sorted(mo_list[k] for k in selected_k)
-print(f"  Gap detected: {gap_val:.4f} at position {n_final} -> orbitals {final_mo_list}")
+    print(f"\n-- Phase C: Gap Detection --")
+    cand_devs = np.array([deviation[i] if i < len(deviation) else 0.0 for i in mo_list])
+    n_final, gap_val, selected_k = find_gap_cutoff(
+        cand_devs, config.GAP_MIN_NORB, config.GAP_MAX_NORB,
+        degeneracy_tol=config.GAP_DEGENERACY_TOL,
+    )
+    final_mo_list = sorted(mo_list[k] for k in selected_k)
+    print(f"  Gap detected: {gap_val:.4f} at position {n_final} -> orbitals {final_mo_list}")
 
 nel = count_active_electrons(mol, mf, final_mo_list)
 

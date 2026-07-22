@@ -274,11 +274,26 @@ ASF_PARAMS = {
 }
 GAP_MIN_NORB       = 2
 GAP_MAX_NORB       = 16
+GAP_DEGENERACY_TOL = 1e-3   # orbitals within this deviation-value tolerance
+                             # of the chosen cutoff are treated as a
+                             # degenerate group and kept/dropped together,
+                             # instead of split across the cutoff -- fixes
+                             # the N2 case where gap detection picked one
+                             # of a true degenerate pi-orbital pair but
+                             # not the other.
 CORE_OCC_THRESHOLD = 1.95
 
 BATH_TOLERANCE = 1e-8
 MIN_BATH_ORBS  = 0
 MAX_EMBED_ORBS = 18
+
+# Optional escape hatch: set to a list of MO indices (0-based, in the UHF
+# alpha-MO basis -- the same basis compute_mp2_deviations already uses)
+# to bypass ASF/DMRG entirely and use that exact active space. Useful for
+# small, well-studied molecules (like N2) where hand-verifying the active
+# space beats trusting automatic selection. Leave as None to use ASF's
+# automatic selection (now with the degeneracy fix above).
+FORCE_ACTIVE_SPACE = None   # e.g. [3, 4, 5, 6, 7, 8] for a manual N2 space
 
 # "mp2" -- reuse Step 1's MP2 1-RDM (fast, unreliable exactly where static
 #          correlation is strong).
