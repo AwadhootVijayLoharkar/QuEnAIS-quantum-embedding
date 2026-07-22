@@ -1,63 +1,4 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python run_all.py 
-
-############################################################
-# Running ASF.py 
-############################################################
-[Step 1] Using cached result: /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step1_asf.pkl
-         Run with --force to recompute.
-
-############################################################
-# Running classical_methods.py 
-############################################################
-[Step 0] Using cached result: /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step0_classical.pkl
-
-############################################################
-# Running DMET.py 
-############################################################
-
-============================================================
-[Step 2] DMET Embedding — N2
-============================================================
-  Active space (Step 1): (2e, 3orb) MOs=[5, 7, 8]
-  DMET_REFERENCE: casci   MU_CORRECTION: True
-
--- Phase A: Restore UHF from Step 1 --
-  UHF energy = -107.49589331 Ha (restored, no recomputation)
-
--- Phase B: Reference Density (casci) --
-  {'method': 'casci', 'e_cas': -15.598529163120087, 'n_active': 3, 'nel_active': 2}
-
--- Phase C: Schmidt Decomposition --
-  Impurity: 3  Bath: 3  Total emb: 6 -> 12 qubits
-  sv2 coverage: 1.0000
-
--- Phase D: Core Mean-Field Potential --
-
--- Phase E: Integral Transformation --
-  ecore (self-consistent) = -103.49223039 Ha   [check OK, delta=0.00e+00]
-
--- Phase F: Chemical Potential Correction --
-  mu = -4.459615 Ha   ecore corrected -> -112.41145955 Ha
-
-  h1e shape: (6, 6)  h2e shape: (6, 6, 6, 6)  Time: 0.0s
-
-[Step 2] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step2_hamiltonian.pkl
-
-############################################################
-# Running gqe_for_qsci.py 
-############################################################
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
-Embedding: 6 orbitals, nelec=(1, 1), spin=0
-CASCI (this embedding) = -110.32116532 Ha
-[Consistency check] mismatch_score=0.3880 (threshold=0.1)  flagged=True
-
-############################################################
-# Running visualization.py 
-############################################################
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/bin/python: can't open file '/home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/visualization.py': [Errno 2] No such file or directory
-
-[run_all] visualization.py exited with code 2 -- stopping.
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ rm -rf .cache/
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python run_all.py 
 
 ############################################################
@@ -83,7 +24,16 @@ CASCI (this embedding) = -110.32116532 Ha
   import pkg_resources
 Embedding: 6 orbitals, nelec=(1, 1), spin=0
 CASCI (this embedding) = -110.32116532 Ha
+[Consistency check] mismatch_score=0.3880 (threshold=0.1)  flagged=True
+
+############################################################
+# Running visualization.py 
+############################################################
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+Embedding: 6 orbitals, nelec=(1, 1), spin=0
+CASCI (this embedding) = -110.32116532 Ha
 AttributeError: 'DMETEmbeddingMolecule' object has no attribute '_last_casci_civec'
 
-[run_all] gqe_for_qsci.py exited with code 1 -- stopping.
+[run_all] visualization.py exited with code 1 -- stopping.
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
