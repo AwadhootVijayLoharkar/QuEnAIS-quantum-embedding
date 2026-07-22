@@ -69,12 +69,30 @@ def lowdin_matrices(S):
 
 
 def adaptive_bath(sv, n_imp, max_embed, bath_tol):
+    """
+    FIX: this used to fall back to `sv_arr[:max_bath]` -- i.e. grab the
+    top max_bath singular values REGARDLESS of whether any of them
+    actually cleared bath_tol -- whenever none did. That's not a safe
+    fallback, it's silently manufacturing a bath out of numerically
+    meaningless near-zero singular values. On N2's (4e,4o) active space,
+    the Schmidt singular values came back EXACTLY [0,0,0,0] (confirmed:
+    the active-space orbitals are close to eigenvectors of the reference
+    density, so there's no real impurity-environment entanglement left
+    to extract), yet this fallback still produced "4 bath orbitals" --
+    which is where the badly non-orthonormal C_emb and ~20 Ha unphysical
+    embedding energies came from. Correct behavior: if nothing clears
+    bath_tol, there IS no bath -- return 0 cleanly, and let the embedding
+    fall back to being just the active space by itself (n_emb = n_imp,
+    handled by the `if n_bath > 0` branch below).
+    """
     max_bath = min(n_imp, max(0, max_embed - n_imp))
     if max_bath == 0 or len(sv) == 0:
         return 0, 0.0, 0.0
     sv_arr = np.asarray(sv, dtype=float)
     sv_above = sv_arr[sv_arr > bath_tol]
-    sv_filtered = sv_above[:max_bath] if len(sv_above) > 0 else sv_arr[:max_bath]
+    if len(sv_above) == 0:
+        return 0, 0.0, 0.0
+    sv_filtered = sv_above[:max_bath]
     n_avail = len(sv_filtered)
     if n_avail == 0:
         return 0, 0.0, 0.0
