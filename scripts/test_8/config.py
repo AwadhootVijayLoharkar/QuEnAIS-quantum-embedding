@@ -79,7 +79,8 @@ BLOCKEXE_WRAPPER = os.path.expanduser("~/block2main_wrapper.sh")
 # be set via the GQE_QSCI_REPO_PATH environment variable instead of
 # editing this file.
 GQE_QSCI_REPO_PATH = os.environ.get(
-    "GQE_QSCI_REPO_PATH", os.path.join(os.path.expanduser("~"), "gqe-for-qsci")
+    "GQE_QSCI_REPO_PATH",
+    "/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci",
 )
 GQE_TRAIN_ENTRYPOINT = "train.py"     # relative to GQE_QSCI_REPO_PATH
 GQE_TRAIN_ARGS       = []             # extra fixed CLI/Hydra overrides, if any

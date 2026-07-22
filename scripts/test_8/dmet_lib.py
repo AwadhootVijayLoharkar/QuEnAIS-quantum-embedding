@@ -40,14 +40,42 @@ def get_reference_density(mf, mol, step1, mo_list, mo_coeff, method):
 
     elif method == "casci":
         from pyscf import ao2mo, fci
+        from pyscf.scf import hf as pyscf_hf
         nel_active = step1["nel"]
         n_active   = len(mo_list)
         n_alpha    = nel_active // 2 + nel_active % 2
         n_beta     = nel_active // 2
 
+        # FIX: this used to build h1e_act from bare kinetic+nuclear
+        # attraction only -- completely ignoring the Coulomb/exchange
+        # screening from the ~10 "core" (non-active) electrons sitting
+        # around the active space. DMET.py's own Phase D DOES add that
+        # core mean-field potential when building h1e_emb for the
+        # embedding solver -- so the reference density here and the
+        # embedding CASCI in gqe_for_qsci.py were being computed from two
+        # DIFFERENT effective Hamiltonians (one screened, one not). That
+        # mismatch feeds directly into a badly-chosen Schmidt bath, which
+        # plausibly explains why mismatch_score/mu/ecore stayed large (or
+        # got worse) even after the active-space basis fix. Fixed by
+        # applying the same core mean-field correction here, using this
+        # basis's own occupation numbers (no_occ, now guaranteed
+        # consistent with mo_coeff -- see ASF.py's project_occupations).
+        n_mo_total = mo_coeff.shape[1]
+        no_occ = step1["no_occ"]
+        active_set = set(mo_list)
+        dm_core_mo = np.diag([
+            no_occ[i] / 2.0 if i not in active_set else 0.0
+            for i in range(n_mo_total)
+        ])
+        dm_core_ao = mo_coeff @ dm_core_mo @ mo_coeff.T  # alpha == beta (closed-shell core)
+
+        h1e_bare = mol.intor("int1e_kin") + mol.intor("int1e_nuc")
+        vj_a, vk_a = pyscf_hf.get_jk(mol, dm_core_ao, hermi=1)
+        vj_b, vk_b = vj_a, vk_a
+        h1e_screened = h1e_bare + (vj_a + vj_b) - 0.5 * (vk_a + vk_b)
+
         C_active = mo_coeff[:, mo_list]
-        h1e_ao   = mol.intor("int1e_kin") + mol.intor("int1e_nuc")
-        h1e_act  = C_active.T @ h1e_ao @ C_active
+        h1e_act  = C_active.T @ h1e_screened @ C_active
         h2e_act  = ao2mo.kernel(mol, C_active, compact=False).reshape(
             n_active, n_active, n_active, n_active
         )
