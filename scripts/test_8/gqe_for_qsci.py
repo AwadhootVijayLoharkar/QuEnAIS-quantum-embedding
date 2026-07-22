@@ -382,6 +382,21 @@ class DMETExcitationPool(DMETUCCSDBasedPool):
 if __name__ == "__main__":
     mol = load_from_dmet_pickle(config.STEP2_FILE)
     print(f"Embedding: {mol.norb} orbitals, nelec={mol.nelec}, spin={mol.spin}")
+
+    # Independent sanity check: DMET.py's own "ecore self-consistent"
+    # assertion is tautological (ecore is DEFINED as mf.e_tot - e_hf_emb,
+    # so that check can never fail regardless of whether h1e_emb/h2e_emb
+    # are actually right). This is a REAL check instead: mol.hf is an
+    # actual converged self-consistent HF calculation run on h1e_emb/
+    # h2e_emb/ecore (see _run_embedding_scf). If this doesn't land close
+    # to the full molecule's UHF energy, the embedding Hamiltonian itself
+    # is wrong, independent of mu or the reference-density method.
+    uhf_ref = mol._step2_result.get("uhf_energy")
+    print(f"Embedding-space HF (real SCF, independent check) = {mol.hf.e_tot:.8f} Ha")
+    if uhf_ref is not None:
+        print(f"  vs full-molecule UHF energy = {uhf_ref:.8f} Ha   "
+              f"(diff = {mol.hf.e_tot - uhf_ref:+.4f} Ha)")
+
     e_casci = mol.compute_casci()
     print(f"CASCI (this embedding) = {e_casci:.8f} Ha")
     run_consistency_check(mol)
