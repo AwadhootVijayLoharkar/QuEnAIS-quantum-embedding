@@ -144,16 +144,31 @@ class DMETEmbeddingMolecule:
         return self._ccsd_amplitude
 
     def compute_casci(self):
+        """
+        FIX: the on-disk cache used to store only the energy, not the CI
+        vector. On a cache MISS this method sets self._last_casci_civec
+        fine -- but on a cache HIT (i.e. re-running after a previous
+        successful run already wrote the .npz file), it returned early
+        without ever setting that attribute. casci_avg_occs()'s
+        `if not hasattr(...)` guard didn't help either, because calling
+        compute_casci() again just hits the same disk cache again --
+        it's a dead end every time the cache file already exists, which
+        is exactly what happened on your second run:
+        AttributeError: 'DMETEmbeddingMolecule' object has no attribute
+        '_last_casci_civec'. Now the civec is cached too, so a cache hit
+        restores it instead of skipping it.
+        """
         cache_path = self._cache_dir / f"{self._cache_key}_casci.npz"
         if cache_path.exists():
             with np.load(cache_path, allow_pickle=False) as data:
+                self._last_casci_civec = data["civec"]
                 return data["energy"]
         e_fci, civec = self.mc.fcisolver.kernel(
             self.cas_hamiltonian.h1, self.cas_hamiltonian.h2, self.norb,
             self.nelec, ecore=self.cas_hamiltonian.e_core,
         )
         self._last_casci_civec = civec
-        np.savez(cache_path, energy=e_fci)
+        np.savez(cache_path, energy=e_fci, civec=np.asarray(civec))
         return e_fci
 
     def compute_ccsd(self):
