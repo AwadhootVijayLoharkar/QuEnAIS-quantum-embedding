@@ -1,16 +1,4 @@
-def compute_casci(self):
-        cache_path = self._cache_dir / f"{self._cache_key}_casci.npz"
-        if cache_path.exists():
-            with np.load(cache_path, allow_pickle=False) as data:
-                self._last_casci_civec = data["civec"]
-                return data["energy"]
-        e_fci, civec = self.mc.fcisolver.kernel(
-            self.cas_hamiltonian.h1,
-            self.cas_hamiltonian.h2,
-            self.norb,
-            self.nelec,
-            ecore=self.cas_hamiltonian.e_core,
-        )
-        self._last_casci_civec = civec
-        np.savez(cache_path, energy=e_fci, civec=np.asarray(civec))
-        return e_fci
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ grep -rn "_last_casci_civec" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/*.py
+/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/dmet_molecule_adapter.py:177:                self._last_casci_civec = data["civec"]
+/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/dmet_molecule_adapter.py:186:        self._last_casci_civec = civec
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$
