@@ -94,3 +94,6 @@ bash: greo: command not found
 190:    def compute_ccsd(self):
 226:def load_from_dmet_pickle(step2_pickle_path: str, **kwargs) -> DMETEmbeddingMolecule:
 (base) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ 
+
+
+grep -n "Embedding:\|CASCI (this embedding)\|_last_casci_civec\|casci_avg_occs\|run_consistency_check\|def main\|__main__" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/train.py
