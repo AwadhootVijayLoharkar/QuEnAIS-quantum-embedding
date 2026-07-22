@@ -6,4 +6,4 @@ grep: /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/__pycache__
 /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/dmet_molecule_adapter.py:173:    def compute_casci(self):
 /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/dmet_molecule_adapter.py:177:                self._last_casci_civec = data["civec"]
 /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/dmet_molecule_adapter.py:186:        self._last_casci_civec = civec
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$   
