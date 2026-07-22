@@ -1,7 +1,7 @@
 # visualization.py — test_8
 """
 Turns everything the pipeline has produced so far into PNG plots and CSV
-tables, using only what's actually saved to disk:
+tables,using only what's actually saved to disk:
 
   step0_classical.pkl  -- HF/MP2/CCSD/CASSCF/NEVPT2 on the full molecule
   step1_asf.pkl         -- active space, deviation spectrum, tier
