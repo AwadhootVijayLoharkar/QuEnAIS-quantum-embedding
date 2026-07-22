@@ -4,7 +4,7 @@
 [Step 2] DMET Embedding — N2
 ============================================================
   Active space (Step 1): (4e, 4orb) MOs=[5, 6, 7, 8]
-  DMET_REFERENCE: casci   MU_CORRECTION: True
+  DMET_REFERENCE: casci   MU_CORRECTION: False
 
 -- Phase A: Restore UHF from Step 1 --
   UHF energy = -107.49589331 Ha (restored, no recomputation)
@@ -21,8 +21,7 @@
 -- Phase E: Integral Transformation --
   ecore (self-consistent) = -97.28352122 Ha   [check OK, delta=1.42e-14]
 
--- Phase F: Chemical Potential Correction --
-  mu = -7.039696 Ha   ecore corrected -> -125.44230433 Ha
+-- Phase F: Chemical Potential Correction -- SKIPPED (MU_CORRECTION=False)
 
   h1e shape: (8, 8)  h2e shape: (8, 8, 8, 8)  Time: 0.0s
 
@@ -45,4 +44,4 @@ CASCI (this embedding) = -128.34575434 Ha
   Saved /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/results_summary.csv
 
 [Visualization] Done. See /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/plots and /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
