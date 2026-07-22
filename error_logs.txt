@@ -10,6 +10,7 @@
   UHF energy = -107.49589331 Ha (restored, no recomputation)
 
 -- Phase B: Reference Density (casci) --
+  [diag] MP2 density active<->non-active cross-coupling (alpha): max|.|=2.65e-16, (beta): max|.|=4.41e-16  (if these are ~0, mo_coeff is diagonalizing this density on its own -- an architectural mismatch, not a bug)
   {'method': 'casci', 'e_cas': -5.701011064579681, 'n_active': 4, 'nel_active': 4}
   [diag] reference density electron count: 13.990083  (should equal mol.nelectron = 14)
 
@@ -38,12 +39,4 @@
   h1e shape: (8, 8)  h2e shape: (8, 8, 8, 8)  Time: 0.0s
 
 [Step 2] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step2_hamiltonian.pkl
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python gqe_for_qsci.py 
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
-Embedding: 8 orbitals, nelec=(2, 2), spin=0
-Embedding-space HF (real SCF, independent check) = -128.67075391 Ha
-  vs full-molecule UHF energy = -107.49589331 Ha   (diff = -21.1749 Ha)
-CASCI (this embedding) = -128.73584379 Ha
-[Consistency check] mismatch_score=0.4529 (threshold=0.1)  flagged=True
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
