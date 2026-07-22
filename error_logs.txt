@@ -133,3 +133,9 @@ FileNotFoundError: [Errno 2] No such file or directory: '/home/loharkar/QuEnAIS-
 
 [run_all] gqe_for_qsci.py exited with code 1 -- stopping.
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
+
+error logs update
+python -c "import config; print('1: config OK')"
+python -c "import config; from dmet_lib import get_reference_density; print('2: dmet_lib OK')"
+python -c "import config; from pyscf import gto, scf, ao2mo; print('3: pyscf OK')"
+python -c "import config; from pyscf.scf import hf as pyscf_hf; print('4: pyscf.scf.hf OK')"
