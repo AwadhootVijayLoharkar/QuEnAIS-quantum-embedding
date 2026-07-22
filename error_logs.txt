@@ -1,9 +1,24 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ HYDRA_FULL_ERROR=1 python run_gqe_training.py 
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
-Embedding: 4 orbitals, nelec=(2, 2), spin=0
-CASCI (this embedding) = -107.59840611 Ha
-AttributeError: 'DMETEmbeddingMolecule' object has no attribute '_last_casci_civec'
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ cat gqe_train.log
-cat: gqe_train.log: No such file or directory
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ head -20 run_gqe_training.py 
+# gqe_for_qsci.py — test_8
+"""
+Consolidated DMET -> GQE-for-QSCI bridge (dmet_molecule_adapter.py +
+dmet_excitation_pool.py merged into one file).
+
+FIX #1 (carried over from test7): `import DMET as dmet_step2` is gone.
+DMET.py is a script -- importing it ran its argparse + cache-check code as
+a side effect, and on a cache hit it called sys.exit(0) at module level,
+silently killing this whole process before any of this file's own code
+ran. This imports `dmet_lib` instead, which has zero module-level side
+effects.
+
+FIX #2 (new in test_8): this file used to require the external gqe_qsci
+package to already be importable -- in practice that meant cd-ing into
+that repo's own folder before running Python so it landed on sys.path (or
+relying on a stale PYTHONPATH). That's exactly the "go to the
+gqe-for-qsci folder to run this" annoyance. Fixed by explicitly adding
+config.GQE_QSCI_REPO_PATH to sys.path at import time, below -- so this
+script works from test_8/ (or anywhere else) regardless of cwd, as long
+as config.GQE_QSCI_REPO_PATH points at the right place.
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ wc -l run_gqe_training.py 
+371 run_gqe_training.py
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
