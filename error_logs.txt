@@ -25,7 +25,7 @@
   [diag] C_emb orthonormality error (C_emb.T @ S @ C_emb vs I): 8.17e-01  (should be ~1e-10 or smaller)
 
 -- Phase D: Core Mean-Field Potential --
-  [diag] core density electron count: 8.274090  (expect ~= mol.nelectron - active nel = 10)
+  [diag] core density electron count: 8.274090  (expect ~= mol.nelectron - active nel = 10)   
 
 -- Phase E: Integral Transformation --
   [diag] h1e_emb eigenvalues (Ha, before mu): [-13.209  -7.405  -6.299  -3.956  -3.124  -2.9    -0.688  -0.008]
@@ -39,4 +39,4 @@
   h1e shape: (8, 8)  h2e shape: (8, 8, 8, 8)  Time: 0.0s
 
 [Step 2] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step2_hamiltonian.pkl
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]
