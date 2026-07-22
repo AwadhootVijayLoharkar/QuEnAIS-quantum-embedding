@@ -1,9 +1,96 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ grep -rn "compute_casci\|_last_casci_civec\| class DMETEmbeddingMolecule" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/
-grep: /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/__pycache__/molecule.cpython-311.pyc: binary file matches
-/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/molecule.py:72:  def compute_casci(self):
-/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/factory.py:53:                reference_energies[key] = molecule.compute_casci()
-/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/dmet_molecule_adapter.py:54:      .compute_casci()
-/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/dmet_molecule_adapter.py:173:    def compute_casci(self):
-/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/dmet_molecule_adapter.py:177:                self._last_casci_civec = data["civec"]
-/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/dmet_molecule_adapter.py:186:        self._last_casci_civec = civec
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$   
+(base) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ sed -n '1,80p' /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/gqe_qsci/factory.py 
+# ============================================================================ #
+# Copyright (c) 2025 NVIDIA Corporation & Affiliates.                          #
+# All rights reserved.                                                         #
+#                                                                              #
+# This source code and the accompanying materials are made available under     #
+# the terms of the Apache License 2.0 which accompanies this distribution.     #
+# ============================================================================ #
+# Modifications Copyright (c) 2026 Ryota Kemmoku
+# Modified from the original file in NVIDIA CUDA-QX.
+# Changes made: Add factory methods for model, molecule, logger,
+# operator_pool, and qsci_pipeline construction.
+
+import cudaq
+from hydra.utils import instantiate
+
+from gqe_qsci.gqe.loss import GRPOLoss, GSPOLoss
+from gqe_qsci.gqe.operator_pool import PauliEvolutionPool, ExcitationPool
+from dmet_excitation_pool import DMETPauliEvolutionPool, DMETExcitationPool
+from gqe_qsci.gqe.sampler import Sampler
+from gqe_qsci.qsci.pipeline import QSCIPipeline
+from gqe_qsci.wandb_logger import Logger
+
+class Factory:
+    def __init__(self):
+        self.molecule = None
+        self.estimator = None
+        self.operator_pool = None
+
+    def create_model(self, cfg):
+        vocab_size = self.create_operator_pool(cfg).get_vocab_size()
+        print(f"Vocab size: {vocab_size}")
+        cfg.vocab_size = vocab_size
+        return instantiate(cfg.model, vocab_size=vocab_size, ngates=cfg.ngates)
+
+    def create_temperature_scheduler(self, cfg):
+        return instantiate(cfg.trainer.temperature_scheduler)
+    
+    def create_molecule(self, cfg):
+        if self.molecule is not None:
+            return self.molecule
+        molecule = instantiate(cfg.molecule)
+        self.molecule = molecule
+        return molecule
+    
+    def create_wandb_logger(self, cfg):
+        reference_keys = cfg.reference_keys
+        molecule = self.create_molecule(cfg)
+        reference_energies = {}
+        for key in reference_keys:
+            if key == "hf_energy":
+                reference_energies[key] = molecule.hf.e_tot
+            elif key == "R-CASCI":
+                reference_energies[key] = molecule.compute_casci()
+                print(f"CASCI Energy: {reference_energies[key]}")
+            elif key == "R-CCSD":
+                reference_energies[key] = molecule.compute_ccsd()
+                print(f"CCSD Energy: {reference_energies[key]}")
+        return Logger(reference_energies=reference_energies)
+        
+    def create_loss_fn(self, cfg):
+        loss_fn_name = cfg.trainer.loss.type
+        match loss_fn_name:
+            case "grpo":
+                assert cfg.trainer.batch_size == cfg.trainer.num_samples, "batch_size must be equal to num_samples for GRPO training"
+                return GRPOLoss(cfg.trainer.loss.clip_grpo_low, cfg.trainer.loss.clip_grpo_high)
+            case "gspo":
+                assert cfg.trainer.batch_size == cfg.trainer.num_samples, "batch_size must be equal to num_samples for GSPO training"
+                return GSPOLoss(cfg.trainer.loss.clip_gspo_low, cfg.trainer.loss.clip_gspo_high)
+            case _:
+                raise ValueError(f"Unknown loss function name: {loss_fn_name}")
+    
+    def create_operator_pool(self, cfg):
+        if self.operator_pool is not None:
+            return self.operator_pool
+        molecule = self.create_molecule(cfg)
+        match cfg.operator_pool.spec:
+            case "pauli_evolution":
+                operator_pool = PauliEvolutionPool(
+                    molecule,
+                    params=cfg.operator_pool.params,
+(base) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ greo -n "def\|_last_casci_civec" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/dmet_molecule_adapter.py 
+bash: greo: command not found
+(base) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ grep -n "def\|_last_casci_civec" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/dmet_molecule_adapter.py 
+69:    def __init__(
+114:    def _build_fake_mol(self, n_alpha: int, n_beta: int) -> gto.Mole:
+122:    def _run_embedding_scf(self):
+153:    def _build_cache_key(self, extra: str) -> str:
+161:        payload_json = json.dumps(payload, sort_keys=True, default=str)
+168:    def ccsd_amplitude(self):
+173:    def compute_casci(self):
+177:                self._last_casci_civec = data["civec"]
+186:        self._last_casci_civec = civec
+190:    def compute_ccsd(self):
+226:def load_from_dmet_pickle(step2_pickle_path: str, **kwargs) -> DMETEmbeddingMolecule:
+(base) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ 
