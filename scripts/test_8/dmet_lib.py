@@ -115,6 +115,21 @@ def get_reference_density(mf, mol, step1, mo_list, mo_coeff, method):
         S = mol.intor("int1e_ovlp")
         dm_full_a = mo_coeff.T @ S @ step1["dm_ao_alpha_mp2"] @ S @ mo_coeff
         dm_full_b = mo_coeff.T @ S @ step1["dm_ao_beta_mp2"]  @ S @ mo_coeff
+
+        # [diag] direct look at the actual off-diagonal coupling BEFORE
+        # the CASCI block overwrite, to test whether mo_coeff nearly
+        # diagonalizes this density on its own (which would mean the
+        # zero Schmidt singular values are inherent to the basis choice,
+        # not an artifact of the block-diagonal construction we just fixed).
+        non_active = [i for i in range(mo_coeff.shape[1]) if i not in set(mo_list)]
+        cross_block_a = dm_full_a[np.ix_(mo_list, non_active)]
+        cross_block_b = dm_full_b[np.ix_(mo_list, non_active)]
+        print(f"  [diag] MP2 density active<->non-active cross-coupling "
+              f"(alpha): max|.|={np.max(np.abs(cross_block_a)):.2e}, "
+              f"(beta): max|.|={np.max(np.abs(cross_block_b)):.2e}  "
+              f"(if these are ~0, mo_coeff is diagonalizing this density "
+              f"on its own -- an architectural mismatch, not a bug)")
+
         for a_i, i in enumerate(mo_list):
             for a_j, j in enumerate(mo_list):
                 dm_full_a[i, j] = dm_active_a[a_i, a_j]
