@@ -17,6 +17,8 @@
   [diag] mo_coeff.T @ S @ mo_coeff vs I (raw-AO-basis convention, expected by the rest of this code): 2.44e-15
   [diag] mo_coeff.T @ mo_coeff vs I (already-orthonormal/Lowdin-basis convention): 4.87e+00
   [diag] whichever of the two lines above is near zero (~1e-10) tells us which basis convention mo_coeff is actually in.
+  [diag] Schmidt singular values (all 4, before bath-count selection): [0. 0. 0. 0.]
+  [diag] max |Q_imp.T @ U_env[:, :n_imp]| (should be ~1e-10 if the first n_imp SVD vectors are genuinely orthogonal to Q_imp): 8.31e-01
   Impurity: 4  Bath: 4  Total emb: 8 -> 16 qubits
   sv2 coverage: 1.0000
   [diag] C_emb orthonormality error (C_emb.T @ S @ C_emb vs I): 8.31e-01  (should be ~1e-10 or smaller)
