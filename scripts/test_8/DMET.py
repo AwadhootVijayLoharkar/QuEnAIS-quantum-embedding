@@ -159,6 +159,12 @@ dm_lo = S_sqrt @ dm_ao_total @ S_sqrt
 P_env = np.eye(n_ao) - Q_imp @ Q_imp.T
 F = P_env @ dm_lo @ Q_imp
 U_env, sv, _ = np.linalg.svd(F, full_matrices=True)
+print(f"  [diag] Schmidt singular values (all {len(sv)}, before bath-count "
+      f"selection): {np.array2string(sv, precision=6, suppress_small=True)}")
+_Uimp_overlap = float(np.max(np.abs(Q_imp.T @ U_env[:, :n_imp])))
+print(f"  [diag] max |Q_imp.T @ U_env[:, :n_imp]| (should be ~1e-10 if the "
+      f"first n_imp SVD vectors are genuinely orthogonal to Q_imp): "
+      f"{_Uimp_overlap:.2e}")
 
 n_bath, sv_gap, sv2_cov = adaptive_bath(sv, n_imp, config.MAX_EMBED_ORBS, config.BATH_TOLERANCE)
 if n_bath < config.MIN_BATH_ORBS:
@@ -266,4 +272,4 @@ results = {
 
 with open(config.STEP2_FILE, "wb") as f:
     pickle.dump(results, f)
-print(f"\n[Step 2] Saved -> {config.STEP2_FILE}") 
+print(f"\n[Step 2] Saved -> {config.STEP2_FILE}")
