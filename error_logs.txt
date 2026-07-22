@@ -1,4 +1,3 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ rm -rf .cache/
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python run_all.py 
 
 ############################################################
@@ -29,11 +28,17 @@ CASCI (this embedding) = -110.32116532 Ha
 ############################################################
 # Running visualization.py 
 ############################################################
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
-Embedding: 6 orbitals, nelec=(1, 1), spin=0
-CASCI (this embedding) = -110.32116532 Ha
-AttributeError: 'DMETEmbeddingMolecule' object has no attribute '_last_casci_civec'
+  [skip] GQE log: /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/gqe_train.log not found (run run_gqe_training.py first)
 
-[run_all] visualization.py exited with code 1 -- stopping.
+============================================================
+[Visualization] N2
+============================================================
+  Saved /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/plots/fig1_asf_deviation_spectrum.png
+  Saved /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/plots/fig2_dmet_schmidt_spectrum.png
+  Saved /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/plots/fig5_method_comparison.png
+  Saved /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/results_summary.csv
+
+[Visualization] Done. See /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/plots and /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results
+
+[run_all] All steps finished. See results/ and results/plots/.
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
