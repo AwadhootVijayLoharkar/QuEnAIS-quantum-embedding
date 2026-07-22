@@ -134,6 +134,10 @@ dm_ao_total, dm_ao_alpha, dm_ao_beta, ref_info = get_reference_density(
     mf, mol, step1, mo_list, mo_coeff, config.DMET_REFERENCE
 )
 print(f"  {ref_info}")
+S_check = mol.intor("int1e_ovlp")
+n_elec_ref = float(np.trace(dm_ao_alpha @ S_check) + np.trace(dm_ao_beta @ S_check))
+print(f"  [diag] reference density electron count: {n_elec_ref:.6f}  "
+      f"(should equal mol.nelectron = {mol.nelectron})")
 
 print(f"\n-- Phase C: Schmidt Decomposition --")
 S = mol.intor("int1e_ovlp")
@@ -160,6 +164,9 @@ n_emb = n_imp + n_bath
 C_emb = S_invsqrt @ Q_emb
 print(f"  Impurity: {n_imp}  Bath: {n_bath}  Total emb: {n_emb} -> {2*n_emb} qubits")
 print(f"  sv2 coverage: {sv2_cov:.4f}")
+orthonorm_err = float(np.max(np.abs(C_emb.T @ S @ C_emb - np.eye(n_emb))))
+print(f"  [diag] C_emb orthonormality error (C_emb.T @ S @ C_emb vs I): "
+      f"{orthonorm_err:.2e}  (should be ~1e-10 or smaller)")
 
 print(f"\n-- Phase D: Core Mean-Field Potential --")
 h1e_bare = mol.intor("int1e_kin") + mol.intor("int1e_nuc")
@@ -172,6 +179,11 @@ dm_core_beta  = S_invsqrt @ dm_core_lo_beta  @ S_invsqrt
 dm_core_alpha = 0.5 * (dm_core_alpha + dm_core_alpha.T)
 dm_core_beta  = 0.5 * (dm_core_beta  + dm_core_beta.T)
 
+n_core_elec = float(np.trace(dm_core_alpha @ S) + np.trace(dm_core_beta @ S))
+n_emb_elec_expected = nel  # active-space electron count from Step 1
+print(f"  [diag] core density electron count: {n_core_elec:.6f}  "
+      f"(expect ~= mol.nelectron - active nel = {mol.nelectron - n_emb_elec_expected})")
+
 vj_a, vk_a = pyscf_hf.get_jk(mol, dm_core_alpha, hermi=1)
 vj_b, vk_b = pyscf_hf.get_jk(mol, dm_core_beta,  hermi=1)
 h1e_eff = h1e_bare + (vj_a + vj_b) - 0.5 * (vk_a + vk_b)
@@ -182,6 +194,12 @@ h1e_emb = C_emb.T @ h1e_eff @ C_emb
 h1e_emb = 0.5 * (h1e_emb + h1e_emb.T)
 h2e_raw = ao2mo.kernel(mol, C_emb, compact=False).reshape(n_emb, n_emb, n_emb, n_emb)
 h2e_emb = _symmetrize_h2e(h2e_raw)
+
+h1e_evals = np.linalg.eigvalsh(h1e_emb)
+print(f"  [diag] h1e_emb eigenvalues (Ha, before mu): "
+      f"{np.array2string(h1e_evals, precision=3, suppress_small=True)}")
+print(f"  [diag] for comparison, full UHF valence orbital energies (Ha): "
+      f"{np.array2string(np.asarray(step1['mo_energy'])[0][:n_ao], precision=3, suppress_small=True)}")
 
 n_alpha = nel // 2 + nel % 2
 n_beta  = nel // 2
