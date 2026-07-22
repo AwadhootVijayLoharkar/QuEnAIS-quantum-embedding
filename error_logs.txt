@@ -13,7 +13,7 @@ converged SCF energy = -107.495893307834  <S^2> = 7.9580786e-13  2S+1 = 1
   Gap   : min=22.3316 eV
   TM    : False  ->  Tier 1
 
--- Phase B: MP2 Deviations + ASF --
+-- Phase B: MP2 Density + ASF --
   MP2 used: True  E_corr: -0.154090 Ha
   ASF (Tier 1): entropy_threshold=0.05, max_norb=12, min_norb=2
 
@@ -31,7 +31,7 @@ Running calculation
 spin = 0, number of roots = 1
 total number of roots calculated = 1
 
-CASCI E = -107.652828729896  E(CI) = -131.274659225550  S^2 = 0.0000000
+CASCI E = -107.652828729957  E(CI) = -131.274659225612  S^2 = 0.0000000
 
 Orbital selection for state 0:
 
@@ -56,64 +56,16 @@ Active space selection finished
   ASF candidates: 4 orbitals -> [5, 6, 7, 8]
 
 -- Phase C: Gap Detection --
-  Gap detected: 0.0445 at position 3 -> orbitals [5, 7, 8]
-  Total electrons: 14  Core MOs: 6  Raw active: 2
-  Final active electrons: 2
+  Gap detected: 0.0602 at position 4 -> orbitals [5, 6, 7, 8]
+  Total electrons: 14  Core MOs: 5  Raw active: 4
+  Final active electrons: 4
 
 -- Phase D: Loewdin Population --
 
 ============================================================
 [Step 1] Summary — N2
-  Tier: 1  Active space: (2e, 3orb)  Orbitals: [5, 7, 8]
-  Correlation strength: 0.0635
+  Tier: 1  Active space: (4e, 4orb)  Orbitals: [5, 6, 7, 8]
+  Correlation strength: 0.0626
 ============================================================
 
 [Step 1] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step1_asf.pkl
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python DMET.py --force
-
-============================================================
-[Step 2] DMET Embedding — N2
-============================================================
-  Active space (Step 1): (2e, 3orb) MOs=[5, 7, 8]
-  DMET_REFERENCE: casci   MU_CORRECTION: True
-
--- Phase A: Restore UHF from Step 1 --
-  UHF energy = -107.49589331 Ha (restored, no recomputation)
-
--- Phase B: Reference Density (casci) --
-  {'method': 'casci', 'e_cas': -15.598529163120087, 'n_active': 3, 'nel_active': 2}
-
--- Phase C: Schmidt Decomposition --
-  Impurity: 3  Bath: 3  Total emb: 6 -> 12 qubits
-  sv2 coverage: 1.0000
-
--- Phase D: Core Mean-Field Potential --
-
--- Phase E: Integral Transformation --
-  ecore (self-consistent) = -103.80668120 Ha   [check OK, delta=0.00e+00]
-
--- Phase F: Chemical Potential Correction --
-  mu = -4.267848 Ha   ecore corrected -> -112.34237784 Ha
-
-  h1e shape: (6, 6)  h2e shape: (6, 6, 6, 6)  Time: 0.0s
-
-[Step 2] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step2_hamiltonian.pkl
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python gqe_for_qsci.py --force
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
-Embedding: 6 orbitals, nelec=(1, 1), spin=0
-CASCI (this embedding) = -110.13179715 Ha
-[Consistency check] mismatch_score=0.4044 (threshold=0.1)  flagged=True
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python visualization.py 
-  [skip] GQE log: /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/gqe_train.log not found (run run_gqe_training.py first)
-
-============================================================
-[Visualization] N2
-============================================================
-  Saved /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/plots/fig1_asf_deviation_spectrum.png
-  Saved /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/plots/fig2_dmet_schmidt_spectrum.png
-  Saved /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/plots/fig5_method_comparison.png
-  Saved /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/results_summary.csv
-
-[Visualization] Done. See /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/plots and /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
