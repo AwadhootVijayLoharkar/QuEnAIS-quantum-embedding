@@ -1,141 +1,36 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python run_all.py 
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ ls -la DMET.py 
+-rw-r--r-- 1 loharkar itwm-guest 6728 Jul 22 14:59 DMET.py
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ wc -l DMET.py 
+159 DMET.py
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ head -30 DMET.py 
+# dmet_lib.py — test_8
+"""
+Reusable DMET helper functions with NO module-level side effects -- safe
+to import from anywhere (DMET.py, gqe_for_qsci.py, a notebook, etc.).
 
-############################################################
-# Running ASF.py 
-############################################################
+This exists to fix a real bug: gqe_for_qsci.py used to do
+`import DMET as dmet_step2` to reuse embedding_consistency_score(). DMET.py
+is a SCRIPT -- it parses argv and, on a cache hit, calls sys.exit(0) at
+module level. Importing it therefore executed DMET.py's whole
+cache-check-and-possibly-recompute logic as a side effect of import, and
+on a cache hit, sys.exit(0) killed the entire importing process before any
+of ITS OWN code ran.
 
-============================================================
-[Step 1] Active Space Finder — N2
-============================================================
-  Atoms: 2 ['N', 'N']  Basis: sto-3g
-  Electrons: 14  AOs: 10
+Fix: the reusable functions live here, with zero side effects. Both
+DMET.py and gqe_for_qsci.py import from this module; DMET.py no longer
+defines these functions inline.
+"""
 
--- Phase A: UHF + Classification --
-converged SCF energy = -107.495893307834  <S^2> = 7.9758422e-13  2S+1 = 1
-  UHF energy = -107.49589331 Ha (converged: True)
-  Spin  : 0.0000  contaminated=False
-  Gap   : min=22.3316 eV
-  TM    : False  ->  Tier 1
-
--- Phase B: MP2 Deviations + ASF --
-  MP2 used: True  E_corr: -0.154090 Ha
-  ASF (Tier 1): entropy_threshold=0.05, max_norb=12, min_norb=2
-
---------------------------------------------------------------------------------
-Calculating MP2 natural orbitals
---------------------------------------------------------------------------------
-
-
--> Selected initial orbital window of 14 electrons in 10 MP2 natural orbitals.
-
---------------------------------------------------------------------------------
-Running calculation
---------------------------------------------------------------------------------
-
-spin = 0, number of roots = 1
-total number of roots calculated = 1
-
-CASCI E = -107.652828729908  E(CI) = -131.274659225563  S^2 = 0.0000000
-
-Orbital selection for state 0:
-
- MO    w( )    w(↑)    w(↓)    w(⇅)       S  sel
-  0   0.000   0.000   0.000   1.000   0.000     
-  1   0.000   0.000   0.000   1.000   0.000     
-  2   0.001   0.001   0.001   0.996   0.030     
-  3   0.006   0.000   0.000   0.993   0.046     
-  4   0.002   0.007   0.007   0.984   0.096     
-  5   0.020   0.014   0.014   0.952   0.246    a
-  6   0.020   0.014   0.014   0.952   0.246    a
-  7   0.947   0.014   0.014   0.024   0.262    a
-  8   0.947   0.014   0.014   0.024   0.262    a
-  9   0.983   0.007   0.007   0.003   0.103     
+import warnings
+import numpy as np
 
 
---------------------------------------------------------------------------------
-Active space selection finished
---------------------------------------------------------------------------------
+def get_reference_density(mf, mol, step1, mo_list, mo_coeff, method):
+    """
+    Returns (dm_ao_total, dm_ao_alpha, dm_ao_beta, info).
 
--> Selected an active space of 4 electrons in 4 orbitals.
-  ASF candidates: 4 orbitals -> [5, 6, 7, 8]
-
--- Phase C: Gap Detection --
-  Gap detected: 0.0445 at position 3 -> orbitals [5, 7, 8]
-  Total electrons: 14  Core MOs: 6  Raw active: 2
-  Final active electrons: 2
-
--- Phase D: Loewdin Population --
-
-============================================================
-[Step 1] Summary — N2
-  Tier: 1  Active space: (2e, 3orb)  Orbitals: [5, 7, 8]
-  Correlation strength: 0.0635
-============================================================
-
-[Step 1] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step1_asf.pkl
-
-############################################################
-# Running classical_methods.py 
-############################################################
-
-============================================================
-[Step 0] Classical Methods — N2
-============================================================
-  Basis: sto-3g  Charge: 0  Spin(2S): 0
-  Methods: ['HF', 'MP2', 'CCSD', 'CASSCF']
-  Electrons: 14   AOs: 10
-  Step 1 loaded: (2e, 3orb) active space
-
--- HF --
-  [HF] done in 0.1s
-  RHF energy: -107.49589331 Ha (converged: True)
-
--- MP2 --
-  [MP2] done in 0.0s
-  E_corr: -0.15409048 Ha   MP2 energy: -107.64998379 Ha
-
--- CCSD --
-  [CCSD] done in 0.1s
-  E_corr: -0.15304798 Ha   CCSD energy: -107.64894129 Ha   Converged: True
-
-  Using Step 1 active space: (2e, 3o)
-
--- CASSCF(2e,3o) --
-  [CASSCF(2e,3o)] done in 0.1s
-  CASSCF energy: -107.53259159 Ha   CI energy: -1.77084433 Ha   Converged: True
-
-============================================================
-[Step 0] Results — N2 / sto-3g
-============================================================
-
-  Method            Energy (Ha)     vs HF (Ha)   vs HF (kcal/mol)
-  --------------------------------------------------------------
-  HF              -107.49589331      +0.000000              +0.00
-  MP2             -107.64998379      -0.154090             -96.69
-  CCSD            -107.64894129      -0.153048             -96.04
-  CASSCF          -107.53259159      -0.036698             -23.03
-
-  Total time: 0.7s
-============================================================
-
-[Step 0] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step0_classical.pkl
-
-############################################################
-# Running DMET.py 
-############################################################
-
-############################################################
-# Running gqe_for_qsci.py 
-############################################################
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
-FileNotFoundError: [Errno 2] No such file or directory: '/home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step2_hamiltonian.pkl'
-
-[run_all] gqe_for_qsci.py exited with code 1 -- stopping.
+    mo_list and mo_coeff are explicit parameters rather than read from a
+    calling script's module-level globals -- that implicit-global
+    dependency is exactly the kind of thing that breaks silently when a
+    function gets reused outside its original script's context.
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
-
-error logs update
-python -c "import config; print('1: config OK')"
-python -c "import config; from dmet_lib import get_reference_density; print('2: dmet_lib OK')"
-python -c "import config; from pyscf import gto, scf, ao2mo; print('3: pyscf OK')"
-python -c "import config; from pyscf.scf import hf as pyscf_hf; print('4: pyscf.scf.hf OK')"
