@@ -33,3 +33,12 @@ find: missing argument to `-exec'
 (base) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ find /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/ -name "__pycache__" -exec rm -rf {} +
 rm -rf /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/.cache
 (base) [loharkar@makaria10:QuEnAIS-quantum-embedding]$ 
+
+
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python run_gqe_training.py 
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+Embedding: 4 orbitals, nelec=(2, 2), spin=0
+CASCI (this embedding) = -107.59840611 Ha
+AttributeError: 'DMETEmbeddingMolecule' object has no attribute '_last_casci_civec'
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
