@@ -143,6 +143,16 @@ print(f"\n-- Phase C: Schmidt Decomposition --")
 S = mol.intor("int1e_ovlp")
 S_sqrt, S_invsqrt = lowdin_matrices(S)
 
+_n_mo_chk = mo_coeff.shape[1]
+_err_raw_ao   = float(np.max(np.abs(mo_coeff.T @ S @ mo_coeff - np.eye(_n_mo_chk))))
+_err_already_orthonorm = float(np.max(np.abs(mo_coeff.T @ mo_coeff - np.eye(_n_mo_chk))))
+print(f"  [diag] mo_coeff.T @ S @ mo_coeff vs I (raw-AO-basis convention, "
+      f"expected by the rest of this code): {_err_raw_ao:.2e}")
+print(f"  [diag] mo_coeff.T @ mo_coeff vs I (already-orthonormal/Lowdin-basis "
+      f"convention): {_err_already_orthonorm:.2e}")
+print(f"  [diag] whichever of the two lines above is near zero (~1e-10) tells "
+      f"us which basis convention mo_coeff is actually in.")
+
 C_imp = mo_coeff[:, mo_list].copy()
 Q_imp = S_sqrt @ C_imp
 dm_lo = S_sqrt @ dm_ao_total @ S_sqrt
