@@ -1,50 +1,8 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python classical_methods.py --force
+grep -n "_last_casci_civec\|compute_casci" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/train.py
+grep -rn "_last_casci_civec\|compute_casci" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/*.py
 
-============================================================
-[Step 0] Classical Methods — N2
-============================================================
-  Basis: sto-3g  Charge: 0  Spin(2S): 0
-  Methods: ['HF', 'MP2', 'CCSD', 'CASSCF']
-  Electrons: 14   AOs: 10
-  Step 1 loaded: (4e, 4orb) active space
 
--- HF --
-  [HF] done in 0.1s
-  RHF energy: -107.49589331 Ha (converged: True)
 
--- MP2 --
-  [MP2] done in 0.0s
-  E_corr: -0.15409048 Ha   MP2 energy: -107.64998379 Ha
 
--- CCSD --
-  [CCSD] done in 0.1s
-  E_corr: -0.15304798 Ha   CCSD energy: -107.64894129 Ha   Converged: True
-
-  Using Step 1 active space: (4e, 4o)
-
--- CASSCF(4e,4o) --
-  [CASSCF(4e,4o)] done in 1.1s
-  CASSCF energy: -107.59836731 Ha   CI energy: -5.68373028 Ha   Converged: True
-
-============================================================
-[Step 0] Results — N2 / sto-3g
-============================================================
-
-  Method            Energy (Ha)     vs HF (Ha)   vs HF (kcal/mol)
-  --------------------------------------------------------------
-  HF              -107.49589331      +0.000000              +0.00
-  MP2             -107.64998379      -0.154090             -96.69
-  CCSD            -107.64894129      -0.153048             -96.04
-  CASSCF          -107.59836731      -0.102474             -64.30
-
-  Total time: 1.8s
-============================================================
-
-[Step 0] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step0_classical.pkl
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python run_gqe_training.py 
-/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
-  import pkg_resources
-Embedding: 4 orbitals, nelec=(2, 2), spin=0
-CASCI (this embedding) = -107.59840611 Ha
-AttributeError: 'DMETEmbeddingMolecule' object has no attribute '_last_casci_civec'
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
+grep -n "_last_casci_civec\|compute_casci" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/train.py
+grep -rn "_last_casci_civec\|compute_casci" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/*.py
