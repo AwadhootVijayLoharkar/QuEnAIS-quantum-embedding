@@ -260,8 +260,25 @@ print(f"  [diag] for comparison, full UHF valence orbital energies (Ha): "
 # n_alpha/n_beta now come from the reference-density trace, computed
 # right after Phase C -- see the FIX comment there.
 
-dm_a_hf = np.diag([1.0] * n_alpha + [0.0] * (n_emb - n_alpha))
-dm_b_hf = np.diag([1.0] * n_beta  + [0.0] * (n_emb - n_beta))
+# FIX #2 (found via LiH re-run: n_bath=2 fix alone only moved
+# DMET+CASCI(active) from -15.92 -> -12.47 Ha, still ~4.6 Ha off HF/
+# CASSCF's -7.86/-7.88 Ha). This used to build dm_a_hf/dm_b_hf as a
+# naive "aufbau" density -- fill the FIRST n_alpha/n_beta COLUMNS of
+# C_emb (which are, in order, Q_imp's impurity orbitals then Q_bath's
+# bath orbitals) as "occupied", regardless of h1e_emb's actual
+# eigenvalue ordering (printed just above as h1e_evals, but never used
+# here). Since ecore is DEFINED as mf.e_tot - e_hf_emb, that made-up
+# density directly determines how much of the TRUE HF energy gets
+# folded into ecore vs. the embedding space -- an arbitrary filling
+# assumption, not the real HF solution's projection into this basis.
+#
+# Fixed the same way ref_occ already fixes the CASCI electron count:
+# project the ACTUAL full-molecule UHF density (mf, restored in Phase
+# A) into the embedding basis, instead of guessing an occupation
+# pattern.
+dm_hf_ao_alpha, dm_hf_ao_beta = mf.make_rdm1()
+dm_a_hf = C_emb.T @ S @ dm_hf_ao_alpha @ S @ C_emb
+dm_b_hf = C_emb.T @ S @ dm_hf_ao_beta  @ S @ C_emb
 dm_t_hf = dm_a_hf + dm_b_hf
 
 e1_hf = float(np.einsum("ij,ji->", h1e_emb, dm_t_hf))
