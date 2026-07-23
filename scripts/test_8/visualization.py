@@ -246,6 +246,47 @@ def plot_gqe_resources():
 # Fig 5 — method comparison bar chart (classical vs DMET+GQE, same molecule)
 # ═══════════════════════════════════════════════════════════════════════
 
+_true_casci_cache = {}
+
+
+def get_true_embedding_casci():
+    """
+    FIX: this used to report step2["ecore"] + ref_info["e_cas"] as
+    "DMET+CASCI(active)" -- but ref_info["e_cas"] is the SMALL, 2e/2o
+    CASCI computed back in Phase B (dmet_lib.py's get_reference_density),
+    used only to help build the reference density BEFORE Schmidt
+    decomposition even runs. It never reflects n_bath, mu, or the actual
+    n_emb-orbital embedded solve -- so it stayed frozen at the same wrong
+    number even after DMET.py's n_alpha/n_beta and dm_a_hf/dm_b_hf fixes
+    were confirmed correct via gqe_for_qsci.py's own smoke test (which
+    showed embedding HF exactly matching full UHF, and CASCI matching
+    CASSCF to 0.13 mHa). That's the REAL embedding CASCI energy -- get it
+    the same way the smoke test does, by actually solving CASCI on the
+    current h1e_emb/h2e_emb/ecore/n_alpha/n_beta from the step2 pickle,
+    instead of reusing the Phase B reference-density-building CASCI.
+    """
+    key = config.STEP2_FILE
+    if key in _true_casci_cache:
+        return _true_casci_cache[key]
+    if not os.path.exists(config.STEP2_FILE):
+        _true_casci_cache[key] = None
+        return None
+    try:
+        import gqe_for_qsci
+        mol = gqe_for_qsci.load_from_dmet_pickle(config.STEP2_FILE)
+        e = float(mol.compute_casci())
+    except Exception as exc:
+        warnings.warn(
+            f"Could not compute the true embedding CASCI energy for "
+            f"visualization ({exc}); falling back to the Phase B "
+            f"reference-density CASCI, which is NOT the same quantity "
+            f"and will look wrong.", RuntimeWarning,
+        )
+        e = None
+    _true_casci_cache[key] = e
+    return e
+
+
 def plot_method_comparison():
     labels, energies, colors = [], [], []
 
@@ -255,21 +296,22 @@ def plot_method_comparison():
             if e is not None:
                 labels.append(name); energies.append(e); colors.append("#4C72B0")
 
+    true_e_casci = None
     if step2 is not None:
         ref_info = step2.get("reference_density_info", {})
         if ref_info.get("method") == "casci":
-            labels.append("DMET+CASCI(active)")
-            energies.append(step2["ecore"] + ref_info["e_cas"])
-            colors.append("#C44E52")
+            true_e_casci = get_true_embedding_casci()
+            if true_e_casci is not None:
+                labels.append("DMET+CASCI(active)")
+                energies.append(true_e_casci)
+                colors.append("#C44E52")
 
-    if gqe_rows:
-        if step2 is not None and step2.get("reference_density_info", {}).get("method") == "casci":
-            e_cas_active = step2["reference_density_info"]["e_cas"]
-            _, err = _col(gqe_rows, "Global-refined(best_so_far)/energy - R-CASCI")
-            if len(err) > 0:
-                labels.append("DMET+GQE (Global-refined, final)")
-                energies.append(step2["ecore"] + e_cas_active + err[-1])
-                colors.append("#55A868")
+    if gqe_rows and true_e_casci is not None:
+        _, err = _col(gqe_rows, "Global-refined(best_so_far)/energy - R-CASCI")
+        if len(err) > 0:
+            labels.append("DMET+GQE (Global-refined, final)")
+            energies.append(true_e_casci + err[-1])
+            colors.append("#55A868")
 
     if not labels:
         print("  [skip] fig5: no energies available from any stage yet")
