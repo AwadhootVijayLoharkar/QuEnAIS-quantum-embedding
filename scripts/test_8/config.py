@@ -106,7 +106,7 @@ HOMO_LUMO_TIER2_THRESHOLD_EV         = 1.0
 # ═══════════════════════════════════════════════════════════════════════
 # Molecule selection — explicit finite geometries (recommended path)
 # ═══════════════════════════════════════════════════════════════════════
-MOLECULE = "N2"
+MOLECULE = "LiH"
 CHARGE   = 0
 SPIN     = 0
 BASIS    = "sto-3g"
