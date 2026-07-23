@@ -31,10 +31,10 @@
 -- Phase E: Integral Transformation --
   [diag] h1e_emb eigenvalues (Ha, before mu): [-4.739 -1.5   -1.117 -0.94 ]
   [diag] for comparison, full UHF valence orbital energies (Ha): [-2.349 -0.286  0.078  0.164  0.164  0.549]
-  ecore (self-consistent) = -5.38784615 Ha   [check OK, delta=0.00e+00]
+  ecore (self-consistent) = 0.99175694 Ha   [check OK, delta=0.00e+00]
 
 -- Phase F: Chemical Potential Correction --
-  mu = -1.500452 Ha   ecore corrected -> -11.38965439 Ha
+  mu = -1.500452 Ha   ecore corrected -> -5.01005131 Ha
 
   h1e shape: (4, 4)  h2e shape: (4, 4, 4, 4)  Time: 0.0s
 
@@ -43,8 +43,7 @@
 /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   import pkg_resources
 Embedding: 4 orbitals, nelec=(2, 2), spin=0
-Embedding-space HF (real SCF, independent check) = -14.24163005 Ha
-  vs full-molecule UHF energy = -7.86202696 Ha   (diff = -6.3796 Ha)
-CASCI (this embedding) = -14.26084924 Ha
+Embedding-space HF (real SCF, independent check) = -7.86202696 Ha
+  vs full-molecule UHF energy = -7.86202696 Ha   (diff = -0.0000 Ha)
+CASCI (this embedding) = -7.88124615 Ha
 [Consistency check] mismatch_score=0.0017 (threshold=0.1)  flagged=False
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
