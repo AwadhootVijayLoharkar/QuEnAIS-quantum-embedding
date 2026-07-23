@@ -202,6 +202,28 @@ orthonorm_err = float(np.max(np.abs(C_emb.T @ S @ C_emb - np.eye(n_emb))))
 print(f"  [diag] C_emb orthonormality error (C_emb.T @ S @ C_emb vs I): "
       f"{orthonorm_err:.2e}  (should be ~1e-10 or smaller)")
 
+# FIX (found via LiH n_bath=2 run: DMET+CASCI came out ~2x HF): n_alpha/
+# n_beta used to be taken from Step 1's ACTIVE-SPACE-ONLY electron count
+# (nel) further down. That's only correct when n_bath=0 (embedding space
+# == active space). Once bath orbitals are added, n_emb > n_imp, and the
+# embedding space's true electron count is whatever the reference density
+# actually puts there -- which the code already computed (ref_occ_alpha/
+# beta) but only used for a downstream consistency check, never to
+# correct n_alpha/n_beta itself. Confirmed on your LiH run: nel-based
+# gave (1,1) while the reference-density trace gave (2.0000076,
+# 2.0000076) -- rounds to (2,2). Moved here (right after C_emb exists,
+# before Phase D/E need it) and used as the actual FCI electron target.
+dm_emb_alpha_mo = C_emb.T @ S @ dm_ao_alpha @ S @ C_emb
+dm_emb_beta_mo  = C_emb.T @ S @ dm_ao_beta  @ S @ C_emb
+ref_occ_alpha = np.clip(np.diag(dm_emb_alpha_mo), 0.0, 1.0)
+ref_occ_beta  = np.clip(np.diag(dm_emb_beta_mo),  0.0, 1.0)
+n_alpha = int(round(float(np.sum(ref_occ_alpha))))
+n_beta  = int(round(float(np.sum(ref_occ_beta))))
+print(f"  [diag] embedding-space electron count from reference density: "
+      f"alpha={np.sum(ref_occ_alpha):.6f} -> {n_alpha}, "
+      f"beta={np.sum(ref_occ_beta):.6f} -> {n_beta}  "
+      f"(old nel-based value was alpha={nel//2 + nel%2}, beta={nel//2})")
+
 print(f"\n-- Phase D: Core Mean-Field Potential --")
 h1e_bare = mol.intor("int1e_kin") + mol.intor("int1e_nuc")
 P_emb_lo = Q_emb @ Q_emb.T
@@ -235,8 +257,8 @@ print(f"  [diag] h1e_emb eigenvalues (Ha, before mu): "
 print(f"  [diag] for comparison, full UHF valence orbital energies (Ha): "
       f"{np.array2string(np.asarray(step1['mo_energy'])[0][:n_ao], precision=3, suppress_small=True)}")
 
-n_alpha = nel // 2 + nel % 2
-n_beta  = nel // 2
+# n_alpha/n_beta now come from the reference-density trace, computed
+# right after Phase C -- see the FIX comment there.
 
 dm_a_hf = np.diag([1.0] * n_alpha + [0.0] * (n_emb - n_alpha))
 dm_b_hf = np.diag([1.0] * n_beta  + [0.0] * (n_emb - n_beta))
@@ -268,10 +290,7 @@ if config.MU_CORRECTION:
 else:
     print(f"\n-- Phase F: Chemical Potential Correction -- SKIPPED (MU_CORRECTION=False)")
 
-dm_emb_alpha_mo = C_emb.T @ S @ dm_ao_alpha @ S @ C_emb
-dm_emb_beta_mo  = C_emb.T @ S @ dm_ao_beta  @ S @ C_emb
-ref_occ_alpha = np.clip(np.diag(dm_emb_alpha_mo), 0.0, 1.0)
-ref_occ_beta  = np.clip(np.diag(dm_emb_beta_mo),  0.0, 1.0)
+# ref_occ_alpha/ref_occ_beta already computed right after Phase C.
 
 elapsed = time.time() - t0
 print(f"\n  h1e shape: {h1e_emb.shape}  h2e shape: {h2e_emb.shape}  Time: {elapsed:.1f}s")
