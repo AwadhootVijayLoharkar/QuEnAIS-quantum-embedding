@@ -83,7 +83,9 @@ GQE_QSCI_REPO_PATH = os.environ.get(
     "/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci",
 )
 GQE_TRAIN_ENTRYPOINT = "train.py"     # relative to GQE_QSCI_REPO_PATH
-GQE_TRAIN_ARGS       = []             # extra fixed CLI/Hydra overrides, if any
+# GQE_TRAIN_ARGS is built from the named GQE_* fields further down this
+# file (see build_gqe_hydra_overrides()) -- assigned at the bottom of this
+# file, after those fields exist.
 
 # ═══════════════════════════════════════════════════════════════════════
 # Physical constants
@@ -106,7 +108,7 @@ HOMO_LUMO_TIER2_THRESHOLD_EV         = 1.0
 # ═══════════════════════════════════════════════════════════════════════
 # Molecule selection — explicit finite geometries (recommended path)
 # ═══════════════════════════════════════════════════════════════════════
-MOLECULE = "LiH"
+MOLECULE = "N2"
 CHARGE   = 0
 SPIN     = 0
 BASIS    = "sto-3g"
@@ -322,6 +324,144 @@ CONSISTENCY_MISMATCH_THRESHOLD = 0.10
 # ═══════════════════════════════════════════════════════════════════════
 QUANTUM_SOLVER   = "gqe_qsci"
 FERMION_TO_QUBIT = "jw"
+
+# ── GQE-for-QSCI training hyperparameters ───────────────────────────────
+# These map 1:1 onto keys in the external gqe-for-qsci repo's own Hydra
+# configs (configs/default.yaml + configs/trainer/default.yaml). Edit the
+# values here instead of hand-editing those yaml files -- run_gqe_training.py
+# forwards whichever ones you set (anything left as None is skipped, so
+# the external repo's own yaml default applies unchanged). This only
+# controls the external repo's config; it does NOT touch anything in
+# ASF.py/DMET.py/gqe_for_qsci.py.
+GQE_SEED                     = None   # int, e.g. 32
+GQE_MAX_ITERS                = None   # int -- number of training epochs (what
+                                       # you changed by hand in defaults.yaml
+                                       # for the 100-epoch LiH run)
+GQE_NUM_SAMPLES              = None   # int -- circuits sampled per iteration
+GQE_BATCH_SIZE               = None   # int -- keep equal to GQE_NUM_SAMPLES
+                                       # for online training (repo's own comment)
+GQE_STEP_PER_EPOCH           = None   # int -- policy updates per iteration
+GQE_WARMUP_SIZE              = None   # int
+GQE_BUFFER_SIZE              = None   # int -- keep equal to GQE_NUM_SAMPLES
+GQE_LOAD_CHECKPOINT          = False  # bool -- True silently resumes from
+                                       # whatever checkpoint dir the repo finds
+                                       # under gqe-for-qsci/outputs/, which
+                                       # isn't scoped per-molecule (this is
+                                       # what caused the frozen ~-107 Ha
+                                       # ensemble-energy numbers during LiH
+                                       # debugging). Keep False unless you
+                                       # specifically want to resume a run.
+GQE_CHECKPOINT_EVERY_N_ITERS = None   # int
+
+GQE_OPTIMIZER_LR             = None   # float, e.g. 5e-6
+GQE_OPTIMIZER_CLS            = None   # str, e.g. "AdamW"
+GQE_OPTIMIZER_WEIGHT_DECAY   = None   # float
+
+GQE_LOSS_TYPE                = None   # str, e.g. "grpo"
+GQE_LOSS_CLIP_GRPO_LOW       = None   # float
+GQE_LOSS_CLIP_GRPO_HIGH      = None   # float
+
+GQE_TEMP_SCHED_INITIAL       = None   # float
+GQE_TEMP_SCHED_DELTA         = None   # float
+GQE_TEMP_SCHED_TARGET_VAR    = None   # float
+
+GQE_NGATES                   = None   # int -- ansatz circuit depth
+GQE_REFERENCE_KEYS           = None   # list[str], e.g. ["R-CASCI", "R-CCSD"]
+
+GQE_SAMPLER_MPI              = None   # bool
+GQE_SAMPLER_SHOTS            = None   # int -- shots per circuit; only matters
+                                       # once GQE_CUDAQ_TARGET below is no
+                                       # longer an exact-statevector backend
+
+GQE_OPERATOR_POOL_SPEC             = None  # str: "pauli_evolution" | "excitation"
+GQE_OPERATOR_POOL_CCSD_THRESHOLD   = None  # float
+GQE_OPERATOR_POOL_REMOVE_Z_LADDER  = None  # bool
+GQE_OPERATOR_POOL_ONLY_FIRST_PAULI = None  # bool
+
+GQE_QSCI_MAX_DIM              = None  # int -- max QSCI subspace dimension
+GQE_QSCI_ENLARGE_METHOD       = None  # str, e.g. "symmetry_completion"
+GQE_QSCI_MAX_CYCLE            = None  # int
+
+# ── CUDA-Q backend selection ────────────────────────────────────────────
+# "qpp-cpu"       -- local CPU statevector simulator (current behavior)
+# "nvidia"        -- local GPU-accelerated statevector simulator
+# "tensornet"     -- exact tensor-network contraction (still classical,
+#                    different scaling than statevector)
+# "tensornet-mps" -- bond-dimension-truncated MPS simulator (approximate,
+#                    scales further at the cost of exactness)
+# "quantinuum" / "ionq" / etc. -- real QPU hardware. NOT a drop-in: needs
+#                    provider credentials, and GQE's energy evaluation
+#                    likely assumes exact statevector expectation values
+#                    today, so hardware also needs shots + error
+#                    mitigation added to the energy-eval step, not just a
+#                    target swap. See the patch note below for where this
+#                    needs to be read on the external repo's side --
+#                    setting this alone does nothing until that patch is
+#                    applied there.
+GQE_CUDAQ_TARGET = "qpp-cpu"
+
+
+def build_gqe_hydra_overrides():
+    """
+    Turns the GQE_* fields above into a list of Hydra CLI override strings
+    ("key=value"), skipping anything left as None. Keys that already exist
+    in the external repo's own yaml use plain "key=value"; GQE_CUDAQ_TARGET
+    uses Hydra's "+key=value" syntax since cudaq_target isn't a key that
+    repo's config schema knows about yet (see the patch note for train.py).
+    """
+    import json as _json
+
+    def _fmt(v):
+        if isinstance(v, bool):
+            return str(v).lower()
+        if isinstance(v, (list, dict)):
+            return _json.dumps(v)
+        return str(v)
+
+    mapping = {
+        "seed": GQE_SEED,
+        "max_iters": GQE_MAX_ITERS,
+        "num_samples": GQE_NUM_SAMPLES,
+        "batch_size": GQE_BATCH_SIZE,
+        "step_per_epoch": GQE_STEP_PER_EPOCH,
+        "warmup_size": GQE_WARMUP_SIZE,
+        "buffer_size": GQE_BUFFER_SIZE,
+        "load_checkpoint": GQE_LOAD_CHECKPOINT,
+        "checkpoint_every_n_iters": GQE_CHECKPOINT_EVERY_N_ITERS,
+        "optimizer.lr": GQE_OPTIMIZER_LR,
+        "optimizer.cls": GQE_OPTIMIZER_CLS,
+        "optimizer.weight_decay": GQE_OPTIMIZER_WEIGHT_DECAY,
+        "loss.type": GQE_LOSS_TYPE,
+        "loss.clip_grpo_low": GQE_LOSS_CLIP_GRPO_LOW,
+        "loss.clip_grpo_high": GQE_LOSS_CLIP_GRPO_HIGH,
+        "temperature_scheduler.initial": GQE_TEMP_SCHED_INITIAL,
+        "temperature_scheduler.delta": GQE_TEMP_SCHED_DELTA,
+        "temperature_scheduler.target_var": GQE_TEMP_SCHED_TARGET_VAR,
+        "ngates": GQE_NGATES,
+        "reference_keys": GQE_REFERENCE_KEYS,
+        "sampler.mpi": GQE_SAMPLER_MPI,
+        "sampler.shots": GQE_SAMPLER_SHOTS,
+        "operator_pool.spec": GQE_OPERATOR_POOL_SPEC,
+        "operator_pool.ccsd_threshold": GQE_OPERATOR_POOL_CCSD_THRESHOLD,
+        "operator_pool.remove_z_ladder": GQE_OPERATOR_POOL_REMOVE_Z_LADDER,
+        "operator_pool.only_use_first_pauli": GQE_OPERATOR_POOL_ONLY_FIRST_PAULI,
+        "qsci.max_dim": GQE_QSCI_MAX_DIM,
+        "qsci.enlarge_method": GQE_QSCI_ENLARGE_METHOD,
+        "qsci.max_cycle": GQE_QSCI_MAX_CYCLE,
+    }
+    overrides = []
+    for key, val in mapping.items():
+        if val is None:
+            continue
+        overrides.append(f"{key}={_fmt(val)}")
+
+    if GQE_CUDAQ_TARGET is not None:
+        overrides.append(f"+cudaq_target={GQE_CUDAQ_TARGET}")
+
+    return overrides
+
+
+GQE_TRAIN_ARGS = build_gqe_hydra_overrides()
 
 # ═══════════════════════════════════════════════════════════════════════
 # Classical reference methods (classical_methods.py)
