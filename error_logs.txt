@@ -1,1 +1,6 @@
 grep -rn "checkpoint\|resume\|ckpt\|reference_energy" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/configs/*.yaml /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/configs/**/*.yaml
+
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ grep -rn "checkpoint\|resume\|ckpt\|reference_energy" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/configs/*.yaml /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/configs/**/*.yaml
+/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/configs/trainer/default.yaml:8:load_checkpoint: true
+/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/configs/trainer/default.yaml:9:checkpoint_every_n_iters: 10
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
