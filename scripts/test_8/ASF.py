@@ -340,6 +340,26 @@ else:
     final_mo_list = sorted(mo_list[k] for k in selected_k)
     print(f"  Gap detected: {gap_val:.4f} at position {n_final} -> orbitals {final_mo_list}")
 
+    # Phase C can only ever SHRINK ASF's candidate list, and it does so
+    # using MP2 occupation deviations -- a cruder signal than the
+    # entanglement entropy ASF itself used to pick those orbitals. On ScH
+    # that silently dropped MO 13 from ASF's own [10,11,12,13] selection,
+    # and the resulting (2e,3o) CASSCF recovered barely half the
+    # correlation energy of plain CCSD. Discarding orbitals that a better
+    # metric deliberately selected needs to be visible, not silent.
+    dropped = sorted(set(mo_list) - set(final_mo_list))
+    if dropped:
+        warnings.warn(
+            f"Phase C gap detection DISCARDED {len(dropped)} orbital(s) "
+            f"{dropped} that ASF itself selected (ASF chose {sorted(mo_list)}, "
+            f"kept {final_mo_list}). Phase C ranks by MP2 occupation "
+            f"deviation, which is a weaker signal than ASF's entanglement "
+            f"entropy -- so this can shrink a well-chosen active space. If "
+            f"CASSCF on this space underperforms CCSD, that is the likely "
+            f"cause; set FORCE_ACTIVE_SPACE in config.py to override.",
+            RuntimeWarning,
+        )
+
 # Always (re)compute deviation/no_occ in the SAME basis as the mo_coeff
 # that's about to be saved -- required for consistency with mo_list
 # indexing everywhere downstream (corr_strength here, and critically

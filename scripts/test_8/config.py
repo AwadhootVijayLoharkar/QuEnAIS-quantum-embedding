@@ -370,7 +370,37 @@ MAX_EMBED_ORBS = 18
 # small, well-studied molecules (like N2) where hand-verifying the active
 # space beats trusting automatic selection. Leave as None to use ASF's
 # automatic selection (now with the degeneracy fix above).
-FORCE_ACTIVE_SPACE = None   # e.g. [3, 4, 5, 6, 7, 8] for a manual N2 space
+# ScH (4e, 6o): set deliberately, because BOTH the automatic paths gave a
+# demonstrably inadequate active space on this first TM system --
+# confirmed against classical references, which is exactly why we
+# established them first:
+#
+#   CASSCF(2e,3o) recovered only -22.79 kcal/mol vs HF, while plain CCSD
+#   recovered -44.01. Even CASSCF+NEVPT2 (-752.69944) landed 6.6 mHa
+#   ABOVE CCSD(T) (-752.70989). A well-chosen active space should put
+#   CASSCF+NEVPT2 at or below CCSD(T), so that reference could not be
+#   trusted as an answer key.
+#
+# Why the automatic paths failed here:
+#   1. ASF itself selected 4 orbitals [10,11,12,13] (entropies 0.316,
+#      0.166, 0.166, 0.094) -- but only 2 ACTIVE ELECTRONS, treating MO 9
+#      (S=0.055) as inert core. For a 3d transition metal that leaves
+#      most of the interesting correlation outside the active space.
+#   2. Phase C's gap detection then RE-CUT ASF's 4 orbitals down to 3,
+#      dropping MO 13 -- second-guessing ASF's entanglement-entropy
+#      selection using a cruder MP2 occupation-deviation metric. See the
+#      warning now emitted in ASF.py Phase C.
+#
+# This space instead takes every orbital in ASF's own window with entropy
+# >= 0.055, which is a clean break (MO 14: S=0.072 vs MO 15: S=0.023, and
+# MOs 6-8: S=0.009). MOs 9 and 10 are the occupied valence pair, giving
+# 4 active electrons -- matching ScH's actual valence count (Sc 3d(1)4s(2)
+# + H 1s(1)); MOs 0-8 are genuine Sc core (1s2s2p3s3p). MOs 11 and 12 are
+# a degenerate pair (identical S=0.166) and are kept together, which is
+# the same symmetry-preservation concern that motivated GAP_DEGENERACY_TOL.
+#
+# Set back to None once ASF's TM behavior is fixed, and compare.
+FORCE_ACTIVE_SPACE = [9, 10, 11, 12, 13, 14]   # ScH: (4e, 6o)
 
 # "mp2" -- reuse Step 1's MP2 1-RDM (fast, unreliable exactly where static
 #          correlation is strong).
