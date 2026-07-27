@@ -148,10 +148,10 @@ once, per environment.
 Fix:
 ```bash
 source $CONDA_PREFIX/lib/python3.11/site-packages/distributed_interfaces/activate_custom_mpi.sh
-conda env config vars set -p <env_path> LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
-conda env config vars set -p <env_path> MPI_PATH="$CONDA_PREFIX"
+conda env config vars set -p /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/ LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
+conda env config vars set -p /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/ MPI_PATH="$CONDA_PREFIX"
 mamba deactivate
-mamba activate <env_name>
+mamba activate /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/
 ```
 `conda env config vars set` persists these vars for the environment so they
 survive future activations — don't rely on a one-off `export`.
