@@ -1,90 +1,3 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python ASF.py --force
-
-============================================================
-[Step 1] Active Space Finder — ScH
-============================================================
-  Atoms: 2 ['Sc', 'H']  Basis: sto-3g
-  Electrons: 22  AOs: 19
-
--- Phase A: UHF + Classification --
-converged SCF energy = -752.6387024081  <S^2> = 1.7846965e-08  2S+1 = 1
-  UHF energy = -752.63870241 Ha (converged: True)
-  Spin  : 0.0000  contaminated=False
-  Gap   : min=10.1754 eV
-  TM    : True  ->  Tier 3
-
--- Phase B: MP2 Density + ASF --
-  MP2 used: True  E_corr: -0.048987 Ha
-  FORCE_ACTIVE_SPACE is set in config.py -- skipping ASF/DMRG entirely and using orbitals [9, 10, 11, 12, 13, 14] directly (indexed in the UHF alpha-MO basis).
-  Total electrons: 22  Core MOs: 9  Raw active: 4
-  Final active electrons: 4
-
--- Phase D: Loewdin Population --
-
-============================================================
-[Step 1] Summary — ScH
-  Tier: 3  Active space: (4e, 6orb)  Orbitals: [9, 10, 11, 12, 13, 14]
-  Correlation strength: 0.0230
-============================================================
-
-[Step 1] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step1_asf.pkl
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python classical_methods.py 
-[Step 0] Using cached result: /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step0_classical.pkl
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python classical_methods.py --force
- 
-============================================================
-[Step 0] Classical Methods — ScH
-============================================================
-  Basis: sto-3g  Charge: 0  Spin(2S): 0
-  Methods: ['HF', 'MP2', 'CCSD', 'CCSD_T', 'CASSCF', 'NEVPT2']
-  Electrons: 22   AOs: 19
-  Step 1 loaded: (4e, 6orb) active space
-
--- HF --
-  [HF] done in 0.1s
-  RHF energy: -752.63870241 Ha (converged: True)
-
--- MP2 --
-  [MP2] done in 0.0s
-  E_corr: -0.04898715 Ha   MP2 energy: -752.68768955 Ha
-
--- CCSD --
-  [CCSD] done in 0.2s
-  E_corr: -0.07013772 Ha   CCSD energy: -752.70884013 Ha   Converged: True
-
--- CCSD(T) --
-  [CCSD(T)] done in 0.0s
-  (T) correction: -0.00105002 Ha   CCSD(T) energy: -752.70989015 Ha
-
-  Using Step 1 active space: (4e, 6o)
-
--- CASSCF(4e,6o) --
-  [CASSCF(4e,6o)] done in 1.0s
-  CASSCF energy: -752.68067667 Ha   CI energy: -4.57017431 Ha   Converged: True
-
--- NEVPT2 --
-  [NEVPT2] done in 0.1s
-  E_corr(NEVPT2): -0.01837596 Ha   NEVPT2 energy: -752.69905263 Ha
-
-============================================================
-[Step 0] Results — ScH / sto-3g
-============================================================
-
-  Method            Energy (Ha)     vs HF (Ha)   vs HF (kcal/mol)
-  --------------------------------------------------------------
-  HF              -752.63870241      +0.000000              +0.00
-  MP2             -752.68768955      -0.048987             -30.74
-  CCSD            -752.70884013      -0.070138             -44.01
-  CCSD_T          -752.70989015      -0.071188             -44.67
-  CASSCF          -752.68067667      -0.041974             -26.34
-  NEVPT2          -752.69905263      -0.060350             -37.87
-
-  Total time: 2.1s
-============================================================
-
-[Step 0] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step0_classical.pkl
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
-
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python DMET.py --force
 
 ============================================================
@@ -106,14 +19,14 @@ converged SCF energy = -752.6387024081  <S^2> = 1.7846965e-08  2S+1 = 1
   [diag] mo_coeff.T @ mo_coeff vs I (already-orthonormal/Lowdin-basis convention): 3.34e+00
   [diag] whichever of the two lines above is near zero (~1e-10) tells us which basis convention mo_coeff is actually in.
   [diag] Schmidt singular values (all 6, before bath-count selection): [0.006149 0.006149 0.00361  0.001029 0.000392 0.      ]
-  [diag] max |Q_imp.T @ U_env[:, :n_imp]| (should be ~1e-10 if the first n_imp SVD vectors are genuinely orthogonal to Q_imp): 1.97e-02
+  [diag] max |Q_imp.T @ Q_bath| over the 5 bath orbital(s) actually kept (should be ~1e-10): 1.26e-11
   Impurity: 6  Bath: 5  Total emb: 11 -> 22 qubits
   sv2 coverage: 1.0000
   [diag] C_emb orthonormality error (C_emb.T @ S @ C_emb vs I): 1.26e-11  (should be ~1e-10 or smaller)
   [diag] embedding-space electron count from reference density: alpha=4.008818 -> 4, beta=4.008818 -> 4  (old nel-based value was alpha=2, beta=2)
 
 -- Phase D: Core Mean-Field Potential --
-  [diag] core density electron count: 14.000438  (expect ~= mol.nelectron - active nel = 18)
+  [diag] core density electron count: 14.000438  (expect ~= mol.nelectron - embedding electrons = 22 - 8 = 14)
 
 -- Phase E: Integral Transformation --
   [diag] h1e_emb eigenvalues (Ha, before mu): [-6.471 -5.366 -2.725 -2.401 -2.401 -2.4   -2.254 -2.254 -2.252 -2.227
@@ -129,4 +42,12 @@ converged SCF energy = -752.6387024081  <S^2> = 1.7846965e-08  2S+1 = 1
   h1e shape: (11, 11)  h2e shape: (11, 11, 11, 11)  Time: 0.0s
 
 [Step 2] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step2_hamiltonian.pkl
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python gqe_for_qsci.py 
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+Embedding: 11 orbitals, nelec=(4, 4), spin=0
+Embedding-space HF (real SCF, independent check) = -752.63870254 Ha
+  vs full-molecule UHF energy = -752.63870241 Ha   (diff = -0.0000 Ha)
+CASCI (this embedding) = -752.69952418 Ha
+[Consistency check] mismatch_score=0.0024 (threshold=0.1)  flagged=False
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
