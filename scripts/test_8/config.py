@@ -430,13 +430,19 @@ QUANTUM_SOLVER   = "gqe_qsci"
 FERMION_TO_QUBIT = "jw"
 
 # ── GQE-for-QSCI training hyperparameters ───────────────────────────────
-# These map 1:1 onto keys in the external gqe-for-qsci repo's own Hydra
+# These map onto keys in the external gqe-for-qsci repo's own Hydra
 # configs (configs/default.yaml + configs/trainer/default.yaml). Edit the
 # values here instead of hand-editing those yaml files -- run_gqe_training.py
 # forwards whichever ones you set (anything left as None is skipped, so
 # the external repo's own yaml default applies unchanged). This only
 # controls the external repo's config; it does NOT touch anything in
 # ASF.py/DMET.py/gqe_for_qsci.py.
+#
+# The GQE_* names below are deliberately flat for readability; the
+# trainer-group ones get their required "trainer." Hydra prefix added
+# automatically in build_gqe_hydra_overrides() -- see the prefix note
+# there. Do NOT pass bare `load_checkpoint=false` on the command line;
+# Hydra rejects it with "Key 'load_checkpoint' is not in struct".
 GQE_SEED                     = None   # int, e.g. 32
 GQE_MAX_ITERS                = None   # int -- number of training epochs (what
                                        # you changed by hand in defaults.yaml
@@ -525,29 +531,47 @@ def build_gqe_hydra_overrides():
     def _fmt(v):
         if isinstance(v, bool):
             return str(v).lower()
-        if isinstance(v, (list, dict)):
+        if isinstance(v, (list, tuple)):
+            # Hydra list syntax is [a,b] -- NOT JSON. json.dumps would emit
+            # ["a", "b"] (double quotes + spaces), which Hydra's override
+            # grammar rejects.
+            return "[" + ",".join(str(x) for x in v) + "]"
+        if isinstance(v, dict):
             return _json.dumps(v)
         return str(v)
 
+    # KEY PREFIXES MATTER. This repo splits its config across two files,
+    # and Hydra addresses each by its config-GROUP path, not by a flat
+    # name:
+    #   configs/trainer/default.yaml -> needs a "trainer." prefix
+    #       (seed, max_iters, num_samples, batch_size, step_per_epoch,
+    #        warmup_size, buffer_size, load_checkpoint,
+    #        checkpoint_every_n_iters, optimizer.*, loss.*,
+    #        temperature_scheduler.*)
+    #   configs/default.yaml         -> genuinely top-level, no prefix
+    #       (ngates, reference_keys, sampler.*, operator_pool.*, qsci.*)
+    # Getting this wrong fails loudly and harmlessly -- Hydra refuses with
+    # "Key 'X' is not in struct" rather than silently ignoring the
+    # override -- which is the good kind of failure.
     mapping = {
-        "seed": GQE_SEED,
-        "max_iters": GQE_MAX_ITERS,
-        "num_samples": GQE_NUM_SAMPLES,
-        "batch_size": GQE_BATCH_SIZE,
-        "step_per_epoch": GQE_STEP_PER_EPOCH,
-        "warmup_size": GQE_WARMUP_SIZE,
-        "buffer_size": GQE_BUFFER_SIZE,
-        "load_checkpoint": GQE_LOAD_CHECKPOINT,
-        "checkpoint_every_n_iters": GQE_CHECKPOINT_EVERY_N_ITERS,
-        "optimizer.lr": GQE_OPTIMIZER_LR,
-        "optimizer.cls": GQE_OPTIMIZER_CLS,
-        "optimizer.weight_decay": GQE_OPTIMIZER_WEIGHT_DECAY,
-        "loss.type": GQE_LOSS_TYPE,
-        "loss.clip_grpo_low": GQE_LOSS_CLIP_GRPO_LOW,
-        "loss.clip_grpo_high": GQE_LOSS_CLIP_GRPO_HIGH,
-        "temperature_scheduler.initial": GQE_TEMP_SCHED_INITIAL,
-        "temperature_scheduler.delta": GQE_TEMP_SCHED_DELTA,
-        "temperature_scheduler.target_var": GQE_TEMP_SCHED_TARGET_VAR,
+        "trainer.seed": GQE_SEED,
+        "trainer.max_iters": GQE_MAX_ITERS,
+        "trainer.num_samples": GQE_NUM_SAMPLES,
+        "trainer.batch_size": GQE_BATCH_SIZE,
+        "trainer.step_per_epoch": GQE_STEP_PER_EPOCH,
+        "trainer.warmup_size": GQE_WARMUP_SIZE,
+        "trainer.buffer_size": GQE_BUFFER_SIZE,
+        "trainer.load_checkpoint": GQE_LOAD_CHECKPOINT,
+        "trainer.checkpoint_every_n_iters": GQE_CHECKPOINT_EVERY_N_ITERS,
+        "trainer.optimizer.lr": GQE_OPTIMIZER_LR,
+        "trainer.optimizer.cls": GQE_OPTIMIZER_CLS,
+        "trainer.optimizer.weight_decay": GQE_OPTIMIZER_WEIGHT_DECAY,
+        "trainer.loss.type": GQE_LOSS_TYPE,
+        "trainer.loss.clip_grpo_low": GQE_LOSS_CLIP_GRPO_LOW,
+        "trainer.loss.clip_grpo_high": GQE_LOSS_CLIP_GRPO_HIGH,
+        "trainer.temperature_scheduler.initial": GQE_TEMP_SCHED_INITIAL,
+        "trainer.temperature_scheduler.delta": GQE_TEMP_SCHED_DELTA,
+        "trainer.temperature_scheduler.target_var": GQE_TEMP_SCHED_TARGET_VAR,
         "ngates": GQE_NGATES,
         "reference_keys": GQE_REFERENCE_KEYS,
         "sampler.mpi": GQE_SAMPLER_MPI,
