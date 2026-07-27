@@ -34,7 +34,7 @@ if config.cached_result_is_current(config.STEP0_FILE) and not args.force:
     sys.exit(0)
 
 from pyscf import gto, scf, mp, cc, mcscf
-from pyscf.mrpt import nevpt2 as pyscf_nevpt2
+from pyscf import mrpt
 
 print(f"\n{'='*60}\n[Step 0] Classical Methods — {config.MOLECULE}\n{'='*60}")
 print(f"  Basis: {config.BASIS}  Charge: {config.CHARGE}  Spin(2S): {config.SPIN}")
@@ -150,13 +150,43 @@ def _run_casscf(mol, mf, nel, norb, mo_guess=None):
 
 
 def _run_nevpt2(mc):
+    """
+    FIX: this used to call pyscf.mrpt.nevpt2.NEVPT2(mc) -- that class does
+    not exist. PySCF names the strongly-contracted NEVPT2 solver class
+    `NEVPT` (exported as pyscf.mrpt.NEVPT); "NEVPT2" is only the method's
+    name in the literature, not the class name. The result was a silent
+    "NEVPT2 FAILED" in the results table with the real cause (an
+    AttributeError) hidden in a stderr warning -- a wrong API name, not a
+    convergence or memory problem.
+
+    Also warns loudly if CASSCF didn't converge: NEVPT2 is a perturbative
+    correction built ON TOP of the CASSCF reference, so a poorly-converged
+    CASSCF makes the NEVPT2 number untrustworthy rather than obviously
+    broken -- which matters here, because this energy is meant to be the
+    ANSWER KEY the whole TM validation rests on.
+    """
     print(f"\n-- NEVPT2 --")
     if mc is None:
         print("  Skipped -- CASSCF not available.")
         return None
+    if not getattr(mc, "converged", True):
+        warnings.warn(
+            "Running NEVPT2 on a CASSCF reference that did NOT converge. "
+            "Treat the resulting energy as unreliable -- it is not a valid "
+            "answer key for validating the DMET/GQE pipeline.", RuntimeWarning,
+        )
     try:
+        solver_cls = getattr(mrpt, "NEVPT", None)
+        if solver_cls is None:  # very old/exotic pyscf layouts
+            from pyscf.mrpt import nevpt2 as _nevpt2_mod
+            solver_cls = getattr(_nevpt2_mod, "NEVPT", None)
+        if solver_cls is None:
+            raise AttributeError(
+                "Could not find pyscf's NEVPT solver class (tried "
+                "pyscf.mrpt.NEVPT and pyscf.mrpt.nevpt2.NEVPT)."
+            )
         with _timer("NEVPT2"):
-            e_nevpt2 = pyscf_nevpt2.NEVPT2(mc).kernel()
+            e_nevpt2 = solver_cls(mc).kernel()
         e_total = float(mc.e_tot + e_nevpt2)
         print(f"  E_corr(NEVPT2): {e_nevpt2:.8f} Ha   NEVPT2 energy: {e_total:.8f} Ha")
         return e_total
