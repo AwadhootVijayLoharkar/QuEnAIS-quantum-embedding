@@ -187,11 +187,6 @@ F = P_env @ dm_lo @ Q_imp
 U_env, sv, _ = np.linalg.svd(F, full_matrices=True)
 print(f"  [diag] Schmidt singular values (all {len(sv)}, before bath-count "
       f"selection): {np.array2string(sv, precision=6, suppress_small=True)}")
-_Uimp_overlap = float(np.max(np.abs(Q_imp.T @ U_env[:, :n_imp])))
-print(f"  [diag] max |Q_imp.T @ U_env[:, :n_imp]| (should be ~1e-10 if the "
-      f"first n_imp SVD vectors are genuinely orthogonal to Q_imp): "
-      f"{_Uimp_overlap:.2e}")
-
 n_bath, sv_gap, sv2_cov = adaptive_bath(sv, n_imp, config.MAX_EMBED_ORBS, config.BATH_TOLERANCE)
 if n_bath < config.MIN_BATH_ORBS:
     warnings.warn(f"Only {n_bath} bath orbital(s) found.", RuntimeWarning)
@@ -199,6 +194,16 @@ if n_bath < config.MIN_BATH_ORBS:
 if n_bath > 0:
     Q_bath = U_env[:, :n_bath]
     Q_emb = np.hstack([Q_imp, Q_bath])
+    # Check ONLY the bath vectors actually kept. The old version checked
+    # U_env[:, :n_imp] -- i.e. n_imp columns regardless of how many were
+    # used as bath. On ScH that reported 1.97e-02 and looked like a
+    # failure, but the 6th column had singular value exactly 0.0, so its
+    # direction is numerically arbitrary and free to overlap Q_imp; it
+    # was discarded anyway (n_bath=5 < n_imp=6). Checking unused,
+    # numerically meaningless vectors manufactures false alarms.
+    _bath_overlap = float(np.max(np.abs(Q_imp.T @ Q_bath)))
+    print(f"  [diag] max |Q_imp.T @ Q_bath| over the {n_bath} bath orbital(s) "
+          f"actually kept (should be ~1e-10): {_bath_overlap:.2e}")
 else:
     Q_emb = Q_imp.copy()
 
@@ -244,9 +249,18 @@ dm_core_alpha = 0.5 * (dm_core_alpha + dm_core_alpha.T)
 dm_core_beta  = 0.5 * (dm_core_beta  + dm_core_beta.T)
 
 n_core_elec = float(np.trace(dm_core_alpha @ S) + np.trace(dm_core_beta @ S))
-n_emb_elec_expected = nel  # active-space electron count from Step 1
+# FIX: this used to expect mol.nelectron - nel, where nel is Step 1's
+# ACTIVE-SPACE electron count. That's only right when n_bath=0. With bath
+# orbitals the embedding holds n_alpha+n_beta electrons (>= nel), so the
+# core holds mol.nelectron - (n_alpha+n_beta). On ScH the old message
+# claimed "expect 18" while printing 14.000438 -- which looked like a
+# 4-electron error but was in fact exactly right (22 - 8 = 14). Same
+# stale-printout class of bug as the old nel-based n_alpha/n_beta.
+n_emb_elec_expected = n_alpha + n_beta
 print(f"  [diag] core density electron count: {n_core_elec:.6f}  "
-      f"(expect ~= mol.nelectron - active nel = {mol.nelectron - n_emb_elec_expected})")
+      f"(expect ~= mol.nelectron - embedding electrons = "
+      f"{mol.nelectron} - {n_emb_elec_expected} = "
+      f"{mol.nelectron - n_emb_elec_expected})")
 
 vj_a, vk_a = pyscf_hf.get_jk(mol, dm_core_alpha, hermi=1)
 vj_b, vk_b = pyscf_hf.get_jk(mol, dm_core_beta,  hermi=1)
