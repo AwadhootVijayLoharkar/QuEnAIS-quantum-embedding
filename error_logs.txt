@@ -1,4 +1,4 @@
-cd /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ cd /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8
 python -c "
 import numpy as np, config, gqe_for_qsci as g
 mol = g.load_from_dmet_pickle(config.STEP2_FILE)
@@ -11,3 +11,11 @@ pool = g.DMETPauliEvolutionPool(mol, params=None, threshold=1e-6,
                                 remove_z_ladder=True, only_use_first_pauli=True)
 print('operator pool size =', pool.get_vocab_size())
 "
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+embedding HF   = -752.6387025357575
+embedding CCSD = -752.6986785985956
+t1 max|amp| = 0.018323455151474502
+t2 max|amp| = 0.18545367138469057
+operator pool size = 369
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
