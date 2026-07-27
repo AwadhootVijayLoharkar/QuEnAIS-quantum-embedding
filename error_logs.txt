@@ -1,1 +1,53 @@
-grep -rn "set_target\|cudaq_target" /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/train.py /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/factory.py 2>/dev/null
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python classical_methods.py --force
+
+============================================================
+[Step 0] Classical Methods — ScH
+============================================================
+  Basis: sto-3g  Charge: 0  Spin(2S): 0
+  Methods: ['HF', 'MP2', 'CCSD', 'CCSD_T', 'CASSCF', 'NEVPT2']
+  Electrons: 22   AOs: 19
+  Step 1 loaded: (2e, 3orb) active space
+
+-- HF --
+  [HF] done in 0.1s
+  RHF energy: -752.63870241 Ha (converged: True)
+
+-- MP2 --
+  [MP2] done in 0.0s
+  E_corr: -0.04898715 Ha   MP2 energy: -752.68768955 Ha
+
+-- CCSD --
+  [CCSD] done in 0.2s
+  E_corr: -0.07013772 Ha   CCSD energy: -752.70884013 Ha   Converged: True
+
+-- CCSD(T) --
+  [CCSD(T)] done in 0.0s
+  (T) correction: -0.00105002 Ha   CCSD(T) energy: -752.70989015 Ha
+
+  Using Step 1 active space: (2e, 3o)
+
+-- CASSCF(2e,3o) --
+  [CASSCF(2e,3o)] done in 0.3s
+  CASSCF energy: -752.67502543 Ha   CI energy: -0.68037155 Ha   Converged: True
+
+-- NEVPT2 --
+  [NEVPT2] done in 0.0s
+  E_corr(NEVPT2): -0.02441138 Ha   NEVPT2 energy: -752.69943681 Ha
+
+============================================================
+[Step 0] Results — ScH / sto-3g
+============================================================
+
+  Method            Energy (Ha)     vs HF (Ha)   vs HF (kcal/mol)
+  --------------------------------------------------------------
+  HF              -752.63870241      +0.000000              +0.00
+  MP2             -752.68768955      -0.048987             -30.74
+  CCSD            -752.70884013      -0.070138             -44.01
+  CCSD_T          -752.70989015      -0.071188             -44.67
+  CASSCF          -752.67502543      -0.036323             -22.79
+  NEVPT2          -752.69943681      -0.060734             -38.11
+
+  Total time: 1.2s
+============================================================
+
+[Step 0] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step0_classical.pkl
