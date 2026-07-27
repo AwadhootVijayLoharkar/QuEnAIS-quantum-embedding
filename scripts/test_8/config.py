@@ -521,7 +521,21 @@ GQE_SAMPLER_SHOTS            = None   # int -- shots per circuit; only matters
 # remove_z_ladder / only_use_first_pauli options below.
 GQE_OPERATOR_POOL_SPEC             = "dmet_pauli_evolution"
 GQE_OPERATOR_POOL_CCSD_THRESHOLD   = None  # float
-GQE_OPERATOR_POOL_REMOVE_Z_LADDER  = None  # bool
+# Set False (repo default is True) because the ScH run showed direct
+# evidence of broken particle-number conservation: the epoch log reported
+# 12 sampled basis states but only 8 symmetry-preserving -- a third of
+# every sample discarded. The Jordan-Wigner Z-ladder encodes fermionic
+# anticommutation; removing it makes exp(i*theta*P) no longer a
+# particle-number-conserving excitation, so sampled states leak into the
+# wrong electron-number sector. Consistent with GQE stalling at exactly
+# the HF energy (-752.63874 vs HF -752.63870) while recovering none of
+# the 60.8 mHa of correlation that the embedding's own CCSD finds.
+#
+# Keeping the ladder makes each circuit deeper (more gates per operator),
+# so expect slower epochs. If this fixes the symmetry ratio but
+# convergence is still poor, the next lever is
+# GQE_OPERATOR_POOL_ONLY_FIRST_PAULI below.
+GQE_OPERATOR_POOL_REMOVE_Z_LADDER  = False
 GQE_OPERATOR_POOL_ONLY_FIRST_PAULI = None  # bool
 
 GQE_QSCI_MAX_DIM              = None  # int -- max QSCI subspace dimension
