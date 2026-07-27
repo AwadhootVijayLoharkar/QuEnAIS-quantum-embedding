@@ -1,10 +1,10 @@
-cd /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ cd /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci
 
 # 1. Does the molecule itself load, and what are its attributes?
 python -c "
 import traceback, dmet_molecule_adapter as a
 try:
-    m = a.load_from_dmet_pickle('/home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step2_hamiltonian.pkl')
+    m = a.load_from_dmet_pickle('/home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step2_hamiltonian.pkl') 
     print('loaded OK  norb=', m.norb, ' nelec=', m.nelec)
     for attr in ('geometry','basis','active_indices','n_orbitals','n_electrons'):
         print(f'  {attr} =', getattr(m, attr, '<missing>'))
@@ -14,3 +14,30 @@ except Exception:
 
 # 2. Who consumes those attributes?
 grep -rn "\.geometry\|\.basis\b\|active_indices" *.py gqe_qsci/ | head -40
+loaded OK  norb= 11  nelec= (4, 4)
+  geometry = None
+  basis = None
+  active_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  n_orbitals = <missing>
+  n_electrons = <missing>
+grep: gqe_qsci/__pycache__/molecule.cpython-311.pyc: binary file matches
+dmet_molecule_adapter.py:57:      .geometry, .basis, .active_indices   (kept for compatibility -- see
+dmet_molecule_adapter.py:61:    `.geometry`/`.basis`/`.active_indices` are kept only so code that
+dmet_molecule_adapter.py:92:        # geometry/basis/active_indices kept only for interface
+dmet_molecule_adapter.py:94:        self.geometry = None
+dmet_molecule_adapter.py:95:        self.basis = None
+dmet_molecule_adapter.py:96:        self.active_indices = list(range(n_emb))
+grep: gqe_qsci/gqe/__pycache__/operator_pool.cpython-311.pyc: binary file matches
+gqe_qsci/gqe/operator_pool.py:97:        geometry_lines = [f"{atom_type} {coords[0]} {coords[1]} {coords[2]}" for atom_type, coords in self.molecule.geometry]
+gqe_qsci/gqe/operator_pool.py:100:            geometry=geometry_str, basis_set=self.molecule.basis, active_orbitals=self.molecule.active_indices, transformation="jordan-wigner"
+gqe_qsci/molecule.py:20:    self.geometry = self._build_geometry(geometry)
+gqe_qsci/molecule.py:21:    self.basis = basis
+gqe_qsci/molecule.py:29:    self.mol = gto.M(atom=self.geometry, basis=basis, charge=charge, spin=spin, unit='Angstrom')
+gqe_qsci/molecule.py:33:    self.active_indices = self._get_active_indices()
+gqe_qsci/molecule.py:55:      return geometry.geometry
+gqe_qsci/molecule.py:59:  def _get_active_indices(self):
+gqe_qsci/molecule.py:61:    active_indices = list(range(ncore, ncore + self.norb))
+gqe_qsci/molecule.py:62:    assert int(sum(self.hf.mo_occ[active_indices])) == sum(self.nelec), "Electron count in active indices does not match nelec."
+gqe_qsci/molecule.py:63:    return active_indices
+gqe_qsci/molecule.py:96:    active_set = set(self.active_indices)
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:gqe-for-qsci]$ 
