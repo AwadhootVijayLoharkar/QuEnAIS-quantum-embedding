@@ -1,4 +1,4 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python run_gqe_training.py 
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ HYDRA_FULL_ERROR=1 python run_gqe_training.py 2>&1 | tail -40
 [run_gqe_training] cwd=/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci
 [run_gqe_training] cmd=/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/bin/python /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/train.py molecule=dmet_embedding trainer.load_checkpoint=false
 [run_gqe_training] logging to /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/gqe_train.log
@@ -6,17 +6,17 @@
 /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   import pkg_resources
 wandb: WARNING The anonymous setting has no effect and will be removed in a future version.
-wandb: WARNING `resume` will be ignored since W&B syncing is set to `offline`. Starting a new run with run id 1vmqrv4o.
+wandb: WARNING `resume` will be ignored since W&B syncing is set to `offline`. Starting a new run with run id 4dya8mv4.
 wandb: Tracking run with wandb version 0.28.0
 wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
-wandb: Run data is saved locally in outputs/gqe-for-qsci/default-2026-07-27-18-02-13/wandb/offline-run-20260727_180214-1vmqrv4o
+wandb: Run data is saved locally in outputs/gqe-for-qsci/default-2026-07-27-18-06-30/wandb/offline-run-20260727_180630-4dya8mv4
 wandb: View this run in the terminal with `wandb leet`
 TypeError: 'NoneType' object is not iterable
 Error executing job with overrides: ['molecule=dmet_embedding', 'trainer.load_checkpoint=false']
 TypeError: 'NoneType' object is not iterable
 wandb: 
 wandb: You can sync this run to the cloud by running:
-wandb: wandb sync outputs/gqe-for-qsci/default-2026-07-27-18-02-13/wandb/offline-run-20260727_180214-1vmqrv4o
+wandb: wandb sync outputs/gqe-for-qsci/default-2026-07-27-18-06-30/wandb/offline-run-20260727_180630-4dya8mv4
 
 [run_gqe_training] train.py exited with code 1
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
