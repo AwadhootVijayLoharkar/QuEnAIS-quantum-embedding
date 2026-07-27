@@ -84,3 +84,49 @@ converged SCF energy = -752.6387024081  <S^2> = 1.7846965e-08  2S+1 = 1
 
 [Step 0] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step0_classical.pkl
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
+
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python DMET.py --force
+
+============================================================
+[Step 2] DMET Embedding — ScH
+============================================================
+  Active space (Step 1): (4e, 6orb) MOs=[9, 10, 11, 12, 13, 14]
+  DMET_REFERENCE: casci   MU_CORRECTION: True
+
+-- Phase A: Restore UHF from Step 1 --
+  UHF energy = -752.63870241 Ha (restored, no recomputation)
+
+-- Phase B: Reference Density (casci) --
+  [diag] MP2 density active<->non-active cross-coupling (alpha): max|.|=3.04e-03, (beta): max|.|=3.04e-03  (if these are ~0, mo_coeff is diagonalizing this density on its own -- an architectural mismatch, not a bug)
+  {'method': 'casci', 'e_cas': -2.812989739513897, 'n_active': 6, 'nel_active': 4}
+  [diag] reference density electron count: 22.018073  (should equal mol.nelectron = 22)
+
+-- Phase C: Schmidt Decomposition --
+  [diag] mo_coeff.T @ S @ mo_coeff vs I (raw-AO-basis convention, expected by the rest of this code): 2.33e-15
+  [diag] mo_coeff.T @ mo_coeff vs I (already-orthonormal/Lowdin-basis convention): 3.34e+00
+  [diag] whichever of the two lines above is near zero (~1e-10) tells us which basis convention mo_coeff is actually in.
+  [diag] Schmidt singular values (all 6, before bath-count selection): [0.006149 0.006149 0.00361  0.001029 0.000392 0.      ]
+  [diag] max |Q_imp.T @ U_env[:, :n_imp]| (should be ~1e-10 if the first n_imp SVD vectors are genuinely orthogonal to Q_imp): 1.97e-02
+  Impurity: 6  Bath: 5  Total emb: 11 -> 22 qubits
+  sv2 coverage: 1.0000
+  [diag] C_emb orthonormality error (C_emb.T @ S @ C_emb vs I): 1.26e-11  (should be ~1e-10 or smaller)
+  [diag] embedding-space electron count from reference density: alpha=4.008818 -> 4, beta=4.008818 -> 4  (old nel-based value was alpha=2, beta=2)
+
+-- Phase D: Core Mean-Field Potential --
+  [diag] core density electron count: 14.000438  (expect ~= mol.nelectron - active nel = 18)
+
+-- Phase E: Integral Transformation --
+  [diag] h1e_emb eigenvalues (Ha, before mu): [-6.471 -5.366 -2.725 -2.401 -2.401 -2.4   -2.254 -2.254 -2.252 -2.227
+ -1.999]
+  [diag] for comparison, full UHF valence orbital energies (Ha): [-164.235  -18.925  -15.676  -15.676  -15.674   -2.626   -1.643   -1.643
+   -1.641   -0.339   -0.153    0.221    0.221    0.23     0.235    0.235
+    0.252    0.252    0.829]
+  ecore (self-consistent) = -730.80461969 Ha   [check OK, delta=0.00e+00]
+
+-- Phase F: Chemical Potential Correction --
+  mu = -2.400772 Ha   ecore corrected -> -750.01079611 Ha
+
+  h1e shape: (11, 11)  h2e shape: (11, 11, 11, 11)  Time: 0.0s
+
+[Step 2] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step2_hamiltonian.pkl
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
