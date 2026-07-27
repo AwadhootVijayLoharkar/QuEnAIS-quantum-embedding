@@ -1,12 +1,44 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python classical_methods.py --force
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python ASF.py --force
 
+============================================================
+[Step 1] Active Space Finder — ScH
+============================================================
+  Atoms: 2 ['Sc', 'H']  Basis: sto-3g
+  Electrons: 22  AOs: 19
+
+-- Phase A: UHF + Classification --
+converged SCF energy = -752.6387024081  <S^2> = 1.7846965e-08  2S+1 = 1
+  UHF energy = -752.63870241 Ha (converged: True)
+  Spin  : 0.0000  contaminated=False
+  Gap   : min=10.1754 eV
+  TM    : True  ->  Tier 3
+
+-- Phase B: MP2 Density + ASF --
+  MP2 used: True  E_corr: -0.048987 Ha
+  FORCE_ACTIVE_SPACE is set in config.py -- skipping ASF/DMRG entirely and using orbitals [9, 10, 11, 12, 13, 14] directly (indexed in the UHF alpha-MO basis).
+  Total electrons: 22  Core MOs: 9  Raw active: 4
+  Final active electrons: 4
+
+-- Phase D: Loewdin Population --
+
+============================================================
+[Step 1] Summary — ScH
+  Tier: 3  Active space: (4e, 6orb)  Orbitals: [9, 10, 11, 12, 13, 14]
+  Correlation strength: 0.0230
+============================================================
+
+[Step 1] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step1_asf.pkl
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python classical_methods.py 
+[Step 0] Using cached result: /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step0_classical.pkl
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python classical_methods.py --force
+ 
 ============================================================
 [Step 0] Classical Methods — ScH
 ============================================================
   Basis: sto-3g  Charge: 0  Spin(2S): 0
   Methods: ['HF', 'MP2', 'CCSD', 'CCSD_T', 'CASSCF', 'NEVPT2']
   Electrons: 22   AOs: 19
-  Step 1 loaded: (2e, 3orb) active space
+  Step 1 loaded: (4e, 6orb) active space
 
 -- HF --
   [HF] done in 0.1s
@@ -24,15 +56,15 @@
   [CCSD(T)] done in 0.0s
   (T) correction: -0.00105002 Ha   CCSD(T) energy: -752.70989015 Ha
 
-  Using Step 1 active space: (2e, 3o)
+  Using Step 1 active space: (4e, 6o)
 
--- CASSCF(2e,3o) --
-  [CASSCF(2e,3o)] done in 0.3s
-  CASSCF energy: -752.67502543 Ha   CI energy: -0.68037155 Ha   Converged: True
+-- CASSCF(4e,6o) --
+  [CASSCF(4e,6o)] done in 1.0s
+  CASSCF energy: -752.68067667 Ha   CI energy: -4.57017431 Ha   Converged: True
 
 -- NEVPT2 --
-  [NEVPT2] done in 0.0s
-  E_corr(NEVPT2): -0.02441138 Ha   NEVPT2 energy: -752.69943681 Ha
+  [NEVPT2] done in 0.1s
+  E_corr(NEVPT2): -0.01837596 Ha   NEVPT2 energy: -752.69905263 Ha
 
 ============================================================
 [Step 0] Results — ScH / sto-3g
@@ -44,84 +76,11 @@
   MP2             -752.68768955      -0.048987             -30.74
   CCSD            -752.70884013      -0.070138             -44.01
   CCSD_T          -752.70989015      -0.071188             -44.67
-  CASSCF          -752.67502543      -0.036323             -22.79
-  NEVPT2          -752.69943681      -0.060734             -38.11
+  CASSCF          -752.68067667      -0.041974             -26.34
+  NEVPT2          -752.69905263      -0.060350             -37.87
 
-  Total time: 1.2s
+  Total time: 2.1s
 ============================================================
 
 [Step 0] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step0_classical.pkl
-
-
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ python ASF.py --force
-
-============================================================
-[Step 1] Active Space Finder — ScH
-============================================================
-  Atoms: 2 ['Sc', 'H']  Basis: sto-3g
-  Electrons: 22  AOs: 19
-
--- Phase A: UHF + Classification --
-converged SCF energy = -752.6387024081  <S^2> = 1.7846956e-08  2S+1 = 1
-  UHF energy = -752.63870241 Ha (converged: True)
-  Spin  : 0.0000  contaminated=False
-  Gap   : min=10.1754 eV
-  TM    : True  ->  Tier 3
-
--- Phase B: MP2 Density + ASF --
-  MP2 used: True  E_corr: -0.048987 Ha
-  ASF (Tier 3): entropy_threshold=0.005, max_norb=16, min_norb=4
-
---------------------------------------------------------------------------------
-Calculating MP2 natural orbitals
---------------------------------------------------------------------------------
-
-
--> Selected initial orbital window of 10 electrons in 10 MP2 natural orbitals.
-
---------------------------------------------------------------------------------
-Running calculation
---------------------------------------------------------------------------------
-
-spin = 0, number of roots = 1
-total number of roots calculated = 1
-
-CASCI E = -752.697360462137  E(CI) = -32.2514147816038  S^2 = 0.0000000
-
-Orbital selection for state 0:
-
- MO    w( )    w(↑)    w(↓)    w(⇅)       S  sel
-  6   0.000   0.000   0.000   0.999   0.009     
-  7   0.000   0.000   0.000   0.999   0.009     
-  8   0.000   0.000   0.000   0.999   0.009     
-  9   0.007   0.001   0.001   0.991   0.055     
- 10   0.087   0.001   0.001   0.910   0.316    a
- 11   0.962   0.000   0.000   0.037   0.166    a
- 12   0.962   0.000   0.000   0.037   0.166    a
- 13   0.985   0.003   0.003   0.009   0.094    a
- 14   0.989   0.003   0.003   0.005   0.072     
- 15   0.997   0.000   0.000   0.002   0.023     
-
-
---------------------------------------------------------------------------------
-Active space selection finished
---------------------------------------------------------------------------------
-
--> Selected an active space of 2 electrons in 4 orbitals.
-  ASF candidates: 4 orbitals -> [10, 11, 12, 13]
-
--- Phase C: Gap Detection --
-  Gap detected: 0.0153 at position 3 -> orbitals [10, 11, 12]
-  Total electrons: 22  Core MOs: 10  Raw active: 2
-  Final active electrons: 2
-
--- Phase D: Loewdin Population --
-
-============================================================
-[Step 1] Summary — ScH
-  Tier: 3  Active space: (2e, 3orb)  Orbitals: [10, 11, 12]
-  Correlation strength: 0.0388
-============================================================
-
-[Step 1] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step1_asf.pkl
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
