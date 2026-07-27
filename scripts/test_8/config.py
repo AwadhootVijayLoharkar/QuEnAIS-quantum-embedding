@@ -443,6 +443,28 @@ FERMION_TO_QUBIT = "jw"
 # automatically in build_gqe_hydra_overrides() -- see the prefix note
 # there. Do NOT pass bare `load_checkpoint=false` on the command line;
 # Hydra rejects it with "Key 'load_checkpoint' is not in struct".
+# WHICH MOLECULE CONFIG train.py LOADS. This is a Hydra config-GROUP
+# selection (configs/molecule/<name>.yaml), not a scalar value.
+#
+# CRITICAL -- this was silently wrong for every run before it was added.
+# configs/default.yaml declares:
+#     defaults:
+#       - molecule: n2
+# so unless something overrides it, train.py loads configs/molecule/n2.yaml
+# and NEVER reads dmet_embedding.yaml (the one pointing at
+# results/step2_hamiltonian.pkl). Proof it was happening: the LiH and ScH
+# runs produced near-identical epoch logs (cx_count=52, total_gates=166,
+# num_sampled_basis=25, energies matching to 5 decimals) with absolute
+# energies around -107 Ha -- N2's energy scale, not LiH's (-7.9) or ScH's
+# (-752). GQE was training on N2 the entire time.
+#
+# That also silently corrupted the reported "DMET+GQE" energy:
+# visualization.py builds it as (true embedding CASCI) + (GQE's
+# best_so_far error vs its OWN R-CASCI reference). With the wrong molecule
+# loaded, that adds N2's convergence error to your molecule's CASCI --
+# producing a plausible-looking number with no physical meaning.
+GQE_MOLECULE_CONFIG          = "dmet_embedding"   # configs/molecule/<this>.yaml
+
 GQE_SEED                     = None   # int, e.g. 32
 GQE_MAX_ITERS                = None   # int -- number of training epochs (what
                                        # you changed by hand in defaults.yaml
@@ -554,6 +576,10 @@ def build_gqe_hydra_overrides():
     # "Key 'X' is not in struct" rather than silently ignoring the
     # override -- which is the good kind of failure.
     mapping = {
+        # Config-GROUP override (selects configs/molecule/<name>.yaml).
+        # Written as "molecule=dmet_embedding" -- no "+" prefix, because
+        # the group already exists in the defaults list.
+        "molecule": GQE_MOLECULE_CONFIG,
         "trainer.seed": GQE_SEED,
         "trainer.max_iters": GQE_MAX_ITERS,
         "trainer.num_samples": GQE_NUM_SAMPLES,
