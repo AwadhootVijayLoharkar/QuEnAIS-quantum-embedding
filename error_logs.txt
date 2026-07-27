@@ -1,20 +1,13 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:gqe-for-qsci]$ cd /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci
-ls *.py
-grep -n "spec\|Pool\|pauli_evolution\|excitation" factory.py
-dmet_excitation_pool.py  dmet_molecule_adapter.py  train.py  validate_excitation_generator.py
-grep: factory.py: No such file or directory
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:gqe-for-qsci]$ cd gqe_qsci/
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:gqe_qsci]$ grep -n "spec\|Pool\|pauli_evolution\|excitation" factory.py
-17:from gqe_qsci.gqe.operator_pool import PauliEvolutionPool, ExcitationPool
-18:from dmet_excitation_pool import DMETPauliEvolutionPool, DMETExcitationPool
-76:        match cfg.operator_pool.spec:
-77:            case "pauli_evolution":
-78:                operator_pool = PauliEvolutionPool(
-85:            case "excitation":
-86:                operator_pool = ExcitationPool(molecule, params=cfg.operator_pool.params, threshold=cfg.operator_pool.ccsd_threshold)
-87:            case "dmet_pauli_evolution":
-88:                operator_pool = DMETPauliEvolutionPool(
-95:            case "dmet_excitation":
-96:                operator_pool = DMETExcitationPool(molecule, params=cfg.operator_pool.params, threshold=cfg.operator_pool.ccsd_threshold)
-98:                raise ValueError(f"Unknown operator pool specification: {cfg.operator_pool.spec}")
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:gqe_qsci]$ 
+cd /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8
+python -c "
+import numpy as np, config, gqe_for_qsci as g
+mol = g.load_from_dmet_pickle(config.STEP2_FILE)
+print('embedding HF   =', mol.hf.e_tot)
+print('embedding CCSD =', mol.compute_ccsd())
+amp = mol.ccsd_amplitude
+print('t1 max|amp| =', np.abs(amp['t1']).max())
+print('t2 max|amp| =', np.abs(amp['t2']).max())
+pool = g.DMETPauliEvolutionPool(mol, params=None, threshold=1e-6,
+                                remove_z_ladder=True, only_use_first_pauli=True)
+print('operator pool size =', pool.get_vocab_size())
+"
