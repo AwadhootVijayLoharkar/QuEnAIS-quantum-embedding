@@ -505,7 +505,21 @@ GQE_SAMPLER_SHOTS            = None   # int -- shots per circuit; only matters
                                        # once GQE_CUDAQ_TARGET below is no
                                        # longer an exact-statevector backend
 
-GQE_OPERATOR_POOL_SPEC             = None  # str: "pauli_evolution" | "excitation"
+# MUST be one of the DMET-aware pools when feeding a DMET embedding.
+# The repo's factory.py registers four specs:
+#     "pauli_evolution", "excitation"            -- stock, geometry-based
+#     "dmet_pauli_evolution", "dmet_excitation"  -- DMET-aware
+# The stock pools rebuild the molecule FROM ITS GEOMETRY to derive CCSD
+# amplitudes (gqe_qsci/gqe/operator_pool.py:97 iterates
+# self.molecule.geometry). A DMET embedding has no geometry -- it is just
+# h1e/h2e/ecore in an abstract orbital basis -- so geometry is None and
+# that line dies with "TypeError: 'NoneType' object is not iterable".
+# The DMET pools instead take CCSD amplitudes from the embedding's own
+# CCSD solve (molecule.ccsd_amplitude), which is the whole reason
+# DMETUCCSDBasedPool exists. "dmet_pauli_evolution" is the direct
+# analogue of the repo default "pauli_evolution" and accepts the same
+# remove_z_ladder / only_use_first_pauli options below.
+GQE_OPERATOR_POOL_SPEC             = "dmet_pauli_evolution"
 GQE_OPERATOR_POOL_CCSD_THRESHOLD   = None  # float
 GQE_OPERATOR_POOL_REMOVE_Z_LADDER  = None  # bool
 GQE_OPERATOR_POOL_ONLY_FIRST_PAULI = None  # bool
