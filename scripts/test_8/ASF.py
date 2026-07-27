@@ -28,7 +28,7 @@ args = parser.parse_args()
 FORCE_RERUN = args.force
 
 os.makedirs(config.RESULTS_DIR, exist_ok=True)
-if os.path.exists(config.STEP1_FILE) and not FORCE_RERUN:
+if config.cached_result_is_current(config.STEP1_FILE) and not FORCE_RERUN:
     print(f"[Step 1] Using cached result: {config.STEP1_FILE}")
     print(f"         Run with --force to recompute.")
     sys.exit(0)

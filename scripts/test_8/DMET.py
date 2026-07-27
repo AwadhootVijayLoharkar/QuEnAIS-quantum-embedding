@@ -39,11 +39,19 @@ args = parser.parse_args()
 FORCE_RERUN = args.force
 
 os.makedirs(config.RESULTS_DIR, exist_ok=True)
-if os.path.exists(config.STEP2_FILE) and not FORCE_RERUN:
+if config.cached_result_is_current(config.STEP2_FILE) and not FORCE_RERUN:
     print(f"[Step 2] Using cached result: {config.STEP2_FILE}")
     sys.exit(0)
 if not os.path.exists(config.STEP1_FILE):
     raise FileNotFoundError(f"Run ASF.py first: {config.STEP1_FILE} not found.")
+if not config.cached_result_is_current(config.STEP1_FILE):
+    raise RuntimeError(
+        f"{config.STEP1_FILE} was generated for a DIFFERENT molecule/basis "
+        f"than config says ({config.MOLECULE}/{config.BASIS}). Re-run "
+        f"ASF.py (it will recompute automatically) before running DMET.py "
+        f"-- silently building an embedding on another molecule's active "
+        f"space is exactly the class of bug this check exists to stop."
+    )
 
 with open(config.STEP1_FILE, "rb") as f:
     step1 = pickle.load(f)

@@ -74,6 +74,58 @@ GQE_LOG_FILE = os.path.join(PROJECT_DIR, "gqe_train.log")
 
 BLOCKEXE_WRAPPER = os.path.expanduser("~/block2main_wrapper.sh")
 
+
+def cached_result_is_current(path, verbose=True):
+    """
+    True only if `path` exists AND the pickle in it was generated for the
+    CURRENT config.MOLECULE / config.BASIS.
+
+    Why this exists: every step's cache file lives at a fixed path shared
+    across molecules (step0_classical.pkl, step1_asf.pkl,
+    step2_hamiltonian.pkl). Change MOLECULE from LiH to ScH and every
+    script's `if os.path.exists(...)` cache check happily reuses LiH's
+    results -- silently, with no error. That's the exact failure mode that
+    already cost real debugging time three separate times in this project
+    (a stale test5 step2 pickle wired into the external repo's
+    dmet_embedding.yaml; two file-content mixups). A wrong-but-plausible
+    number is far more expensive than a recomputation.
+
+    Paths stay fixed on purpose -- the external gqe-for-qsci repo's
+    configs/molecule/dmet_embedding.yaml hardcodes the step2 path, so
+    making these molecule-specific would silently break THAT instead.
+    Validating content is the fix that doesn't trade one stale-path bug
+    for another.
+    """
+    import pickle as _pickle
+    if not os.path.exists(path):
+        return False
+    try:
+        with open(path, "rb") as fh:
+            data = _pickle.load(fh)
+    except Exception as exc:
+        if verbose:
+            print(f"  [cache] {os.path.basename(path)} unreadable ({exc}); recomputing.")
+        return False
+
+    # step0 stores molecule/basis at top level; step1/step2 nest it in mol_info.
+    info = data.get("mol_info", data) if isinstance(data, dict) else {}
+    cached_mol   = info.get("molecule")
+    cached_basis = info.get("basis")
+
+    if cached_mol is None:
+        if verbose:
+            print(f"  [cache] {os.path.basename(path)} has no molecule tag "
+                  f"(pre-dates this check); recomputing to be safe.")
+        return False
+
+    if cached_mol != MOLECULE or (cached_basis is not None and cached_basis != BASIS):
+        if verbose:
+            print(f"  [cache] {os.path.basename(path)} was built for "
+                  f"{cached_mol}/{cached_basis}, but config says "
+                  f"{MOLECULE}/{BASIS} -- ignoring stale cache and recomputing.")
+        return False
+    return True
+
 # EDIT to wherever you cloned the external gqe_qsci / GQE-for-QSCI repo
 # (the one with GQE_README.md, train.py, activate_custom_mpi.sh). Can also
 # be set via the GQE_QSCI_REPO_PATH environment variable instead of
@@ -108,12 +160,34 @@ HOMO_LUMO_TIER2_THRESHOLD_EV         = 1.0
 # ═══════════════════════════════════════════════════════════════════════
 # Molecule selection — explicit finite geometries (recommended path)
 # ═══════════════════════════════════════════════════════════════════════
-MOLECULE = "N2"
+# FIRST TRANSITION-METAL RUNG: ScH.
+# Chosen deliberately as the smallest real step up from LiH toward the
+# TM-complex target, changing as few things at once as possible:
+#   - X(1)Sigma+ ground state => SPIN=0, so n_alpha == n_beta. That keeps
+#     the pipeline inside the ONLY regime it has ever been validated in.
+#     (Open-shell TM systems like TiO (X(3)Delta) or ScO (X(2)Sigma+)
+#     trigger the n_alpha != n_beta warning branch in
+#     dmet_lib.chemical_potential_correction(), which has never been
+#     exercised -- don't stack that new failure mode on top of a new
+#     molecule. Save those for rung 2+, after ScH validates clean.)
+#   - Sc is the lightest 3d transition metal (21 electrons), so CASSCF/
+#     NEVPT2 stays cheap enough to remain a trustworthy answer key --
+#     which is exactly what caught every bug during the N2/LiH work.
+#   - Still has genuine d-orbital character, unlike LiH. This is a real
+#     test of ASF's active-space selection, not a rerun of a solved case.
+# Note ScH has a low-lying (3)Delta state; if UHF converges to something
+# with unexpected spin contamination, that's a real physical near-
+# degeneracy, not necessarily a code bug.
+MOLECULE = "ScH"
 CHARGE   = 0
-SPIN     = 0
+SPIN     = 0        # X(1)Sigma+ ground state (singlet)
 BASIS    = "sto-3g"
 
 geometries = {
+    # X(1)Sigma+ ground state; r_e ~ 1.78 Ang (theory puts it close to
+    # 3.4 a0 = 1.799 Ang). Verify against your own preferred reference
+    # before quoting any absolute energy from this geometry.
+    "ScH": [("Sc", (0.0, 0.0, 0.0)), ("H", (0.0, 0.0, 1.7800))],
     "LiH": [("Li", (0.0, 0.0, 0.0)), ("H", (0.0, 0.0, 1.5949))],
     "H2O": [("O", (0.0, 0.0, 0.1173)),
             ("H", (0.0, 0.7572, -0.4692)),
@@ -394,20 +468,27 @@ GQE_QSCI_MAX_CYCLE            = None  # int
 #                    likely assumes exact statevector expectation values
 #                    today, so hardware also needs shots + error
 #                    mitigation added to the energy-eval step, not just a
-#                    target swap. See the patch note below for where this
-#                    needs to be read on the external repo's side --
-#                    setting this alone does nothing until that patch is
-#                    applied there.
+#                    target swap.
+#
+# NOTE: grep-ing the external repo's train.py/factory.py for
+# set_target()/cudaq_target came back empty -- that code never calls
+# cudaq.set_target() itself, so there's no Hydra config key to override
+# here. Instead, run_gqe_training.py sets CUDA-Q's own
+# CUDAQ_DEFAULT_SIMULATOR environment variable from this field before
+# launching train.py -- the same mechanism you already use manually
+# (`export CUDAQ_DEFAULT_SIMULATOR=qpp-cpu`) for GPU-architecture
+# mismatches. That picks the backend at runtime with zero changes needed
+# to the external repo's source.
 GQE_CUDAQ_TARGET = "qpp-cpu"
 
 
 def build_gqe_hydra_overrides():
     """
     Turns the GQE_* fields above into a list of Hydra CLI override strings
-    ("key=value"), skipping anything left as None. Keys that already exist
-    in the external repo's own yaml use plain "key=value"; GQE_CUDAQ_TARGET
-    uses Hydra's "+key=value" syntax since cudaq_target isn't a key that
-    repo's config schema knows about yet (see the patch note for train.py).
+    ("key=value"), skipping anything left as None. GQE_CUDAQ_TARGET is NOT
+    included here -- it's applied via the CUDAQ_DEFAULT_SIMULATOR env var
+    in run_gqe_training.py instead, since the external repo's Hydra config
+    has no key for it (confirmed empty grep for set_target/cudaq_target).
     """
     import json as _json
 
@@ -454,10 +535,6 @@ def build_gqe_hydra_overrides():
         if val is None:
             continue
         overrides.append(f"{key}={_fmt(val)}")
-
-    if GQE_CUDAQ_TARGET is not None:
-        overrides.append(f"+cudaq_target={GQE_CUDAQ_TARGET}")
-
     return overrides
 
 
@@ -466,8 +543,15 @@ GQE_TRAIN_ARGS = build_gqe_hydra_overrides()
 # ═══════════════════════════════════════════════════════════════════════
 # Classical reference methods (classical_methods.py)
 # ═══════════════════════════════════════════════════════════════════════
-CLASSICAL_METHODS = ["HF", "MP2", "CCSD", "CASSCF"]
-# CLASSICAL_METHODS = ["HF", "MP2", "CCSD", "CCSD_T", "CASSCF", "NEVPT2"]  # full
+# NEVPT2 enabled for the TM rung: CASSCF alone is frequently NOT accurate
+# enough to serve as ground truth for transition-metal energetics (it has
+# static correlation but misses dynamic correlation, which is large for 3d
+# systems). Since the whole point of this step is having a trustworthy
+# answer key -- the thing that caught every bug during N2/LiH -- the extra
+# cost is the point, not overhead. Drop back to the shorter list below if
+# NEVPT2 turns out to be prohibitively slow for a bigger system later.
+CLASSICAL_METHODS = ["HF", "MP2", "CCSD", "CCSD_T", "CASSCF", "NEVPT2"]
+# CLASSICAL_METHODS = ["HF", "MP2", "CCSD", "CASSCF"]  # lighter (LiH-era default)
 
 # ═══════════════════════════════════════════════════════════════════════
 # Resolve geometry at import time

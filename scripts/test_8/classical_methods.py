@@ -29,7 +29,7 @@ parser.add_argument("--force", action="store_true")
 args = parser.parse_args()
 
 os.makedirs(config.RESULTS_DIR, exist_ok=True)
-if os.path.exists(config.STEP0_FILE) and not args.force:
+if config.cached_result_is_current(config.STEP0_FILE) and not args.force:
     print(f"[Step 0] Using cached result: {config.STEP0_FILE}")
     sys.exit(0)
 
