@@ -178,9 +178,21 @@ HOMO_LUMO_TIER2_THRESHOLD_EV         = 1.0
 # Note ScH has a low-lying (3)Delta state; if UHF converges to something
 # with unexpected spin contamination, that's a real physical near-
 # degeneracy, not necessarily a code bug.
-MOLECULE = "ScH"
+# TEMPORARILY SET TO LiH FOR A CONTROL EXPERIMENT.
+# GQE has never been observed to converge on a DMET embedding: every
+# earlier "successful" run was silently using the repo's own n2.yaml
+# molecule + stock geometry-based operator pool (see GQE_MOLECULE_CONFIG).
+# The real DMET path has only run on ScH, where it stalls at exactly the
+# HF energy. LiH is the cheap control: 8 qubits, known answers
+# (DMET+CASCI = -7.881246, HF = -7.862027, so 19 mHa of correlation to
+# find). If GQE converges here, ScH is a scale/compute problem; if it
+# stalls at -7.8620 too, the DMET->GQE handoff is systemically broken and
+# no ScH tuning would have helped.
+# TO SWITCH BACK TO ScH: set MOLECULE = "ScH" and restore
+# FORCE_ACTIVE_SPACE = [9, 10, 11, 12, 13, 14] below.
+MOLECULE = "LiH"
 CHARGE   = 0
-SPIN     = 0        # X(1)Sigma+ ground state (singlet)
+SPIN     = 0
 BASIS    = "sto-3g"
 
 geometries = {
@@ -400,7 +412,11 @@ MAX_EMBED_ORBS = 18
 # the same symmetry-preservation concern that motivated GAP_DEGENERACY_TOL.
 #
 # Set back to None once ASF's TM behavior is fixed, and compare.
-FORCE_ACTIVE_SPACE = [9, 10, 11, 12, 13, 14]   # ScH: (4e, 6o)
+# Set to None for the LiH control run -- [9,10,11,12,13,14] are ScH MO
+# indices and are meaningless (and out of range) for LiH's 6 AOs. LiH
+# validated fine on ASF's own automatic (2e, 2o) selection.
+# RESTORE TO [9, 10, 11, 12, 13, 14] when switching MOLECULE back to ScH.
+FORCE_ACTIVE_SPACE = None   # ScH used: [9, 10, 11, 12, 13, 14]  -> (4e, 6o)
 
 # "mp2" -- reuse Step 1's MP2 1-RDM (fast, unreliable exactly where static
 #          correlation is strong).
