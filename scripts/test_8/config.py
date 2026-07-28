@@ -575,7 +575,23 @@ GQE_OPERATOR_POOL_CCSD_THRESHOLD   = None  # float
 # convergence is still poor, the next lever is
 # GQE_OPERATOR_POOL_ONLY_FIRST_PAULI below.
 GQE_OPERATOR_POOL_REMOVE_Z_LADDER  = False
-GQE_OPERATOR_POOL_ONLY_FIRST_PAULI = None  # bool
+# Set False (repo default True). A fermionic excitation generator maps
+# under Jordan-Wigner to a SUM of Pauli strings, and particle-number
+# conservation is a property of that sum -- no single term conserves it
+# alone. Keeping only the first Pauli word therefore breaks the
+# cancellation, so every gate leaks amplitude into wrong-electron-number
+# sectors, and the leak compounds with circuit depth.
+#
+# Observed exactly that on ScH: symmetry-preserving fraction fell from
+# 73% (11/15) at ngates=20 to 49% (38/77) at ngates=40 -- half of every
+# sample discarded, getting worse as circuits deepen. Note this is a
+# separate mechanism from remove_z_ladder (already False); the Z-ladder
+# fixes the parity string, this fixes the term-sum cancellation.
+#
+# Cost: each pool element becomes a multi-term operator, so circuits get
+# substantially deeper per gate. If runtime becomes impractical, lower
+# GQE_NGATES (each gate is now more expressive, so fewer may suffice).
+GQE_OPERATOR_POOL_ONLY_FIRST_PAULI = False
 
 # NOW THE BINDING CONSTRAINT. The ngates=40 ScH run pinned
 # Global-refined subspace_dim at exactly 2000 from epoch 30 onward --
