@@ -558,7 +558,33 @@ GQE_SAMPLER_SHOTS            = None   # int -- shots per circuit; only matters
 # DMETUCCSDBasedPool exists. "dmet_pauli_evolution" is the direct
 # analogue of the repo default "pauli_evolution" and accepts the same
 # remove_z_ladder / only_use_first_pauli options below.
-GQE_OPERATOR_POOL_SPEC             = "dmet_pauli_evolution"
+# Switched from "dmet_pauli_evolution" to "dmet_excitation" to fix the
+# persistent ~50% symmetry-violation rate on ScH.
+#
+# Root cause, from reading the pool code rather than theorising:
+# DMETPauliEvolutionPool appends every Pauli TERM of an excitation
+# generator as its own separate pool element --
+#     for term in _qubit_op_terms_to_cudaq(qubit_op):
+#         operator_pool.append(angle * cudaq.SpinOperator(term))
+# so each pool element is a SINGLE Pauli word. Particle-number
+# conservation is a property of the full SUM of terms in a JW-mapped
+# fermionic excitation, never of one term alone -- so that pool cannot
+# conserve electron number no matter how its flags are set. Confirmed
+# empirically: only_use_first_pauli=False left the ratio unchanged
+# (35/68 = 51% vs 38/77 = 49%) and slightly WORSENED the error
+# (0.02085 -> 0.02504), because it merely added more single-word
+# operators and diluted the search.
+#
+# DMETExcitationPool instead accumulates the terms --
+#     operator = weighted if operator is None else (operator + weighted)
+# -- building the complete, particle-number-conserving excitation
+# operator.
+#
+# NOTE: factory.py constructs DMETExcitationPool as
+#   DMETExcitationPool(molecule, params=..., threshold=...)
+# so GQE_OPERATOR_POOL_REMOVE_Z_LADDER and
+# GQE_OPERATOR_POOL_ONLY_FIRST_PAULI below are IGNORED by this pool type.
+GQE_OPERATOR_POOL_SPEC             = "dmet_excitation"
 GQE_OPERATOR_POOL_CCSD_THRESHOLD   = None  # float
 # Set False (repo default is True) because the ScH run showed direct
 # evidence of broken particle-number conservation: the epoch log reported
