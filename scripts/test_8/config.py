@@ -178,21 +178,17 @@ HOMO_LUMO_TIER2_THRESHOLD_EV         = 1.0
 # Note ScH has a low-lying (3)Delta state; if UHF converges to something
 # with unexpected spin contamination, that's a real physical near-
 # degeneracy, not necessarily a code bug.
-# TEMPORARILY SET TO LiH FOR A CONTROL EXPERIMENT.
-# GQE has never been observed to converge on a DMET embedding: every
-# earlier "successful" run was silently using the repo's own n2.yaml
-# molecule + stock geometry-based operator pool (see GQE_MOLECULE_CONFIG).
-# The real DMET path has only run on ScH, where it stalls at exactly the
-# HF energy. LiH is the cheap control: 8 qubits, known answers
-# (DMET+CASCI = -7.881246, HF = -7.862027, so 19 mHa of correlation to
-# find). If GQE converges here, ScH is a scale/compute problem; if it
-# stalls at -7.8620 too, the DMET->GQE handoff is systemically broken and
-# no ScH tuning would have helped.
-# TO SWITCH BACK TO ScH: set MOLECULE = "ScH" and restore
-# FORCE_ACTIVE_SPACE = [9, 10, 11, 12, 13, 14] below.
-MOLECULE = "LiH"
+# Back to ScH. The LiH control run PASSED: DMET+GQE reached -7.880890 vs
+# DMET+CASCI -7.881246 (0.356 mHa error, inside chemical accuracy),
+# recovering 18.9 of 19.2 mHa of correlation. That proves the
+# DMET -> GQE handoff (molecule=dmet_embedding + dmet_pauli_evolution)
+# works correctly, so ScH's stall at HF is a sampling-CAPACITY problem,
+# not a wiring bug -- see the enlarged GQE sampling settings below.
+# TO RE-RUN THE LiH CONTROL: set MOLECULE = "LiH" and
+# FORCE_ACTIVE_SPACE = None.
+MOLECULE = "ScH"
 CHARGE   = 0
-SPIN     = 0
+SPIN     = 0        # X(1)Sigma+ ground state (singlet)
 BASIS    = "sto-3g"
 
 geometries = {
@@ -412,11 +408,10 @@ MAX_EMBED_ORBS = 18
 # the same symmetry-preservation concern that motivated GAP_DEGENERACY_TOL.
 #
 # Set back to None once ASF's TM behavior is fixed, and compare.
-# Set to None for the LiH control run -- [9,10,11,12,13,14] are ScH MO
-# indices and are meaningless (and out of range) for LiH's 6 AOs. LiH
-# validated fine on ASF's own automatic (2e, 2o) selection.
-# RESTORE TO [9, 10, 11, 12, 13, 14] when switching MOLECULE back to ScH.
-FORCE_ACTIVE_SPACE = None   # ScH used: [9, 10, 11, 12, 13, 14]  -> (4e, 6o)
+# Set to None when running the LiH control (these are ScH MO indices and
+# are out of range for LiH's 6 AOs; LiH validates fine on ASF's own
+# automatic (2e, 2o) selection).
+FORCE_ACTIVE_SPACE = [9, 10, 11, 12, 13, 14]   # ScH: (4e, 6o)
 
 # "mp2" -- reuse Step 1's MP2 1-RDM (fast, unreliable exactly where static
 #          correlation is strong).
@@ -481,16 +476,29 @@ FERMION_TO_QUBIT = "jw"
 # producing a plausible-looking number with no physical meaning.
 GQE_MOLECULE_CONFIG          = "dmet_embedding"   # configs/molecule/<this>.yaml
 
+# SAMPLING CAPACITY -- enlarged for ScH (22 qubits). The repo's defaults
+# (num_samples=10, max_iters=50) were sized for a small system and are far
+# too small here. Evidence, comparing the LiH control run to ScH:
+#
+#                        LiH            ScH
+#   embedding orbitals   4  (8 qubits)  11 (22 qubits)
+#   determinant space    C(4,2)^2 = 36  C(11,4)^2 = 108,900
+#   num_sampled_basis    17             15
+#   final subspace_dim   34             309
+#   result               0.36 mHa err   stalled at HF (60 mHa err)
+#
+# The Hilbert space grew ~3000x while the sampling volume stayed flat, so
+# ScH explored ~0.3% of its determinant space and the optimizer fell back
+# to the only state it could reliably reach (HF). LiH's 34-configuration
+# subspace covers most of its 36 determinants, which is why it nearly
+# nails CASCI. Scaling the search to match the space:
 GQE_SEED                     = None   # int, e.g. 32
-GQE_MAX_ITERS                = None   # int -- number of training epochs (what
-                                       # you changed by hand in defaults.yaml
-                                       # for the 100-epoch LiH run)
-GQE_NUM_SAMPLES              = None   # int -- circuits sampled per iteration
-GQE_BATCH_SIZE               = None   # int -- keep equal to GQE_NUM_SAMPLES
-                                       # for online training (repo's own comment)
+GQE_MAX_ITERS                = 200    # was 50 -- more policy-learning epochs
+GQE_NUM_SAMPLES              = 100    # was 10 -- circuits sampled per iteration
+GQE_BATCH_SIZE               = 100    # keep == GQE_NUM_SAMPLES (online training)
 GQE_STEP_PER_EPOCH           = None   # int -- policy updates per iteration
-GQE_WARMUP_SIZE              = None   # int
-GQE_BUFFER_SIZE              = None   # int -- keep equal to GQE_NUM_SAMPLES
+GQE_WARMUP_SIZE              = 100    # keep in step with num_samples
+GQE_BUFFER_SIZE              = 100    # keep == GQE_NUM_SAMPLES (online training)
 GQE_LOAD_CHECKPOINT          = False  # bool -- True silently resumes from
                                        # whatever checkpoint dir the repo finds
                                        # under gqe-for-qsci/outputs/, which
@@ -513,7 +521,11 @@ GQE_TEMP_SCHED_INITIAL       = None   # float
 GQE_TEMP_SCHED_DELTA         = None   # float
 GQE_TEMP_SCHED_TARGET_VAR    = None   # float
 
-GQE_NGATES                   = None   # int -- ansatz circuit depth
+# Circuit depth. 10 gates drawn from a 369-operator pool can only reach a
+# limited set of excitation patterns -- fine for LiH's 36-determinant
+# space, too shallow to reach deep into ScH's 108,900. Raised to 20; this
+# is the main knob to try next (30, 40) if 200 epochs still fall short.
+GQE_NGATES                   = 20     # was 10 (repo default)
 GQE_REFERENCE_KEYS           = None   # list[str], e.g. ["R-CASCI", "R-CCSD"]
 
 GQE_SAMPLER_MPI              = None   # bool
