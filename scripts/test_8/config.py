@@ -493,7 +493,11 @@ GQE_MOLECULE_CONFIG          = "dmet_embedding"   # configs/molecule/<this>.yaml
 # subspace covers most of its 36 determinants, which is why it nearly
 # nails CASCI. Scaling the search to match the space:
 GQE_SEED                     = None   # int, e.g. 32
-GQE_MAX_ITERS                = 200    # was 50 -- more policy-learning epochs
+GQE_MAX_ITERS                = 120    # 200 was wasteful: the ngates=20 run
+                                       # stopped improving at epoch ~100 and
+                                       # the last 100 epochs changed nothing.
+                                       # Raise again only if the deeper
+                                       # circuits are still improving at the end.
 GQE_NUM_SAMPLES              = 100    # was 10 -- circuits sampled per iteration
 GQE_BATCH_SIZE               = 100    # keep == GQE_NUM_SAMPLES (online training)
 GQE_STEP_PER_EPOCH           = None   # int -- policy updates per iteration
@@ -521,11 +525,18 @@ GQE_TEMP_SCHED_INITIAL       = None   # float
 GQE_TEMP_SCHED_DELTA         = None   # float
 GQE_TEMP_SCHED_TARGET_VAR    = None   # float
 
-# Circuit depth. 10 gates drawn from a 369-operator pool can only reach a
-# limited set of excitation patterns -- fine for LiH's 36-determinant
-# space, too shallow to reach deep into ScH's 108,900. Raised to 20; this
-# is the main knob to try next (30, 40) if 200 epochs still fall short.
-GQE_NGATES                   = 20     # was 10 (repo default)
+# Circuit depth -- now the binding constraint. At ngates=20 the ScH run
+# broke the HF stall (error 0.0604 -> 0.0368, e/min -752.639 -> -752.660,
+# 39% of correlation recovered) but then FROZE from epoch ~100 onward:
+# Global-refined subspace_dim stuck at exactly 1116 and the error at
+# exactly 0.036796 for the final 100 epochs.
+#
+# That plateau is a reachability limit, not an optimization failure --
+# e/mean (-752.55) still sat well above e/min (-752.66), so the policy
+# was still sampling varied circuits; they simply couldn't reach any new
+# determinants. More epochs or more samples cannot fix that; only deeper
+# circuits can. Doubling to 40.
+GQE_NGATES                   = 40     # 10 = repo default, 20 = plateaued
 GQE_REFERENCE_KEYS           = None   # list[str], e.g. ["R-CASCI", "R-CCSD"]
 
 GQE_SAMPLER_MPI              = None   # bool
