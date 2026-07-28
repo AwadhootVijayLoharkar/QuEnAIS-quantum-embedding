@@ -577,7 +577,20 @@ GQE_OPERATOR_POOL_CCSD_THRESHOLD   = None  # float
 GQE_OPERATOR_POOL_REMOVE_Z_LADDER  = False
 GQE_OPERATOR_POOL_ONLY_FIRST_PAULI = None  # bool
 
-GQE_QSCI_MAX_DIM              = None  # int -- max QSCI subspace dimension
+# NOW THE BINDING CONSTRAINT. The ngates=40 ScH run pinned
+# Global-refined subspace_dim at exactly 2000 from epoch 30 onward --
+# that is this cap (repo default 2000), not a convergence plateau. GQE is
+# finding more useful configurations than QSCI is permitted to keep.
+#
+# Progression so far on ScH (correlation recovered, of 60.8 mHa):
+#   ngates=10, samples=10   -> error 0.0604   (0%,  stalled at HF)
+#   ngates=20, samples=100  -> error 0.0368   (39%, subspace froze 1116)
+#   ngates=40, samples=100  -> error 0.02405  (60.5%, subspace CAPPED 2000)
+#
+# ScH's full determinant space is C(11,4)^2 = 108,900, so 10000 is ~9% of
+# it -- a real increase while staying far from full CI. QSCI cost grows
+# with subspace dimension (sparse eigensolve), so expect slower epochs.
+GQE_QSCI_MAX_DIM              = 10000  # was 2000 (repo default)
 GQE_QSCI_ENLARGE_METHOD       = None  # str, e.g. "symmetry_completion"
 GQE_QSCI_MAX_CYCLE            = None  # int
 
