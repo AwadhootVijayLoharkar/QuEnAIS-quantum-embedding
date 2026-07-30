@@ -1,21 +1,59 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ cd /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8
-python -c "
-import numpy as np, config, gqe_for_qsci as g
-mol = g.load_from_dmet_pickle(config.STEP2_FILE)
-print('embedding HF   =', mol.hf.e_tot)
-print('embedding CCSD =', mol.compute_ccsd())
-amp = mol.ccsd_amplitude
-print('t1 max|amp| =', np.abs(amp['t1']).max())
-print('t2 max|amp| =', np.abs(amp['t2']).max())
-pool = g.DMETPauliEvolutionPool(mol, params=None, threshold=1e-6,
-                                remove_z_ladder=True, only_use_first_pauli=True)
-print('operator pool size =', pool.get_vocab_size())
-"
+
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:QuEnAIS-quantum-embedding]$ cd gqe-for-qsci/
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ python validate_excitation_generator.py 
 /home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   import pkg_resources
-embedding HF   = -752.6387025357575
-embedding CCSD = -752.6986785985956
-t1 max|amp| = 0.018323455151474502
-t2 max|amp| = 0.18545367138469057
-operator pool size = 369
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@makaria10:test_8]$ 
+
+======================================================================
+Test case: single excitation (alpha, 0->1)   indices=[(0, 2)]
+======================================================================
+  '0X,1Z,2Y'            tequila=-0.500000   mine=-0.500000+0.000000j   ratio(mine/tequila)=1.000000-0.000000j
+  '0Y,1Z,2X'            tequila=0.500000   mine=0.500000+0.000000j   ratio(mine/tequila)=1.000000+0.000000j
+
+  PASS: identical Pauli-string set, consistent ratio = 1.000000-0.000000j
+
+======================================================================
+Test case: single excitation (beta, 0->1)   indices=[(1, 3)]
+======================================================================
+  '1X,2Z,3Y'            tequila=-0.500000   mine=-0.500000+0.000000j   ratio(mine/tequila)=1.000000-0.000000j
+  '1Y,2Z,3X'            tequila=0.500000   mine=0.500000+0.000000j   ratio(mine/tequila)=1.000000+0.000000j
+
+  PASS: identical Pauli-string set, consistent ratio = 1.000000-0.000000j
+
+======================================================================
+Test case: double excitation (alpha-beta)   indices=[(1, 3), (0, 2)]
+======================================================================
+  '0X,1X,2X,3Y'         tequila=-0.125000   mine=-0.125000+0.000000j   ratio(mine/tequila)=1.000000-0.000000j
+  '0X,1X,2Y,3X'         tequila=-0.125000   mine=-0.125000+0.000000j   ratio(mine/tequila)=1.000000-0.000000j
+  '0X,1Y,2X,3X'         tequila=0.125000   mine=0.125000+0.000000j   ratio(mine/tequila)=1.000000+0.000000j
+  '0X,1Y,2Y,3Y'         tequila=-0.125000   mine=-0.125000+0.000000j   ratio(mine/tequila)=1.000000-0.000000j
+  '0Y,1X,2X,3X'         tequila=0.125000   mine=0.125000+0.000000j   ratio(mine/tequila)=1.000000+0.000000j
+  '0Y,1X,2Y,3Y'         tequila=-0.125000   mine=-0.125000+0.000000j   ratio(mine/tequila)=1.000000-0.000000j
+  '0Y,1Y,2X,3Y'         tequila=0.125000   mine=0.125000+0.000000j   ratio(mine/tequila)=1.000000+0.000000j
+  '0Y,1Y,2Y,3X'         tequila=0.125000   mine=0.125000+0.000000j   ratio(mine/tequila)=1.000000+0.000000j
+
+  PASS: identical Pauli-string set, consistent ratio = 1.000000-0.000000j
+
+======================================================================
+If all cases above say PASS with a consistent ratio (ideally 1.0,
+or note the fixed scale factor to apply), the generator
+construction in dmet_excitation_pool.py is confirmed correct and
+safe to use on DMET's embedding Hamiltonian.
+======================================================================
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ git diff gqe_qsci/factory.py > ../factory_dmet.patch
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ git status --porcelain
+ M configs/trainer/default.yaml
+ M gqe_qsci/factory.py
+ M gqe_qsci/gqe/sampler.py
+ M gqe_qsci/train_pipeline.py
+ D run.log
+?? configs/molecule/dmet_embedding.yaml
+?? dmet_excitation_pool.py
+?? dmet_molecule_adapter.py
+?? dmet_test.log
+?? dmet_test_3.log
+?? get_train.log
+?? validate_excitation_generator.py
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ git log --oneline -1
+732c1ea (HEAD -> main) run logs
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]

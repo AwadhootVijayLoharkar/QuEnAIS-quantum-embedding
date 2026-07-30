@@ -1,0 +1,29 @@
+diff --git a/gqe_qsci/factory.py b/gqe_qsci/factory.py
+index 22eb0cb..8f0a7b2 100644
+--- a/gqe_qsci/factory.py
++++ b/gqe_qsci/factory.py
+@@ -15,6 +15,7 @@ from hydra.utils import instantiate
+ 
+ from gqe_qsci.gqe.loss import GRPOLoss, GSPOLoss
+ from gqe_qsci.gqe.operator_pool import PauliEvolutionPool, ExcitationPool
++from dmet_excitation_pool import DMETPauliEvolutionPool, DMETExcitationPool
+ from gqe_qsci.gqe.sampler import Sampler
+ from gqe_qsci.qsci.pipeline import QSCIPipeline
+ from gqe_qsci.wandb_logger import Logger
+@@ -83,6 +84,16 @@ class Factory:
+                 )
+             case "excitation":
+                 operator_pool = ExcitationPool(molecule, params=cfg.operator_pool.params, threshold=cfg.operator_pool.ccsd_threshold)
++            case "dmet_pauli_evolution":
++                operator_pool = DMETPauliEvolutionPool(
++                    molecule,
++                    params=cfg.operator_pool.params,
++                    threshold=cfg.operator_pool.ccsd_threshold,
++                    remove_z_ladder=cfg.operator_pool.remove_z_ladder,
++                    only_use_first_pauli=cfg.operator_pool.only_use_first_pauli
++                )
++            case "dmet_excitation":
++                operator_pool = DMETExcitationPool(molecule, params=cfg.operator_pool.params, threshold=cfg.operator_pool.ccsd_threshold)
+             case _:
+                 raise ValueError(f"Unknown operator pool specification: {cfg.operator_pool.spec}")
+         self.operator_pool = operator_pool
