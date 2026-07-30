@@ -1,34 +1,156 @@
-.log  gqe_qsci/      
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ git diff gqe_qsci/factory.py gqe_qsci/gqe/sampler.py gqe_qsci/train_pipeline.py configs/trainer/default.yaml > ../gqe_dmet_full.patch
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ git diff -stat
-error: did you mean `--stat` (with two dashes)?
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ git diff --stat
- configs/trainer/default.yaml |  6 +++---
- gqe_qsci/factory.py          | 11 +++++++++++
- gqe_qsci/gqe/sampler.py      |  4 ++--
- gqe_qsci/train_pipeline.py   |  5 +++--
- run.log                      | 42 ------------------------------------------
- 5 files changed, 19 insertions(+), 49 deletions(-)
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ git diff g
-get_train.log  gqe_qsci/      
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ git diff gqe_qsci/gqe/sampler.py gqe_qsci/train_pipeline.py
-diff --git a/gqe_qsci/gqe/sampler.py b/gqe_qsci/gqe/sampler.py
-index 16a8ca0..df7976a 100644
---- a/gqe_qsci/gqe/sampler.py
-+++ b/gqe_qsci/gqe/sampler.py
-@@ -38,7 +38,7 @@ class Sampler:
-         idx_output = state["idx"]
-         pool = self.pool  
- 
--        if cudaq.mpi.is_initialized():  
-+        if self.mpi and cudaq.mpi.is_initialized():  
-             rank = cudaq.mpi.rank()  
-             numRanks = cudaq.mpi.num_ranks()  
-             total_elements = len(idx_output)  
-@@ -66,7 +66,7 @@ class Sampler:
-             res = [getResultFunctor(handle) for (handle, getResultFunctor) in res]  
- 
-         # Gather results from all MPI ranks  
--        if cudaq.mpi.is_initialized():  
-+        if self.mpi and cudaq.mpi.is_initialized():  
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:gqe-for-qsci]$ 
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:test_8]$ python ASF.py --force
+  [cache] step1_asf.pkl was built for LiH/sto-3g, but config says ScH/sto-3g -- ignoring stale cache and recomputing.
+
+============================================================
+[Step 1] Active Space Finder — ScH
+============================================================
+  Atoms: 2 ['Sc', 'H']  Basis: sto-3g
+  Electrons: 22  AOs: 19
+
+-- Phase A: UHF + Classification --
+converged SCF energy = -752.6387024081  <S^2> = 1.7846963e-08  2S+1 = 1
+  UHF energy = -752.63870241 Ha (converged: True)
+  Spin  : 0.0000  contaminated=False
+  Gap   : min=10.1754 eV
+  TM    : True  ->  Tier 3
+
+-- Phase B: MP2 Density + ASF --
+  MP2 used: True  E_corr: -0.048987 Ha
+  FORCE_ACTIVE_SPACE is set in config.py -- skipping ASF/DMRG entirely and using orbitals [9, 10, 11, 12, 13, 14] directly (indexed in the UHF alpha-MO basis).
+  Total electrons: 22  Core MOs: 9  Raw active: 4
+  Final active electrons: 4
+
+-- Phase D: Loewdin Population --
+
+============================================================
+[Step 1] Summary — ScH
+  Tier: 3  Active space: (4e, 6orb)  Orbitals: [9, 10, 11, 12, 13, 14]
+  Correlation strength: 0.0230
+============================================================
+
+[Step 1] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step1_asf.pkl
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:test_8]$ python classical_methods.py --force
+  [cache] step0_classical.pkl was built for LiH/sto-3g, but config says ScH/sto-3g -- ignoring stale cache and recomputing.
+
+============================================================
+[Step 0] Classical Methods — ScH
+============================================================
+  Basis: sto-3g  Charge: 0  Spin(2S): 0
+  Methods: ['HF', 'MP2', 'CCSD', 'CCSD_T', 'CASSCF', 'NEVPT2']
+  Electrons: 22   AOs: 19
+  Step 1 loaded: (4e, 6orb) active space
+
+-- HF --
+  [HF] done in 0.3s
+  RHF energy: -752.63870241 Ha (converged: True)
+
+-- MP2 --
+  [MP2] done in 0.0s
+  E_corr: -0.04898715 Ha   MP2 energy: -752.68768955 Ha
+
+-- CCSD --
+  [CCSD] done in 0.7s
+  E_corr: -0.07013772 Ha   CCSD energy: -752.70884013 Ha   Converged: True
+
+-- CCSD(T) --
+  [CCSD(T)] done in 0.1s
+  (T) correction: -0.00105002 Ha   CCSD(T) energy: -752.70989015 Ha
+
+  Using Step 1 active space: (4e, 6o)
+
+-- CASSCF(4e,6o) --
+  [CASSCF(4e,6o)] done in 25.3s
+  CASSCF energy: -752.68160436 Ha   CI energy: -6.30082884 Ha   Converged: True
+
+-- NEVPT2 --
+  [NEVPT2] done in 0.3s
+  E_corr(NEVPT2): -0.02106345 Ha   NEVPT2 energy: -752.70266780 Ha
+
+============================================================
+[Step 0] Results — ScH / sto-3g
+============================================================
+
+  Method            Energy (Ha)     vs HF (Ha)   vs HF (kcal/mol)
+  --------------------------------------------------------------
+  HF              -752.63870241      +0.000000              +0.00
+  MP2             -752.68768955      -0.048987             -30.74
+  CCSD            -752.70884013      -0.070138             -44.01
+  CCSD_T          -752.70989015      -0.071188             -44.67
+  CASSCF          -752.68160436      -0.042902             -26.92
+  NEVPT2          -752.70266780      -0.063965             -40.14
+
+  Total time: 27.5s
+============================================================
+
+[Step 0] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step0_classical.pkl
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:test_8]$ python DMET.py --force
+  [cache] step2_hamiltonian.pkl was built for LiH/sto-3g, but config says ScH/sto-3g -- ignoring stale cache and recomputing.
+
+============================================================
+[Step 2] DMET Embedding — ScH
+============================================================
+  Active space (Step 1): (4e, 6orb) MOs=[9, 10, 11, 12, 13, 14]
+  DMET_REFERENCE: casci   MU_CORRECTION: True
+
+-- Phase A: Restore UHF from Step 1 --
+  UHF energy = -752.63870241 Ha (restored, no recomputation)
+
+-- Phase B: Reference Density (casci) --
+  [diag] MP2 density active<->non-active cross-coupling (alpha): max|.|=3.07e-03, (beta): max|.|=3.07e-03  (if these are ~0, mo_coeff is diagonalizing this density on its own -- an architectural mismatch, not a bug)
+  {'method': 'casci', 'e_cas': -2.812989739513871, 'n_active': 6, 'nel_active': 4}
+  [diag] reference density electron count: 22.018073  (should equal mol.nelectron = 22)
+
+-- Phase C: Schmidt Decomposition --
+  [diag] mo_coeff.T @ S @ mo_coeff vs I (raw-AO-basis convention, expected by the rest of this code): 1.55e-15
+  [diag] mo_coeff.T @ mo_coeff vs I (already-orthonormal/Lowdin-basis convention): 3.34e+00
+  [diag] whichever of the two lines above is near zero (~1e-10) tells us which basis convention mo_coeff is actually in.
+  [diag] Schmidt singular values (all 6, before bath-count selection): [0.006149 0.006149 0.00361  0.001029 0.000392 0.      ]
+  [diag] max |Q_imp.T @ Q_bath| over the 5 bath orbital(s) actually kept (should be ~1e-10): 4.58e-12
+  Impurity: 6  Bath: 5  Total emb: 11 -> 22 qubits
+  sv2 coverage: 1.0000
+  [diag] C_emb orthonormality error (C_emb.T @ S @ C_emb vs I): 4.58e-12  (should be ~1e-10 or smaller)
+  [diag] embedding-space electron count from reference density: alpha=4.008818 -> 4, beta=4.008818 -> 4  (old nel-based value was alpha=2, beta=2)
+
+-- Phase D: Core Mean-Field Potential --
+  [diag] core density electron count: 14.000438  (expect ~= mol.nelectron - embedding electrons = 22 - 8 = 14)
+
+-- Phase E: Integral Transformation --
+  [diag] h1e_emb eigenvalues (Ha, before mu): [-6.471 -5.366 -2.725 -2.401 -2.401 -2.4   -2.254 -2.254 -2.252 -2.227
+ -1.999]
+  [diag] for comparison, full UHF valence orbital energies (Ha): [-164.235  -18.925  -15.676  -15.676  -15.674   -2.626   -1.643   -1.643
+   -1.641   -0.339   -0.153    0.221    0.221    0.23     0.235    0.235
+    0.252    0.252    0.829]
+  ecore (self-consistent) = -730.80461969 Ha   [check OK, delta=0.00e+00]
+
+-- Phase F: Chemical Potential Correction --
+  mu = -2.400772 Ha   ecore corrected -> -750.01079611 Ha
+
+  h1e shape: (11, 11)  h2e shape: (11, 11, 11, 11)  Time: 0.1s
+
+[Step 2] Saved -> /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/results/step2_hamiltonian.pkl
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:test_8]$ python gqe_for_qsci.py --force
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+Embedding: 11 orbitals, nelec=(4, 4), spin=0
+Embedding-space HF (real SCF, independent check) = -752.63870254 Ha
+  vs full-molecule UHF energy = -752.63870241 Ha   (diff = -0.0000 Ha)
+CASCI (this embedding) = -752.69952418 Ha
+[Consistency check] mismatch_score=0.0024 (threshold=0.1)  flagged=False
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:test_8]$ python run_gqe_training.py 
+[run_gqe_training] cwd=/home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci
+[run_gqe_training] cmd=/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/bin/python /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci/train.py molecule=dmet_embedding trainer.max_iters=120 trainer.num_samples=100 trainer.batch_size=100 trainer.warmup_size=100 trainer.buffer_size=100 trainer.load_checkpoint=false ngates=40 operator_pool.spec=dmet_excitation operator_pool.remove_z_ladder=false operator_pool.only_use_first_pauli=false qsci.max_dim=10000
+[run_gqe_training] logging to /home/loharkar/QuEnAIS-quantum-embedding/scripts/test_8/gqe_train.log
+
+/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2/lib/python3.11/site-packages/tequila/simulators/simulator_api.py:5: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+wandb: WARNING The anonymous setting has no effect and will be removed in a future version.
+wandb.errors.errors.UsageError: No API key configured. Use `wandb login` to log in.
+Error executing job with overrides: ['molecule=dmet_embedding', 'trainer.max_iters=120', 'trainer.num_samples=100', 'trainer.batch_size=100', 'trainer.warmup_size=100', 'trainer.buffer_size=100', 'trainer.load_checkpoint=false', 'ngates=40', 'operator_pool.spec=dmet_excitation', 'operator_pool.remove_z_ladder=false', 'operator_pool.only_use_first_pauli=false', 'qsci.max_dim=10000']
+wandb.errors.errors.UsageError: No API key configured. Use `wandb login` to log in.
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+
+[run_gqe_training] train.py exited with code 1
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:test_8]$ echo $CUDAQ_DEFAULT_SIMULATOR 
+qpp-cpu
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@cerberus03:test_8]$ 
