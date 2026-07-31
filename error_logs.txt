@@ -1,4 +1,3 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:QuEnAIS-quantum-embedding]$ cd scripts/quenais-merged/
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ pip install -e . --no-deps
 Obtaining file:///home/loharkar/QuEnAIS-quantum-embedding/scripts/quenais-merged
   Installing build dependencies ... done
@@ -7,8 +6,8 @@ Obtaining file:///home/loharkar/QuEnAIS-quantum-embedding/scripts/quenais-merged
   Preparing editable metadata (pyproject.toml) ... done
 Building wheels for collected packages: quenais
   Building editable for quenais (pyproject.toml) ... done
-  Created wheel for quenais: filename=quenais-0.2.0-0.editable-py3-none-any.whl size=5300 sha256=720a4adcc26174da70de70148a4aeb76a6d8bd3a31b459da90e6cc309a96106c
-  Stored in directory: /tmp/pip-ephem-wheel-cache-niman_2n/wheels/c0/2b/09/d1336dde4f413872c0e04e6a4c8ed6c63ae5ae6298f4700084
+  Created wheel for quenais: filename=quenais-0.2.0-0.editable-py3-none-any.whl size=5300 sha256=b414920baeb6d075758fab83cc6ba19d603aa1a2d96ba8575098418de6c0f1ee
+  Stored in directory: /tmp/pip-ephem-wheel-cache-6867fkoj/wheels/c0/2b/09/d1336dde4f413872c0e04e6a4c8ed6c63ae5ae6298f4700084
 Successfully built quenais
 Installing collected packages: quenais
   Attempting uninstall: quenais
@@ -20,13 +19,8 @@ Successfully installed quenais-0.2.0
 [notice] A new release of pip is available: 26.1.2 -> 26.2
 [notice] To update, run: pip install --upgrade pip
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ pytest -q
-................................................................................................................ [ 45%]
-................................................................................................................ [ 91%]
-....................                                                                                             [100%]
-244 passed in 46.95s
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ quenais-gqe-setup --repo ~/QuEnAIS-quantum-embedding/gqe-for-qsci/
-repo: /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci
-Patch already applied to /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci -- nothing to do.
-
-Ready: submodule is at the expected commit and patched.
+................................................................................................................ [ 42%]
+................................................................................................................ [ 85%]
+.......................................                                                                          [100%]
+263 passed in 50.89s
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ 
