@@ -336,3 +336,16 @@ def test_all_console_scripts_resolve():
         module_path, func_name = target.split(":")
         module = importlib.import_module(module_path)
         assert callable(getattr(module, func_name)), target
+
+
+def test_selftest_suppresses_third_party_output():
+    """
+    PySCF's logger and the ASF library both write past
+    contextlib.redirect_stdout. Only an fd-level redirect covers code we do
+    not own, so _quiet must use dup2 rather than a Python-level context.
+    """
+    from quenais import selftest
+
+    src = Path(selftest.__file__).read_text()
+    assert "dup2" in src, "_quiet must redirect at the file-descriptor level"
+    assert "os.dup(1)" in src.replace("_os.", "os.")

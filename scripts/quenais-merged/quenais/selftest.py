@@ -187,17 +187,35 @@ def run_selftest(system="LiH", project_dir=None, verbose=False):
 
 
 def _quiet(fn, cfg, verbose=False, **kwargs):
-    """Run a stage, suppressing its stdout unless verbose."""
-    import contextlib
-    import io
+    """
+    Run a stage with its output suppressed unless verbose.
+
+    Redirects at the FILE DESCRIPTOR level, not via
+    contextlib.redirect_stdout. Two sources write past a Python-level
+    redirect: PySCF's own logger, which holds its own stream reference, and
+    the ASF library, whose internal CASCI prints from code we do not own.
+    Silencing objects one at a time cannot cover third-party internals;
+    dup2 on fd 1 covers everything.
+    """
+    import os as _os
     import warnings
 
     if verbose:
         return fn(cfg, **kwargs)
-    sink = io.StringIO()
-    with contextlib.redirect_stdout(sink), warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        return fn(cfg, **kwargs)
+
+    saved_fd = _os.dup(1)
+    devnull = _os.open(_os.devnull, _os.O_WRONLY)
+    try:
+        sys.stdout.flush()
+        _os.dup2(devnull, 1)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            return fn(cfg, **kwargs)
+    finally:
+        sys.stdout.flush()
+        _os.dup2(saved_fd, 1)
+        _os.close(saved_fd)
+        _os.close(devnull)
 
 
 def main(argv=None):

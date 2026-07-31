@@ -385,8 +385,10 @@ def main(cfg, force=False):
     print(f"[Step 1] Active Space Finder -- {cfg.molecule}")
     print(f"{'='*60}")
 
+    # verbose=0: the stage prints its own summary, and PySCF's SCF banner
+    # is noise in a library context. Raise it when debugging convergence.
     mol = gto.M(atom=cfg.geometry, basis=cfg.basis, charge=cfg.charge,
-                spin=cfg.spin, verbose=3)
+                spin=cfg.spin, verbose=0)
     print(f"  Atoms     : {cfg.n_atoms} {cfg.atom_syms}  Basis: {cfg.basis}")
     print(f"  Electrons : {mol.nelectron}  AOs: {mol.nao_nr()}")
     S = mol.intor("int1e_ovlp")
