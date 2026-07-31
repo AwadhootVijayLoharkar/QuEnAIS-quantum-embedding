@@ -1,8 +1,8 @@
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ pytest -q
 ................................................................................................................ [ 47%]
 ................................................................................................................ [ 94%]
-............                                                                                                     [100%]
-236 passed in 44.96s
+.............                                                                                                    [100%]
+237 passed in 47.08s
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ quenais-selftest 
 
 QuEnAIS self-test -- LiH
@@ -11,8 +11,6 @@ QuEnAIS self-test -- LiH
 [  ok  ] HF energy                                    -7.862026959 Ha  (delta 5.3e-15)
 [  ok  ] MP2 energy                                   -7.874890917 Ha  (delta 3.7e-12)
 [  ok  ] CCSD energy                                  -7.882392917 Ha  (delta 4.4e-15)
-converged SCF energy = -7.86202695934392  <S^2> = 2.9816483e-10  2S+1 = 1
-CASCI E = -7.88240341033147  E(CI) = -8.87778345469789  S^2 = 0.0000000
 [  ok  ] active space                                 (2e, 2o) MOs=[1, 2]
 [  ok  ] step 1 provides dm_ao_alpha_mp2              required by the embedding stage
 [  ok  ] step 1 provides dm_ao_beta_mp2               required by the embedding stage
