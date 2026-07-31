@@ -1,46 +1,46 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:scripts]$ cd quenais-merged/
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ pip install -e . --no-deps
-Obtaining file:///home/loharkar/QuEnAIS-quantum-embedding/scripts/quenais-merged
-  Installing build dependencies ... done
-  Checking if build backend supports build_editable ... done
-  Getting requirements to build editable ... done
-  Preparing editable metadata (pyproject.toml) ... done
-Building wheels for collected packages: quenais
-  Building editable for quenais (pyproject.toml) ... done
-  Created wheel for quenais: filename=quenais-0.2.0-0.editable-py3-none-any.whl size=5300 sha256=eb2332a630fe65a66c3db85cff1999d91a28706f829cb8caa93cd3478de01884
-  Stored in directory: /tmp/pip-ephem-wheel-cache-9a1_y85a/wheels/c0/2b/09/d1336dde4f413872c0e04e6a4c8ed6c63ae5ae6298f4700084
-Successfully built quenais
-Installing collected packages: quenais
-  Attempting uninstall: quenais
-    Found existing installation: quenais 0.2.0
-    Uninstalling quenais-0.2.0:
-      Successfully uninstalled quenais-0.2.0
-Successfully installed quenais-0.2.0
-
-[notice] A new release of pip is available: 26.1.2 -> 26.2
-[notice] To update, run: pip install --upgrade pip
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ pytest -q
-................................................................................................................ [ 48%]
-................................................................................................................ [ 96%]
-........                                                                                                         [100%]
-232 passed in 65.69s (0:01:05)
+................................................................................................................ [ 47%]
+................................................................................................................ [ 95%]
+.........F.                                                                                                      [100%]
+======================================================= FAILURES =======================================================
+___________________________________ test_falls_back_to_cpu_count_without_a_scheduler ___________________________________
+
+    def test_falls_back_to_cpu_count_without_a_scheduler():
+        import json
+    
+        out = run_snippet(
+            "import quenais, json\n"
+            "from quenais import _threads\n"
+            "print(json.dumps(_threads.snapshot()['cpu_source']))\n"
+        )
+        assert out.returncode == 0, out.stderr
+>       assert json.loads(out.stdout.strip().splitlines()[-1]) == "os.cpu_count"
+E       AssertionError: assert 'SLURM_CPUS_PER_TASK' == 'os.cpu_count'
+E         
+E         - os.cpu_count
+E         + SLURM_CPUS_PER_TASK
+
+tests/test_threads.py:172: AssertionError
+=============================================== short test summary info ================================================
+FAILED tests/test_threads.py::test_falls_back_to_cpu_count_without_a_scheduler - AssertionError: assert 'SLURM_CPUS_PER_TASK' == 'os.cpu_count'
+1 failed, 234 passed in 46.58s
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ quenais-selftest 
 
 QuEnAIS self-test -- LiH
 ==================================================================
-[  ok  ] thread environment                           OPENBLAS=1 OMP=95
-[  ok  ] HF energy                                    -7.862026959 Ha  (delta 1.8e-15)
-[  ok  ] MP2 energy                                   -7.874890917 Ha  (delta 2.1e-12)
-[  ok  ] CCSD energy                                  -7.882392917 Ha  (delta 2.7e-15)
-converged SCF energy = -7.86202695934391  <S^2> = 2.9816838e-10  2S+1 = 1
-CASCI E = -7.88240341033146  E(CI) = -8.87778345469788  S^2 = 0.0000000
+[  ok  ] thread environment                           OPENBLAS=1 OMP=1 (from SLURM_CPUS_PER_TASK)
+[  ok  ] HF energy                                    -7.862026959 Ha  (delta 5.3e-15)
+[  ok  ] MP2 energy                                   -7.874890917 Ha  (delta 3.7e-12)
+[  ok  ] CCSD energy                                  -7.882392917 Ha  (delta 4.4e-15)
+converged SCF energy = -7.86202695934392  <S^2> = 2.9816483e-10  2S+1 = 1
+CASCI E = -7.88240341033147  E(CI) = -8.87778345469789  S^2 = 0.0000000
 [  ok  ] active space                                 (2e, 2o) MOs=[1, 2]
 [  ok  ] step 1 provides dm_ao_alpha_mp2              required by the embedding stage
 [  ok  ] step 1 provides dm_ao_beta_mp2               required by the embedding stage
 [  ok  ] bath orbital count                           2 (expected 2)
 [  ok  ] embedded electron count                      (2a, 2b) -- from the reference density, not the active space
-[  ok  ] ecore                                        -5.010051311 Ha  (delta 1.2e-10)
-[  ok  ] embedded SCF vs full UHF                     delta -3.37e-09 Ha  (tol 2e-07)
+[  ok  ] ecore                                        -5.010051310 Ha  (delta 1.3e-10)
+[  ok  ] embedded SCF vs full UHF                     delta -3.02e-09 Ha  (tol 2e-07)
 
 ==================================================================
   11 passed, 0 failed, 0 skipped
