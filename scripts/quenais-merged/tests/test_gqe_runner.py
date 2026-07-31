@@ -349,3 +349,70 @@ def test_selftest_suppresses_third_party_output():
     src = Path(selftest.__file__).read_text()
     assert "dup2" in src, "_quiet must redirect at the file-descriptor level"
     assert "os.dup(1)" in src.replace("_os.", "os.")
+
+
+# ── The shipped patch ────────────────────────────────────────────────────
+
+def _patch_text():
+    return gqe_setup.PATCH_PATH.read_text()
+
+
+def test_patch_is_shipped():
+    """Without it, quenais-gqe-setup cannot prepare a clean clone."""
+    assert gqe_setup.PATCH_PATH.exists(), (
+        f"missing {gqe_setup.PATCH_PATH}. Regenerate with "
+        f"quenais-gqe-setup --repo <checkout> --create-patch"
+    )
+
+
+def test_patch_touches_exactly_the_declared_files():
+    targets = {line[len("+++ b/"):].strip()
+               for line in _patch_text().splitlines()
+               if line.startswith("+++ b/")}
+    assert targets == set(gqe_setup.PATCHED_FILES), (
+        f"patch touches {sorted(targets)}, declared {sorted(gqe_setup.PATCHED_FILES)}"
+    )
+
+
+def test_patch_does_not_carry_the_debug_config():
+    """
+    configs/trainer/default.yaml held leftover debugging values
+    (max_iters 100->50, load_checkpoint true->false, target_var 1e-5->1e-3).
+    Shipping them would silently override the package's own settings.
+    """
+    assert "configs/trainer" not in _patch_text()
+
+
+def test_patch_registers_both_dmet_pools():
+    text = _patch_text()
+    assert "+from dmet_excitation_pool import" in text
+    for spec in ("dmet_pauli_evolution", "dmet_excitation"):
+        assert f'+            case "{spec}":' in text, f"pool spec {spec} unregistered"
+
+
+def test_patch_makes_the_mpi_flag_authoritative():
+    """
+    Upstream takes the MPI branch whenever MPI happens to be initialised,
+    ignoring sampler.mpi. Both call sites must be fixed, not one.
+    """
+    text = _patch_text()
+    assert text.count("+        if self.mpi and cudaq.mpi.is_initialized():") == 2
+
+
+def test_patch_emits_the_epoch_log():
+    """
+    The load-bearing instrumentation hunk. Without it training succeeds and
+    the visualisation stage has nothing to parse.
+    """
+    text = _patch_text()
+    assert "+        metrics = self.metric_logger.log_result(self, log_inputs)" in text
+    assert '+        print(f"[epoch {self.current_epoch}] {metrics}", flush=True)' in text
+
+
+def test_patch_is_a_well_formed_unified_diff():
+    lines = _patch_text().splitlines()
+    assert lines[0].startswith("diff --git ")
+    hunks = [ln for ln in lines if ln.startswith("@@")]
+    assert len(hunks) >= 4, f"expected at least 4 hunks, found {len(hunks)}"
+    for name in gqe_setup.PATCHED_FILES:
+        assert f"--- a/{name}" in _patch_text()

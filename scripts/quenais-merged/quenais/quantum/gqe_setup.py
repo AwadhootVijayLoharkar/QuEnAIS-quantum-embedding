@@ -207,8 +207,12 @@ def apply_patch(repo, patch_path=None, force=False):
         )
 
     # Already applied? Reverse-check succeeds only if the changes are present.
+    # --whitespace=nowarn: the upstream sources carry trailing whitespace on
+    # the context lines, so the patch does too. That is not an error here.
+    apply_flags = ["--whitespace=nowarn"]
+
     reverse = subprocess.run(
-        ["git", "apply", "--reverse", "--check", str(patch_path)],
+        ["git", "apply", "--reverse", "--check", *apply_flags, str(patch_path)],
         cwd=repo, capture_output=True, text=True,
     )
     if reverse.returncode == 0:
@@ -217,7 +221,7 @@ def apply_patch(repo, patch_path=None, force=False):
         return True
 
     check = subprocess.run(
-        ["git", "apply", "--check", str(patch_path)],
+        ["git", "apply", "--check", *apply_flags, str(patch_path)],
         cwd=repo, capture_output=True, text=True,
     )
     if check.returncode != 0:
@@ -227,7 +231,7 @@ def apply_patch(repo, patch_path=None, force=False):
         )
 
     applied = subprocess.run(
-        ["git", "apply", str(patch_path)],
+        ["git", "apply", *apply_flags, str(patch_path)],
         cwd=repo, capture_output=True, text=True,
     )
     if applied.returncode != 0:
