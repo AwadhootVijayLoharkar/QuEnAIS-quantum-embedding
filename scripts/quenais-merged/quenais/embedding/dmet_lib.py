@@ -224,12 +224,21 @@ def get_reference_density(mf, mol, step1, mo_list, mo_coeff, method):
     print(f"  [diag] MP2 density active<->non-active coupling: "
           f"max|.|={max_cross:.2e}")
     if max_cross < 1e-12 and non_active:
+        # Expected for systems whose active orbitals are already close to
+        # eigenvectors of the reference density -- N2/STO-3G (4e,4o) is the
+        # known case, and its empty bath is correct, not a failure.
+        #
+        # Worth surfacing anyway: the same signature appears if the
+        # reference density is ever rebuilt block-diagonally, which would
+        # zero the coupling artificially on a system that does have a bath.
         warnings.warn(
-            "The reference density has essentially no active/non-active "
-            "coupling, so the Schmidt decomposition has nothing to extract "
-            "and the bath will be empty. For a system that should have a "
-            "bath this indicates the block-diagonal construction has "
-            "regressed.",
+            f"The reference density has essentially no active/non-active "
+            f"coupling (max|.|={max_cross:.1e}), so the Schmidt "
+            f"decomposition has nothing to extract and the bath will be "
+            f"empty. This is expected when the active orbitals are already "
+            f"near-eigenvectors of the reference density (N2/STO-3G is the "
+            f"known case). Only a concern if you expected a bath for this "
+            f"system.",
             RuntimeWarning,
         )
 

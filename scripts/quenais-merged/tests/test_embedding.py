@@ -300,6 +300,20 @@ def _stage_golden_step1(golden_dir, cfg, system):
     shutil.copy(golden_dir / system / "step1_asf.pkl", cfg.step1_file)
 
 
+def _run_embedding(cfg):
+    """
+    Run step 2, silencing the zero-coupling RuntimeWarning.
+
+    N2 legitimately has no active/non-active coupling, so that warning
+    fires on every N2 run. It is asserted explicitly in
+    test_zero_coupling_is_reported, and suppressed here so `pytest -q`
+    stays clean for the expected case.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        return hamiltonian.main(cfg, force=True)
+
+
 @pytest.mark.needs_pyscf
 @pytest.mark.slow
 @pytest.mark.parametrize("system", ["LiH", "N2", "ScH"])
@@ -312,7 +326,7 @@ def test_embedding_matches_golden(system, tmp_path, golden_dir):
     cfg = _cfg_for(system, tmp_path)
     _stage_golden_step1(golden_dir, cfg, system)
 
-    results = hamiltonian.main(cfg, force=True)
+    results = _run_embedding(cfg)
 
     struct = ref["structure"]
     assert results["n_bath"] == struct["n_bath"]
@@ -338,7 +352,7 @@ def test_embedded_scf_matches_full_uhf(system, tmp_path, golden_dir):
     """
     cfg = _cfg_for(system, tmp_path)
     _stage_golden_step1(golden_dir, cfg, system)
-    results = hamiltonian.main(cfg, force=True)
+    results = _run_embedding(cfg)
 
     check = results["embedded_scf_check"]
     assert check is not None, "the embedded SCF check did not run"
@@ -354,7 +368,7 @@ def test_n2_produces_no_bath_end_to_end(tmp_path, golden_dir):
     """The 20 Ha bug, checked on the real system that exposed it."""
     cfg = _cfg_for("N2", tmp_path)
     _stage_golden_step1(golden_dir, cfg, "N2")
-    results = hamiltonian.main(cfg, force=True)
+    results = _run_embedding(cfg)
 
     assert results["n_bath"] == 0
     assert float(np.max(np.abs(results["sv_all"]))) < cfg.dmet.bath_tolerance
@@ -367,7 +381,7 @@ def test_lih_electron_count_is_not_the_active_space_count(tmp_path, golden_dir):
     """The 2x-HF bug, checked end to end."""
     cfg = _cfg_for("LiH", tmp_path)
     _stage_golden_step1(golden_dir, cfg, "LiH")
-    results = hamiltonian.main(cfg, force=True)
+    results = _run_embedding(cfg)
 
     with open(cfg.step1_file, "rb") as fh:
         nel = pickle.load(fh)["nel"]
@@ -389,3 +403,20 @@ def test_stale_step1_is_rejected(tmp_path, golden_dir):
     shutil.copy(golden_dir / "LiH" / "step1_asf.pkl", cfg.step1_file)
     with pytest.raises(RuntimeError, match="different molecule"):
         hamiltonian.main(cfg, force=True)
+
+
+@pytest.mark.needs_pyscf
+@pytest.mark.slow
+def test_zero_coupling_is_reported_for_n2(tmp_path, golden_dir):
+    """
+    N2's reference density genuinely has no active/non-active coupling.
+    The warning must still fire -- the same signature would appear if the
+    density were ever rebuilt block-diagonally on a system that does have
+    a bath, which is the failure it guards.
+    """
+    cfg = _cfg_for("N2", tmp_path)
+    _stage_golden_step1(golden_dir, cfg, "N2")
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        hamiltonian.main(cfg, force=True)
+    assert any("no active/non-active coupling" in str(w.message) for w in caught)
