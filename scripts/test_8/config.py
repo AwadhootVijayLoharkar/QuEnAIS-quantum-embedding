@@ -186,7 +186,7 @@ HOMO_LUMO_TIER2_THRESHOLD_EV         = 1.0
 # not a wiring bug -- see the enlarged GQE sampling settings below.
 # TO RE-RUN THE LiH CONTROL: set MOLECULE = "LiH" and
 # FORCE_ACTIVE_SPACE = None.
-MOLECULE = "LiH"
+MOLECULE = "N2"
 CHARGE   = 0
 SPIN     = 0        # X(1)Sigma+ ground state (singlet)
 BASIS    = "sto-3g"
