@@ -101,6 +101,8 @@ class DMETEmbeddingMolecule:
         self.mol = self._build_fake_mol()
         self.hf = self._run_embedding_scf()
         self.mc = mcscf.CASCI(self.hf, self.norb, self.nelec)
+        self.mc.verbose = 0          # see the note in _run_embedding_scf
+        self.mc.fcisolver.verbose = 0
         self.cas_hamiltonian = Hamiltonian(
             h1=self._h1e_emb, h2=self._h2e_emb, e_core=self._ecore
         )
@@ -140,6 +142,9 @@ class DMETEmbeddingMolecule:
         mf.energy_nuc = lambda *a, **k: self._ecore
         mf.max_cycle = 200
         mf.conv_tol = 1e-10
+        # PySCF logs through its own stream, which contextlib.redirect_stdout
+        # does not capture, so quiet the object rather than the stream.
+        mf.verbose = 0
         mf.kernel()
 
         if not mf.converged:

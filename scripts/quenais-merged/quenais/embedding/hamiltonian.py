@@ -89,6 +89,10 @@ def verify_embedded_scf(step2, tol=2e-7, verbose=True):
     mf._eri = ao2mo.restore(8, h2e, n_emb)
     mf.energy_nuc = lambda *a, **k: ecore
     mf.max_cycle, mf.conv_tol = 200, 1e-10
+    # PySCF's logger writes to its own stream, past contextlib.redirect_stdout,
+    # so callers that capture stdout still see "converged SCF energy = ...".
+    # Silence the object instead of the stream.
+    mf.verbose = 0
     mf.kernel()
 
     if not mf.converged:

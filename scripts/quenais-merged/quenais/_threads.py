@@ -44,14 +44,46 @@ OPENBLAS_NUM_THREADS=4 keeps their value.
 
 import os
 
-__all__ = ["THREAD_VARS", "applied", "verify", "snapshot"]
+__all__ = ["THREAD_VARS", "applied", "verify", "snapshot",
+           "CPU_SOURCE"]
+
+#: Schedulers that tell us how many cores were actually allocated. Reading
+#: these matters on a shared HPC node: os.cpu_count() reports the whole
+#: machine, so a job allocated 8 cores would otherwise start ~95 OpenMP
+#: threads and fight every other job on the node.
+_SCHEDULER_VARS = (
+    "SLURM_CPUS_PER_TASK",
+    "SLURM_CPUS_ON_NODE",
+    "PBS_NP",
+    "NSLOTS",             # Grid Engine
+    "LSB_DJOB_NUMPROC",   # LSF
+)
+
+
+def _allocated_cpus():
+    """Cores this process may use: the scheduler's allocation, else the box."""
+    for name in _SCHEDULER_VARS:
+        raw = os.environ.get(name)
+        if raw:
+            try:
+                value = int(raw)
+            except ValueError:
+                continue
+            if value > 0:
+                return value, name
+    return (os.cpu_count() or 4), "os.cpu_count"
+
+
+_CPUS, CPU_SOURCE = _allocated_cpus()
 
 #: Variables this module controls, and the values it sets when unset.
 THREAD_VARS = {
     "OPENBLAS_NUM_THREADS": "1",
     "MKL_NUM_THREADS": "1",
     "NUMEXPR_NUM_THREADS": "1",
-    "OMP_NUM_THREADS": str(max(1, (os.cpu_count() or 4) - 1)),
+    # block2 keeps its own parallelism; leave it generous but never beyond
+    # what the scheduler actually gave us.
+    "OMP_NUM_THREADS": str(max(1, _CPUS - 1)),
 }
 
 #: True for each variable this module actually set (i.e. it was unset before).
@@ -104,4 +136,6 @@ def snapshot():
         "set_by_quenais": dict(applied),
         "numpy_imported_first": too_late,
         "cpu_count": os.cpu_count(),
+        "allocated_cpus": _CPUS,
+        "cpu_source": CPU_SOURCE,
     }

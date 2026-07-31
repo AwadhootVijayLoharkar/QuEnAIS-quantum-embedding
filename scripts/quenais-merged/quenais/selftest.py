@@ -71,10 +71,12 @@ def _check_threads(results):
     if problems:
         results.add(FAIL, "thread environment", problems[0])
     else:
-        vals = _threads.snapshot()["vars"]
+        snap = _threads.snapshot()
+        vals = snap["vars"]
         results.add(PASS, "thread environment",
                     f"OPENBLAS={vals['OPENBLAS_NUM_THREADS']} "
-                    f"OMP={vals['OMP_NUM_THREADS']}")
+                    f"OMP={vals['OMP_NUM_THREADS']} "
+                    f"(from {snap['cpu_source']})")
 
 
 def run_selftest(system="LiH", project_dir=None, verbose=False):

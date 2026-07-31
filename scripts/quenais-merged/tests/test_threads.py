@@ -137,3 +137,48 @@ def test_snapshot_is_serialisable():
     import json
 
     json.dumps(_threads.snapshot())
+
+
+def test_scheduler_allocation_is_respected():
+    """
+    On a shared node os.cpu_count() reports the whole machine. A job given
+    8 cores must not start ~95 OpenMP threads and fight everything else on
+    the node.
+    """
+    import json
+
+    out = run_snippet(
+        "import quenais, os, json\n"
+        "from quenais import _threads\n"
+        "print(json.dumps({'omp': os.environ['OMP_NUM_THREADS'],\n"
+        "                  'src': _threads.snapshot()['cpu_source']}))\n",
+        env={"SLURM_CPUS_PER_TASK": "8"},
+    )
+    assert out.returncode == 0, out.stderr
+    data = json.loads(out.stdout.strip().splitlines()[-1])
+    assert data["omp"] == "7", f"expected 7 (8 allocated - 1), got {data['omp']}"
+    assert data["src"] == "SLURM_CPUS_PER_TASK"
+
+
+def test_falls_back_to_cpu_count_without_a_scheduler():
+    import json
+
+    out = run_snippet(
+        "import quenais, json\n"
+        "from quenais import _threads\n"
+        "print(json.dumps(_threads.snapshot()['cpu_source']))\n"
+    )
+    assert out.returncode == 0, out.stderr
+    assert json.loads(out.stdout.strip().splitlines()[-1]) == "os.cpu_count"
+
+
+def test_malformed_scheduler_value_is_ignored():
+    """A non-numeric allocation must not crash the guard."""
+    out = run_snippet(
+        "import quenais, os\n"
+        "assert int(os.environ['OMP_NUM_THREADS']) >= 1\n"
+        "print('ok')\n",
+        env={"SLURM_CPUS_PER_TASK": "not-a-number"},
+    )
+    assert out.returncode == 0, out.stderr
+    assert "ok" in out.stdout
