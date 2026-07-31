@@ -1,0 +1,28 @@
+# environment.yml
+# Create with: mamba env create -f environment.yml -p ./quenais-env
+# Activate with: mamba activate ./quenais-env
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.11
+  - pip
+  - clang
+  - cmake
+  - openblas
+  - gfortran
+  - numpy>=1.24
+  - scipy>=1.10
+  - matplotlib>=3.7
+  - h5py>=3.9
+  - networkx>=3.0
+  - rust
+  - pip:
+    - pyscf>=2.4
+    - qiskit>=1.0
+    - qiskit-aer>=0.14
+    - qiskit-addon-sqd>=0.5
+    - openfermion>=1.6
+    - ffsim>=0.0.50

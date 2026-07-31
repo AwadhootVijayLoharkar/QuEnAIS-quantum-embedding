@@ -1,0 +1,6 @@
+quenais-env/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pkl
+results/
