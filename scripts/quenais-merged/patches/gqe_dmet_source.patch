@@ -1,34 +1,67 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:QuEnAIS-quantum-embedding]$ sha256sum scripts/quenais-merged/patches/gqe_dmet_source.patch 
-65c9c6416a98105dbd9aba8d8c09e2e17106451d092592bc4cf2d0cca41008c0  scripts/quenais-merged/patches/gqe_dmet_source.patch
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:QuEnAIS-quantum-embedding]$ cd scripts/quenais-merged/
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ pip install -e . --no-deps
-Obtaining file:///home/loharkar/QuEnAIS-quantum-embedding/scripts/quenais-merged
-  Installing build dependencies ... done
-  Checking if build backend supports build_editable ... done
-  Getting requirements to build editable ... done
-  Preparing editable metadata (pyproject.toml) ... done
-Building wheels for collected packages: quenais
-  Building editable for quenais (pyproject.toml) ... done
-  Created wheel for quenais: filename=quenais-0.2.0-0.editable-py3-none-any.whl size=5300 sha256=720a4adcc26174da70de70148a4aeb76a6d8bd3a31b459da90e6cc309a96106c
-  Stored in directory: /tmp/pip-ephem-wheel-cache-niman_2n/wheels/c0/2b/09/d1336dde4f413872c0e04e6a4c8ed6c63ae5ae6298f4700084
-Successfully built quenais
-Installing collected packages: quenais
-  Attempting uninstall: quenais
-    Found existing installation: quenais 0.2.0
-    Uninstalling quenais-0.2.0:
-      Successfully uninstalled quenais-0.2.0
-Successfully installed quenais-0.2.0
-
-[notice] A new release of pip is available: 26.1.2 -> 26.2
-[notice] To update, run: pip install --upgrade pip
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ pytest -q
-................................................................................................................ [ 45%]
-................................................................................................................ [ 91%]
-....................                                                                                             [100%]
-244 passed in 46.95s
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ quenais-gqe-setup --repo ~/QuEnAIS-quantum-embedding/gqe-for-qsci/
-repo: /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci
-Patch already applied to /home/loharkar/QuEnAIS-quantum-embedding/gqe-for-qsci -- nothing to do.
-
-Ready: submodule is at the expected commit and patched.
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ 
+diff --git a/gqe_qsci/factory.py b/gqe_qsci/factory.py
+index 22eb0cb..8f0a7b2 100644
+--- a/gqe_qsci/factory.py
++++ b/gqe_qsci/factory.py
+@@ -15,6 +15,7 @@ from hydra.utils import instantiate
+ 
+ from gqe_qsci.gqe.loss import GRPOLoss, GSPOLoss
+ from gqe_qsci.gqe.operator_pool import PauliEvolutionPool, ExcitationPool
++from dmet_excitation_pool import DMETPauliEvolutionPool, DMETExcitationPool
+ from gqe_qsci.gqe.sampler import Sampler
+ from gqe_qsci.qsci.pipeline import QSCIPipeline
+ from gqe_qsci.wandb_logger import Logger
+@@ -83,6 +84,16 @@ class Factory:
+                 )
+             case "excitation":
+                 operator_pool = ExcitationPool(molecule, params=cfg.operator_pool.params, threshold=cfg.operator_pool.ccsd_threshold)
++            case "dmet_pauli_evolution":
++                operator_pool = DMETPauliEvolutionPool(
++                    molecule,
++                    params=cfg.operator_pool.params,
++                    threshold=cfg.operator_pool.ccsd_threshold,
++                    remove_z_ladder=cfg.operator_pool.remove_z_ladder,
++                    only_use_first_pauli=cfg.operator_pool.only_use_first_pauli
++                )
++            case "dmet_excitation":
++                operator_pool = DMETExcitationPool(molecule, params=cfg.operator_pool.params, threshold=cfg.operator_pool.ccsd_threshold)
+             case _:
+                 raise ValueError(f"Unknown operator pool specification: {cfg.operator_pool.spec}")
+         self.operator_pool = operator_pool
+diff --git a/gqe_qsci/gqe/sampler.py b/gqe_qsci/gqe/sampler.py
+index 16a8ca0..df7976a 100644
+--- a/gqe_qsci/gqe/sampler.py
++++ b/gqe_qsci/gqe/sampler.py
+@@ -38,7 +38,7 @@ class Sampler:
+         idx_output = state["idx"]
+         pool = self.pool  
+ 
+-        if cudaq.mpi.is_initialized():  
++        if self.mpi and cudaq.mpi.is_initialized():  
+             rank = cudaq.mpi.rank()  
+             numRanks = cudaq.mpi.num_ranks()  
+             total_elements = len(idx_output)  
+@@ -66,7 +66,7 @@ class Sampler:
+             res = [getResultFunctor(handle) for (handle, getResultFunctor) in res]  
+ 
+         # Gather results from all MPI ranks  
+-        if cudaq.mpi.is_initialized():  
++        if self.mpi and cudaq.mpi.is_initialized():  
+             res = MPI.COMM_WORLD.allgather(res)  
+             res = [x for xs in res for x in xs]  
+ 
+diff --git a/gqe_qsci/train_pipeline.py b/gqe_qsci/train_pipeline.py
+index bfed3fb..df94239 100644
+--- a/gqe_qsci/train_pipeline.py
++++ b/gqe_qsci/train_pipeline.py
+@@ -57,8 +57,9 @@ class TrainPipeline(pl.LightningModule):
+             log_inputs.append({"result": self.best_local_refined, "prefix": "Local-refined(best_so_far)"})
+         if self.best_global_refined is not None:
+             log_inputs.append({"result": self.best_global_refined, "prefix": "Global-refined(best_so_far)"})
+-        self.metric_logger.log_result(self, log_inputs)
+-        super().on_train_epoch_start()
++        metrics = self.metric_logger.log_result(self, log_inputs)
++        print(f"[epoch {self.current_epoch}] {metrics}", flush=True)
++        super().on_train_epoch_start() 
+     
+     def on_train_epoch_end(self):
+         super().on_train_epoch_end()
