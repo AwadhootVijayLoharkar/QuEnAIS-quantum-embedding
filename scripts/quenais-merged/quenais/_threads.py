@@ -21,8 +21,8 @@ sure only ONE of the two libraries spawns threads. PySCF/block2 integral
 code already parallelises via OpenMP, so OpenBLAS is pinned to a single
 thread and never spawns its own pool inside an OpenMP region.
 
-OMP_NUM_THREADS is deliberately left generous (cpu_count - 1) so block2
-keeps its own parallelism.
+OMP_NUM_THREADS is left generous so block2 keeps its own parallelism, but
+never beyond what the scheduler actually allocated -- see _OMP_THREADS.
 
 TIMING IS THE WHOLE POINT
 -------------------------
@@ -76,14 +76,21 @@ def _allocated_cpus():
 
 _CPUS, CPU_SOURCE = _allocated_cpus()
 
+#: OpenMP threads for block2.
+#:
+#: When a scheduler told us the allocation, those cores are ours
+#: exclusively -- use all of them. When we are guessing from cpu_count we
+#: are probably sharing the machine, so leave one core free. The old
+#: unconditional cpu_count - 1 was wrong in both directions: it wasted a
+#: core inside a batch job, and grabbed ~95 threads on a login node.
+_OMP_THREADS = _CPUS if CPU_SOURCE != "os.cpu_count" else max(1, _CPUS - 1)
+
 #: Variables this module controls, and the values it sets when unset.
 THREAD_VARS = {
     "OPENBLAS_NUM_THREADS": "1",
     "MKL_NUM_THREADS": "1",
     "NUMEXPR_NUM_THREADS": "1",
-    # block2 keeps its own parallelism; leave it generous but never beyond
-    # what the scheduler actually gave us.
-    "OMP_NUM_THREADS": str(max(1, _CPUS - 1)),
+    "OMP_NUM_THREADS": str(max(1, _OMP_THREADS)),
 }
 
 #: True for each variable this module actually set (i.e. it was unset before).

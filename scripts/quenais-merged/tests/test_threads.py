@@ -20,10 +20,16 @@ from quenais import _threads
 VARS = ["OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
         "NUMEXPR_NUM_THREADS", "OMP_NUM_THREADS"]
 
+# Also cleared from the child environment. Running the suite inside a real
+# SLURM job otherwise leaks the allocation into tests that are asserting
+# the no-scheduler fallback.
+SCHEDULER_VARS = list(_threads._SCHEDULER_VARS)
+
 
 def run_snippet(code, env=None):
     """Run code in a fresh interpreter with the repo on sys.path."""
-    child_env = {k: v for k, v in os.environ.items() if k not in VARS}
+    stripped = set(VARS) | set(SCHEDULER_VARS)
+    child_env = {k: v for k, v in os.environ.items() if k not in stripped}
     child_env["PYTHONPATH"] = os.pathsep.join(sys.path)
     if env:
         child_env.update(env)
@@ -156,7 +162,8 @@ def test_scheduler_allocation_is_respected():
     )
     assert out.returncode == 0, out.stderr
     data = json.loads(out.stdout.strip().splitlines()[-1])
-    assert data["omp"] == "7", f"expected 7 (8 allocated - 1), got {data['omp']}"
+    # A scheduler allocation is exclusive, so use all 8 rather than 7.
+    assert data["omp"] == "8", f"expected 8 (the full allocation), got {data['omp']}"
     assert data["src"] == "SLURM_CPUS_PER_TASK"
 
 
@@ -182,3 +189,22 @@ def test_malformed_scheduler_value_is_ignored():
     )
     assert out.returncode == 0, out.stderr
     assert "ok" in out.stdout
+
+
+def test_cpu_count_fallback_leaves_one_core_free():
+    """
+    Without a scheduler we are probably sharing the machine, so reserve a
+    core. With one, the allocation is exclusive and we take all of it --
+    the two cases genuinely differ.
+    """
+    import json
+
+    out = run_snippet(
+        "import quenais, os, json\n"
+        "from quenais import _threads\n"
+        "print(json.dumps({'omp': int(os.environ['OMP_NUM_THREADS']),\n"
+        "                  'cpus': _threads.snapshot()['cpu_count']}))\n"
+    )
+    assert out.returncode == 0, out.stderr
+    data = json.loads(out.stdout.strip().splitlines()[-1])
+    assert data["omp"] == max(1, data["cpus"] - 1)
