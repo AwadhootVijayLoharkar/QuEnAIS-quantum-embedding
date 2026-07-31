@@ -1,29 +1,8 @@
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ pytest -q
 ................................................................................................................ [ 47%]
-................................................................................................................ [ 95%]
-.........F.                                                                                                      [100%]
-======================================================= FAILURES =======================================================
-___________________________________ test_falls_back_to_cpu_count_without_a_scheduler ___________________________________
-
-    def test_falls_back_to_cpu_count_without_a_scheduler():
-        import json
-    
-        out = run_snippet(
-            "import quenais, json\n"
-            "from quenais import _threads\n"
-            "print(json.dumps(_threads.snapshot()['cpu_source']))\n"
-        )
-        assert out.returncode == 0, out.stderr
->       assert json.loads(out.stdout.strip().splitlines()[-1]) == "os.cpu_count"
-E       AssertionError: assert 'SLURM_CPUS_PER_TASK' == 'os.cpu_count'
-E         
-E         - os.cpu_count
-E         + SLURM_CPUS_PER_TASK
-
-tests/test_threads.py:172: AssertionError
-=============================================== short test summary info ================================================
-FAILED tests/test_threads.py::test_falls_back_to_cpu_count_without_a_scheduler - AssertionError: assert 'SLURM_CPUS_PER_TASK' == 'os.cpu_count'
-1 failed, 234 passed in 46.58s
+................................................................................................................ [ 94%]
+............                                                                                                     [100%]
+236 passed in 44.96s
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ quenais-selftest 
 
 QuEnAIS self-test -- LiH
