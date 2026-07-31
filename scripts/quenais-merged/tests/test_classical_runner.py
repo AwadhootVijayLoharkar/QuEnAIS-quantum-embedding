@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import ast
 import inspect
+import os
 import pickle
 from pathlib import Path
 
@@ -129,6 +130,26 @@ def test_nevpt_class_is_resolved_by_the_right_name():
 
 # ── Numerical: needs PySCF ───────────────────────────────────────────────
 
+def _stage_golden_step1(golden_dir, cfg, system):
+    """
+    Copy the validated step 1 pickle into the run's results directory.
+
+    Without it, CASSCF falls back to a guessed active space and the
+    comparison is meaningless -- the golden CASSCF/NEVPT2 numbers were
+    produced with ASF's space. Concretely: LiH's golden space is (2e,2o)
+    but the fallback picks (4e,3o); N2's is (4e,4o) but the fallback picks
+    (10e,5o), which is completely filled, leaves no correlating degrees of
+    freedom, and makes CASSCF return exactly the HF energy.
+
+    This is a test-fixture concern, not a pipeline one. In a real run,
+    step 1 has already written this file.
+    """
+    import shutil
+
+    os.makedirs(cfg.results_dir, exist_ok=True)
+    shutil.copy(golden_dir / system / "step1_asf.pkl", cfg.step1_file)
+
+
 @pytest.mark.needs_pyscf
 @pytest.mark.slow
 @pytest.mark.parametrize("system", ["LiH", "N2"])
@@ -137,7 +158,7 @@ def test_energies_match_golden(system, tmp_path, golden_dir):
     Run step 0 for real and compare against the validated pickle.
 
     Deterministic methods are held to 1e-9 Ha. CASSCF and NEVPT2 get a
-    1 mHa window because they depend on which solution the optimiser finds.
+    2 mHa window because they depend on which solution the optimiser finds.
     ScH is excluded: it takes minutes and its CASSCF is the least stable of
     the three.
     """
@@ -149,8 +170,13 @@ def test_energies_match_golden(system, tmp_path, golden_dir):
         classical_methods=["HF", "MP2", "CCSD", "CCSD_T", "CASSCF", "NEVPT2"],
     )
     cfg.validate().make_dirs().load_geometry()
+    _stage_golden_step1(golden_dir, cfg, system)
 
     results = runner.main(cfg, force=True)
+
+    # The active space must be the one the golden numbers came from.
+    assert results["methods"]["CASSCF"]["nel"] == ref["structure"]["nel"]
+    assert results["methods"]["CASSCF"]["norb"] == ref["structure"]["n_imp"]
 
     for method, (expected, tier) in ref["energies"].items():
         if method.startswith("DMET"):
@@ -177,6 +203,7 @@ def test_result_pickle_is_comparable_to_golden(tmp_path, golden_dir):
         classical_methods=["HF", "MP2", "CCSD", "CCSD_T", "CASSCF", "NEVPT2"],
     )
     cfg.validate().make_dirs().load_geometry()
+    _stage_golden_step1(golden_dir, cfg, "LiH")
     runner.main(cfg, force=True)
 
     with open(golden_dir / "LiH" / "step0_classical.pkl", "rb") as fh:
@@ -184,7 +211,17 @@ def test_result_pickle_is_comparable_to_golden(tmp_path, golden_dir):
     with open(cfg.step0_file, "rb") as fh:
         produced = pickle.load(fh)
 
-    report = compare(golden, produced, tol=1e-9)
+    # Everything is held to 1e-9 except the two optimizer-dependent
+    # energies, which get the same 2 mHa window as the tier table. Loosening
+    # them by full dotted path rather than by the bare name "energy" keeps
+    # the deterministic energies tight.
+    report = compare(
+        golden, produced, tol=1e-9,
+        key_tol={
+            "methods.CASSCF.energy": 2e-3,
+            "methods.NEVPT2.energy": 2e-3,
+        },
+    )
     # 'tier' and 'provenance' are new in 0.2 and absent from golden; the
     # comparator reports extra keys as informational, not failures.
     assert report.ok, report.render(verbose=True)

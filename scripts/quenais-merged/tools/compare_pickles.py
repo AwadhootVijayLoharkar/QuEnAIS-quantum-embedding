@@ -113,6 +113,13 @@ class Report:
 
 
 def _tol_for(key: str, key_tol: dict[str, float], default: float) -> float:
+    """
+    Tolerance for a key. Full dotted paths win over bare names, so a caller
+    can loosen one quantity ("methods.CASSCF.energy") without loosening
+    every "energy" in the file.
+    """
+    if key in key_tol:
+        return key_tol[key]
     return key_tol.get(key.split(".")[-1], default)
 
 
@@ -160,7 +167,8 @@ def _compare_scalar(key: str, a: Any, b: Any, tol: float, report: Report) -> Non
                    f"|d|={d:.3e} > {tol:.0e} (golden={fa:.12g}, got={fb:.12g})")
 
 
-def _compare_value(key: str, a: Any, b: Any, tol: float, report: Report) -> None:
+def _compare_value(key: str, a: Any, b: Any, tol: float, report: Report,
+                   key_tol: dict | None = None) -> None:
     if type(a) is not type(b) and not (
         isinstance(a, (int, float, np.number)) and isinstance(b, (int, float, np.number))
     ):
@@ -168,7 +176,7 @@ def _compare_value(key: str, a: Any, b: Any, tol: float, report: Report) -> None
         return
 
     if isinstance(a, dict):
-        _compare_dict(a, b, tol, report, prefix=key + ".")
+        _compare_dict(a, b, tol, report, prefix=key + ".", key_tol=key_tol)
     elif isinstance(a, np.ndarray):
         _compare_arrays(key, a, np.asarray(b), tol, report)
     elif isinstance(a, (list, tuple)):
@@ -192,7 +200,9 @@ def _compare_value(key: str, a: Any, b: Any, tol: float, report: Report) -> None
 
 
 def _compare_dict(golden: dict, cand: dict, tol: float,
-                  report: Report, prefix: str = "") -> None:
+                  report: Report, prefix: str = "",
+                  key_tol: dict | None = None) -> None:
+    key_tol = DEFAULT_KEY_TOL if key_tol is None else key_tol
     for k in golden:
         key = prefix + str(k)
         short = str(k)
@@ -203,30 +213,41 @@ def _compare_dict(golden: dict, cand: dict, tol: float,
             report.add(key, FAIL, "MISSING from candidate")
             continue
         _compare_value(key, golden[k], cand[k],
-                       _tol_for(key, DEFAULT_KEY_TOL, tol), report)
+                       _tol_for(key, key_tol, tol), report, key_tol)
 
     for k in cand:
         if k not in golden:
             report.add(prefix + str(k), INFO, "new key, not in golden")
 
 
-def compare(golden: Any, candidate: Any, tol: float = DEFAULT_TOL) -> Report:
-    """Compare two loaded pickle payloads. Returns a Report."""
+def compare(golden: Any, candidate: Any, tol: float = DEFAULT_TOL,
+            key_tol: dict | None = None) -> Report:
+    """
+    Compare two loaded pickle payloads. Returns a Report.
+
+    key_tol overrides DEFAULT_KEY_TOL. Entries may be bare names ("ecore")
+    or full dotted paths ("methods.CASSCF.energy"); the full path wins.
+    Use it to loosen an optimizer-dependent quantity without loosening the
+    deterministic ones next to it.
+    """
+    merged = dict(DEFAULT_KEY_TOL)
+    if key_tol:
+        merged.update(key_tol)
     report = Report()
     if isinstance(golden, dict) and isinstance(candidate, dict):
-        _compare_dict(golden, candidate, tol, report)
+        _compare_dict(golden, candidate, tol, report, key_tol=merged)
     else:
-        _compare_value("<root>", golden, candidate, tol, report)
+        _compare_value("<root>", golden, candidate, tol, report, merged)
     return report
 
 
 def compare_files(golden_path: str, candidate_path: str,
-                  tol: float = DEFAULT_TOL) -> Report:
+                  tol: float = DEFAULT_TOL, key_tol: dict | None = None) -> Report:
     with open(golden_path, "rb") as fh:
         golden = pickle.load(fh)
     with open(candidate_path, "rb") as fh:
         candidate = pickle.load(fh)
-    return compare(golden, candidate, tol=tol)
+    return compare(golden, candidate, tol=tol, key_tol=key_tol)
 
 
 def main() -> int:
