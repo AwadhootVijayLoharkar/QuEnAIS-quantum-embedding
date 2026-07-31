@@ -1,43 +1,27 @@
-(/home/loharkar/test-gqe-quenais/test-env-gqe) [loharkar@erebos05:quenais-merged]$ PYTHONPATH=$PWD pytest -q
-ImportError while loading conftest '/home/loharkar/test-gqe-quenais/quenais-merged/tests/conftest.py'.
-tests/conftest.py:15: in <module>
-    import quenais  # noqa: F401  isort:skip
-    ^^^^^^^^^^^^^^
-E   ModuleNotFoundError: No module named 'quenais'
-(/home/loharkar/test-gqe-quenais/test-env-gqe) [loharkar@erebos05:quenais-merged]$ cd ..
-(/home/loharkar/test-gqe-quenais/test-env-gqe) [loharkar@erebos05:test-gqe-quenais]$ PYTHONPATH=$PWD pytest -q
-
-======================================================== ERRORS ========================================================
-________________________________________ ERROR collecting quenais-merged/tests _________________________________________
-test-env-gqe/lib/python3.11/importlib/__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-<frozen importlib._bootstrap>:1204: in _gcd_import
-    ???
-<frozen importlib._bootstrap>:1176: in _find_and_load
-    ???
-<frozen importlib._bootstrap>:1147: in _find_and_load_unlocked
-    ???
-<frozen importlib._bootstrap>:690: in _load_unlocked
-    ???
-test-env-gqe/lib/python3.11/site-packages/_pytest/assertion/rewrite.py:188: in exec_module
-    exec(co, module.__dict__)
-quenais-merged/tests/conftest.py:15: in <module>
-    import quenais  # noqa: F401  isort:skip
-    ^^^^^^^^^^^^^^
-E   ModuleNotFoundError: No module named 'quenais'
-=============================================== short test summary info ================================================
-ERROR quenais-merged/tests - ModuleNotFoundError: No module named 'quenais'
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-1 error in 0.43s
-(/home/loharkar/test-gqe-quenais/test-env-gqe) [loharkar@erebos05:test-gqe-quenais]$ cd quenais-merged/
-(/home/loharkar/test-gqe-quenais/test-env-gqe) [loharkar@erebos05:quenais-merged]$ ls
-cif_files  environment.yml  notebooks       quenais.egg-info  requirements-base.txt  requirements-quantum.txt  tests
-docs       install.sh       pyproject.toml  README.md         requirements-dev.txt   setup.cfg                 tools
-(/home/loharkar/test-gqe-quenais/test-env-gqe) [loharkar@erebos05:quenais-merged]$ pytest =q
-ImportError while loading conftest '/home/loharkar/test-gqe-quenais/quenais-merged/tests/conftest.py'.
-tests/conftest.py:15: in <module>
-    import quenais  # noqa: F401  isort:skip
-    ^^^^^^^^^^^^^^
-E   ModuleNotFoundError: No module named 'quenais'
-(/home/loharkar/test-gqe-quenais/test-env-gqe) [loharkar@erebos05:quenais-merged]$
+(/home/loharkar/test-gqe-quenais/test-env-gqe) [loharkar@erebos05:test-gqe-quenais]$ pip uninstall quenais -y
+Found existing installation: quenais 0.2.0
+Uninstalling quenais-0.2.0:
+  Successfully uninstalled quenais-0.2.0
+(/home/loharkar/test-gqe-quenais/test-env-gqe) [loharkar@erebos05:test-gqe-quenais]$ rm -rf /home/loharkar/test-gqe-quenais/quenais-merged/
+(/home/loharkar/test-gqe-quenais/test-env-gqe) [loharkar@erebos05:test-gqe-quenais]$ cd /home/loharkar/QuEnAIS-quantum-embedding/scripts/quenais-merged/
+(/home/loharkar/test-gqe-quenais/test-env-gqe) [loharkar@erebos05:quenais-merged]$ ls quenais/settings/
+asf.py  dmet.py  gqe.py  __init__.py  qiskit_solver.py  tiering.py
+(/home/loharkar/test-gqe-quenais/test-env-gqe) [loharkar@erebos05:quenais-merged]$ pip install -e . --no-deps
+Obtaining file:///home/loharkar/QuEnAIS-quantum-embedding/scripts/quenais-merged
+  Installing build dependencies ... done
+  Checking if build backend supports build_editable ... done
+  Getting requirements to build editable ... done
+  Preparing editable metadata (pyproject.toml) ... done
+Building wheels for collected packages: quenais
+  Building editable for quenais (pyproject.toml) ... done
+  Created wheel for quenais: filename=quenais-0.2.0-0.editable-py3-none-any.whl size=5300 sha256=86baae227e44a102975aedf40faa8892af155b4be56466d4cedb4bb8ed11e287
+  Stored in directory: /tmp/pip-ephem-wheel-cache-_jm35gz5/wheels/c0/2b/09/d1336dde4f413872c0e04e6a4c8ed6c63ae5ae6298f4700084
+Successfully built quenais
+Installing collected packages: quenais
+Successfully installed quenais-0.2.0
+(/home/loharkar/test-gqe-quenais/test-env-gqe) [loharkar@erebos05:quenais-merged]$ python -c "import quenais ; print(quenais.__file__)"
+/home/loharkar/QuEnAIS-quantum-embedding/scripts/quenais-merged/quenais/__init__.py
+(/home/loharkar/test-gqe-quenais/test-env-gqe) [loharkar@erebos05:quenais-merged]$ pytest -q
+...............................................................................................................  [100%]
+111 passed in 6.57s
+(/home/loharkar/test-gqe-quenais/test-env-gqe) [loharkar@erebos05:quenais-merged]$ 
