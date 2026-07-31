@@ -411,7 +411,7 @@ MAX_EMBED_ORBS = 18
 # Set to None when running the LiH control (these are ScH MO indices and
 # are out of range for LiH's 6 AOs; LiH validates fine on ASF's own
 # automatic (2e, 2o) selection).
-FORCE_ACTIVE_SPACE = [9, 10, 11, 12, 13, 14]   # ScH: (4e, 6o)
+FORCE_ACTIVE_SPACE = [9, 10, 11, 12, 13, 14]  # ScH: (4e, 6o)
 
 # "mp2" -- reuse Step 1's MP2 1-RDM (fast, unreliable exactly where static
 #          correlation is strong).
