@@ -416,3 +416,39 @@ def test_patch_is_a_well_formed_unified_diff():
     assert len(hunks) >= 4, f"expected at least 4 hunks, found {len(hunks)}"
     for name in gqe_setup.PATCHED_FILES:
         assert f"--- a/{name}" in _patch_text()
+
+
+def test_create_patch_refuses_an_incomplete_diff(tmp_path, monkeypatch=None):
+    """
+    git diff reports only uncommitted changes, so a file committed inside
+    the submodule silently drops its hunk -- and a partial patch looks
+    fine. Writing one over a good patch destroyed it once. Refuse instead.
+    """
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    out = tmp_path / "out.patch"
+    out.write_text("ORIGINAL PATCH CONTENT")
+
+    partial = (
+        "diff --git a/gqe_qsci/factory.py b/gqe_qsci/factory.py\n"
+        "--- a/gqe_qsci/factory.py\n"
+        "+++ b/gqe_qsci/factory.py\n"
+        "@@ -1 +1 @@\n-x\n+y\n"
+    )
+
+    class FakeResult:
+        returncode = 0
+        stdout = partial
+        stderr = ""
+
+    original = gqe_setup._git
+    gqe_setup._git = lambda *a, **k: FakeResult()
+    try:
+        with pytest.raises(RuntimeError, match="incomplete patch"):
+            gqe_setup.create_patch(repo, out)
+    finally:
+        gqe_setup._git = original
+
+    assert out.read_text() == "ORIGINAL PATCH CONTENT", (
+        "the existing patch must be left untouched when the new one is bad"
+    )

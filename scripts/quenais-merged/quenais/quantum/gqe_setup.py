@@ -176,9 +176,28 @@ def create_patch(repo, out_path=None):
             f"this checkout does not carry them."
         )
 
+    # VALIDATE BEFORE WRITING. git diff reports only UNCOMMITTED changes, so
+    # if any of the three files has been committed inside the submodule it
+    # silently drops that hunk -- and a partial patch looks like a perfectly
+    # good file. That happened once and produced a patch with zero hunks
+    # that overwrote the correct one. Refuse rather than write a lie.
+    touched = {ln[len("+++ b/"):].strip() for ln in result.stdout.splitlines()
+               if ln.startswith("+++ b/")}
+    missing = set(PATCHED_FILES) - touched
+    if missing:
+        raise RuntimeError(
+            f"Refusing to write an incomplete patch. git diff produced hunks "
+            f"for {sorted(touched) or 'nothing'}, but {sorted(missing)} "
+            f"are missing.\n\n"
+            f"git diff only reports UNCOMMITTED changes, so this usually "
+            f"means those files were committed inside the submodule. Check "
+            f"with:\n"
+            f"  cd {repo} && git log --oneline -3 && git status\n\n"
+            f"The existing patch at {out_path} has NOT been modified."
+        )
+
     out_path.write_text(result.stdout)
-    touched = [ln.split()[-1] for ln in result.stdout.splitlines()
-               if ln.startswith("+++ b/")]
+    touched = sorted(touched)
     print(f"Wrote {out_path}")
     print(f"  files: {touched}")
     print(f"  sha256: {_sha256(out_path)}")
