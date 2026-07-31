@@ -46,9 +46,13 @@ def test_degenerate_pair_is_not_split():
     The invariant is that the pair is not SPLIT -- keeping both or dropping
     both are equally valid. Asserting they must be kept would be wrong.
     """
-    _k, _gap, selected = finder.find_gap_cutoff(
-        DEGENERATE_VALUES, min_n=3, max_n=3, degeneracy_tol=1e-3
-    )
+    # The extension warning is the expected behaviour here and is asserted
+    # by test_extension_warns; suppress it so `pytest -q` stays clean.
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        _k, _gap, selected = finder.find_gap_cutoff(
+            DEGENERATE_VALUES, min_n=3, max_n=3, degeneracy_tol=1e-3
+        )
     assert (2 in selected) == (3 in selected), (
         f"degenerate pair split: kept indices {sorted(selected)}"
     )
@@ -66,9 +70,11 @@ def test_degenerate_pair_would_be_split_without_the_tolerance():
 
 
 def test_extension_reports_a_consistent_count():
-    k, _gap, selected = finder.find_gap_cutoff(
-        DEGENERATE_VALUES, min_n=3, max_n=3, degeneracy_tol=1e-3
-    )
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        k, _gap, selected = finder.find_gap_cutoff(
+            DEGENERATE_VALUES, min_n=3, max_n=3, degeneracy_tol=1e-3
+        )
     assert k == len(selected) == 4, "cutoff extended from 3 to 4"
 
 
