@@ -1,5 +1,13 @@
 # Known limitations
 
+Status: the DMET pipeline (steps 0-2) and the GQE integration layer are
+validated against the reference values in the README. The GQE solver has
+not yet been run end to end THROUGH THE PACKAGE -- the adapter, pools,
+runner and patch tooling are each tested, but the full
+`quenais-run --solver gqe` path is the last unexercised link. Until it is,
+keep `scripts/test_8/` as the oracle.
+
+
 Read this before trusting a result from a system that is not LiH or N₂.
 
 ## Active-space selection under-selects for transition metals

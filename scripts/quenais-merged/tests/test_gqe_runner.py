@@ -452,3 +452,37 @@ def test_create_patch_refuses_an_incomplete_diff(tmp_path, monkeypatch=None):
     assert out.read_text() == "ORIGINAL PATCH CONTENT", (
         "the existing patch must be left untouched when the new one is bad"
     )
+
+
+# ── Documentation contracts ──────────────────────────────────────────────
+
+def _docs_dir():
+    return Path(gqe_setup.PATCH_PATH).parents[1] / "docs"
+
+
+def test_documented_files_match_the_code():
+    """
+    The GQE integration doc names the three patched files. If PATCHED_FILES
+    changes and the doc does not, the doc becomes a lie.
+    """
+    text = (_docs_dir() / "gqe_integration.md").read_text()
+    for name in gqe_setup.PATCHED_FILES:
+        assert name in text, f"docs/gqe_integration.md does not mention {name}"
+    assert "configs/trainer/default.yaml" in text, (
+        "the doc must explain why the config hunk is excluded"
+    )
+
+
+def test_readme_documents_both_solver_families():
+    from quenais.config import GQE_SOLVERS, QISKIT_SOLVERS
+
+    readme = (Path(gqe_setup.PATCH_PATH).parents[1] / "README.md").read_text()
+    for name in list(QISKIT_SOLVERS) + list(GQE_SOLVERS):
+        assert f"`{name}`" in readme, f"README does not document solver {name}"
+
+
+def test_limitations_doc_exists_and_covers_the_known_issues():
+    text = (_docs_dir() / "limitations.md").read_text().lower()
+    for topic in ("active space", "transition metal", "closed-shell",
+                  "optimizer-dependent"):
+        assert topic in text, f"docs/limitations.md does not cover: {topic}"
