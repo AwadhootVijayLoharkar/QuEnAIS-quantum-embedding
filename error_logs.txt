@@ -1,4 +1,4 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ pip install -e . --no-deps
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ pip install -e . --no-deps 
 Obtaining file:///home/loharkar/QuEnAIS-quantum-embedding/scripts/quenais-merged
   Installing build dependencies ... done
   Checking if build backend supports build_editable ... done
@@ -6,8 +6,8 @@ Obtaining file:///home/loharkar/QuEnAIS-quantum-embedding/scripts/quenais-merged
   Preparing editable metadata (pyproject.toml) ... done
 Building wheels for collected packages: quenais
   Building editable for quenais (pyproject.toml) ... done
-  Created wheel for quenais: filename=quenais-0.2.0-0.editable-py3-none-any.whl size=5300 sha256=b414920baeb6d075758fab83cc6ba19d603aa1a2d96ba8575098418de6c0f1ee
-  Stored in directory: /tmp/pip-ephem-wheel-cache-6867fkoj/wheels/c0/2b/09/d1336dde4f413872c0e04e6a4c8ed6c63ae5ae6298f4700084
+  Created wheel for quenais: filename=quenais-0.2.0-0.editable-py3-none-any.whl size=6926 sha256=e383a444e9d37c4ccb23d405d3cdf65a202597efa1933a226edb70ff56d2142a
+  Stored in directory: /tmp/pip-ephem-wheel-cache-fo1ohgme/wheels/c0/2b/09/d1336dde4f413872c0e04e6a4c8ed6c63ae5ae6298f4700084
 Successfully built quenais
 Installing collected packages: quenais
   Attempting uninstall: quenais
@@ -20,7 +20,7 @@ Successfully installed quenais-0.2.0
 [notice] To update, run: pip install --upgrade pip
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ pytest -q
 ................................................................................................................ [ 42%]
-................................................................................................................ [ 85%]
-.......................................                                                                          [100%]
-263 passed in 50.89s
+................................................................................................................ [ 84%]
+..........................................                                                                       [100%]
+266 passed in 177.27s (0:02:57)
 (/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ 
