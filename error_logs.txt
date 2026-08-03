@@ -1,26 +1,27 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ pip install -e . --no-deps 
-Obtaining file:///home/loharkar/QuEnAIS-quantum-embedding/scripts/quenais-merged
-  Installing build dependencies ... done
-  Checking if build backend supports build_editable ... done
-  Getting requirements to build editable ... done
-  Preparing editable metadata (pyproject.toml) ... done
-Building wheels for collected packages: quenais
-  Building editable for quenais (pyproject.toml) ... done
-  Created wheel for quenais: filename=quenais-0.2.0-0.editable-py3-none-any.whl size=6926 sha256=e383a444e9d37c4ccb23d405d3cdf65a202597efa1933a226edb70ff56d2142a
-  Stored in directory: /tmp/pip-ephem-wheel-cache-fo1ohgme/wheels/c0/2b/09/d1336dde4f413872c0e04e6a4c8ed6c63ae5ae6298f4700084
-Successfully built quenais
-Installing collected packages: quenais
-  Attempting uninstall: quenais
-    Found existing installation: quenais 0.2.0
-    Uninstalling quenais-0.2.0:
-      Successfully uninstalled quenais-0.2.0
-Successfully installed quenais-0.2.0
-
-[notice] A new release of pip is available: 26.1.2 -> 26.2
-[notice] To update, run: pip install --upgrade pip
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ pytest -q
-................................................................................................................ [ 42%]
-................................................................................................................ [ 84%]
-..........................................                                                                       [100%]
-266 passed in 177.27s (0:02:57)
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-merged]$ 
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:QuEnAIS-quantum-embedding]$ mkdir ~/quenais-standalone
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:QuEnAIS-quantum-embedding]$ cd ..
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:~]$ cd quenais-standalone/
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-standalone]$ tar xzf ~/QuEnAIS-quantum-embedding/quenais_standalone_repo.tar.gz 
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-standalone]$ cd quenais/
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais]$ ls
+cif_files        environment.yml  notebooks       quenais                requirements-dev.txt      SETUP_NEW_REPO.md
+CONTRIBUTING.md  install.sh       patches         README.md              requirements-quantum.txt  tests
+docs             LICENSE          pyproject.toml  requirements-base.txt  setup.cfg                 tools
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais]$ git init
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint:
+hint:   git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint:   git branch -m <name>
+Initialized empty Git repository in /home/loharkar/quenais-standalone/quenais/.git/
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais]$ git branch -M main
+git remote add origin https://github.com/AwadhootVijayLoharkar/quenais-package-test.git
+git push -u origin main
+error: src refspec main does not match any
+error: failed to push some refs to 'https://github.com/AwadhootVijayLoharkar/quenais-package-test.git'
+(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais]$ 
