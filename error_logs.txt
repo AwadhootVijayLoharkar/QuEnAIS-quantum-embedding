@@ -1,27 +1,538 @@
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:QuEnAIS-quantum-embedding]$ mkdir ~/quenais-standalone
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:QuEnAIS-quantum-embedding]$ cd ..
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:~]$ cd quenais-standalone/
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-standalone]$ tar xzf ~/QuEnAIS-quantum-embedding/quenais_standalone_repo.tar.gz 
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais-standalone]$ cd quenais/
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais]$ ls
-cif_files        environment.yml  notebooks       quenais                requirements-dev.txt      SETUP_NEW_REPO.md
-CONTRIBUTING.md  install.sh       patches         README.md              requirements-quantum.txt  tests
-docs             LICENSE          pyproject.toml  requirements-base.txt  setup.cfg                 tools
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais]$ git init
-hint: Using 'master' as the name for the initial branch. This default branch name
-hint: is subject to change. To configure the initial branch name to use in all
-hint: of your new repositories, which will suppress this warning, call:
-hint:
-hint:   git config --global init.defaultBranch <name>
-hint:
-hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
-hint: 'development'. The just-created branch can be renamed via this command:
-hint:
-hint:   git branch -m <name>
-Initialized empty Git repository in /home/loharkar/quenais-standalone/quenais/.git/
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais]$ git branch -M main
-git remote add origin https://github.com/AwadhootVijayLoharkar/quenais-package-test.git
-git push -u origin main
-error: src refspec main does not match any
-error: failed to push some refs to 'https://github.com/AwadhootVijayLoharkar/quenais-package-test.git'
-(/home/loharkar/QuEnAIS-quantum-embedding/quenais-env2) [loharkar@erebos05:quenais]$ 
+Linking jupyter-lsp-2.3.1-pyhcf101f3_0
+Linking jupyterlab_server-2.28.0-pyhcf101f3_0
+Linking jupyterlab-4.6.2-pyhd8ed1ab_0
+Linking notebook-7.6.1-pyhcf101f3_0
+Linking jupyter-1.1.1-pyhd8ed1ab_1
+
+Transaction finished
+
+
+To activate this environment, use:
+
+    mamba activate /home/loharkar/quenais-standalone/quenais/quenais-env
+
+Or to execute a single command in this environment, use:
+
+    mamba run -p /home/loharkar/quenais-standalone/quenais/quenais-env mycommand
+
+warning  libmamba You are using 'pip' as an additional package manager.
+    Be aware that packages installed with 'pip' are managed independently from 'conda-forge' channel.
+
+Installing pip packages: pyscf>=2.4, qiskit>=1.0, qiskit-aer>=0.14, qiskit-addon-sqd>=0.5, ffsim>=0.0.50, openfermion>=1.6, block2==0.5.2
+Collecting pyscf>=2.4 (from -r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 1))
+  Downloading pyscf-2.14.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)
+Collecting qiskit>=1.0 (from -r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 2))
+  Downloading qiskit-2.5.1-cp310-abi3-manylinux_2_28_x86_64.whl.metadata (14 kB)
+Collecting qiskit-aer>=0.14 (from -r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 3))
+  Using cached qiskit_aer-0.17.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (8.3 kB)
+Collecting qiskit-addon-sqd>=0.5 (from -r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 4))
+  Using cached qiskit_addon_sqd-0.12.1-py3-none-any.whl.metadata (26 kB)
+Collecting ffsim>=0.0.50 (from -r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 5))
+  Downloading ffsim-0.0.83-cp311-abi3-manylinux_2_28_x86_64.whl.metadata (5.0 kB)
+Collecting openfermion>=1.6 (from -r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6))
+  Downloading openfermion-1.8.1-py3-none-any.whl.metadata (13 kB)
+Collecting block2==0.5.2 (from -r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 7))
+  Using cached block2-0.5.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (9.5 kB)
+Collecting mkl==2021.4 (from block2==0.5.2->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 7))
+  Using cached mkl-2021.4.0-py2.py3-none-manylinux1_x86_64.whl.metadata (1.3 kB)
+Collecting mkl-include (from block2==0.5.2->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 7))
+  Downloading mkl_include-2026.1.0-py2.py3-none-manylinux_2_28_x86_64.whl.metadata (1.6 kB)
+Collecting intel-openmp (from block2==0.5.2->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 7))
+  Downloading intel_openmp-2026.1.1-py2.py3-none-manylinux_2_28_x86_64.whl.metadata (1.2 kB)
+Requirement already satisfied: numpy in ./quenais-env/lib/python3.11/site-packages (from block2==0.5.2->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 7)) (2.4.6)
+Collecting cmake>=3.19 (from block2==0.5.2->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 7))
+  Downloading cmake-4.4.0-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (7.0 kB)
+Requirement already satisfied: scipy in ./quenais-env/lib/python3.11/site-packages (from block2==0.5.2->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 7)) (1.17.1)
+Requirement already satisfied: psutil in ./quenais-env/lib/python3.11/site-packages (from block2==0.5.2->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 7)) (7.2.2)
+Collecting pybind11<=2.10.1 (from block2==0.5.2->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 7))
+  Using cached pybind11-2.10.1-py3-none-any.whl.metadata (9.4 kB)
+Collecting intel-openmp (from block2==0.5.2->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 7))
+  Using cached intel_openmp-2021.4.0-py2.py3-none-manylinux1_x86_64.whl.metadata (1.1 kB)
+Collecting tbb==2021.* (from mkl==2021.4->block2==0.5.2->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 7))
+  Using cached tbb-2021.13.1-py2.py3-none-manylinux1_x86_64.whl.metadata (1.0 kB)
+Requirement already satisfied: h5py>=2.7 in ./quenais-env/lib/python3.11/site-packages (from pyscf>=2.4->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 1)) (3.16.0)
+Requirement already satisfied: setuptools in ./quenais-env/lib/python3.11/site-packages (from pyscf>=2.4->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 1)) (83.0.0)
+Collecting rustworkx>=0.15.0 (from qiskit>=1.0->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 2))
+  Downloading rustworkx-0.18.1-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (10 kB)
+Collecting dill>=0.3 (from qiskit>=1.0->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 2))
+  Using cached dill-0.4.1-py3-none-any.whl.metadata (10 kB)
+Collecting stevedore>=3.0.0 (from qiskit>=1.0->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 2))
+  Downloading stevedore-5.9.0-py3-none-any.whl.metadata (2.3 kB)
+Requirement already satisfied: typing-extensions in ./quenais-env/lib/python3.11/site-packages (from qiskit>=1.0->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 2)) (4.16.0)
+Requirement already satisfied: python-dateutil>=2.8.0 in ./quenais-env/lib/python3.11/site-packages (from qiskit-aer>=0.14->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 3)) (2.9.0.post0)
+Collecting jax>=0.4.30 (from qiskit-addon-sqd>=0.5->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 4))
+  Using cached jax-0.10.2-py3-none-any.whl.metadata (13 kB)
+Collecting jaxlib>=0.4.30 (from qiskit-addon-sqd>=0.5->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 4))
+  Using cached jaxlib-0.10.2-cp311-cp311-manylinux_2_27_x86_64.whl.metadata (1.3 kB)
+Collecting opt-einsum (from ffsim>=0.0.50->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 5))
+  Using cached opt_einsum-3.4.0-py3-none-any.whl.metadata (6.3 kB)
+Collecting orjson (from ffsim>=0.0.50->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 5))
+  Using cached orjson-3.11.9-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (41 kB)
+Collecting cirq-core>=1.6.0 (from openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6))
+  Downloading cirq_core-1.7.0-py3-none-any.whl.metadata (4.8 kB)
+Collecting deprecation (from openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6))
+  Using cached deprecation-2.1.0-py2.py3-none-any.whl.metadata (4.6 kB)
+Requirement already satisfied: networkx in ./quenais-env/lib/python3.11/site-packages (from openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6)) (3.6.1)
+Collecting pubchempy (from openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6))
+  Using cached pubchempy-1.0.5-py3-none-any.whl.metadata (4.3 kB)
+Requirement already satisfied: requests in ./quenais-env/lib/python3.11/site-packages (from openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6)) (2.34.2)
+Collecting sympy (from openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6))
+  Using cached sympy-1.14.0-py3-none-any.whl.metadata (12 kB)
+Requirement already satisfied: attrs>=21.3.0 in ./quenais-env/lib/python3.11/site-packages (from cirq-core>=1.6.0->openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6)) (26.1.0)
+Collecting duet>=0.2.8 (from cirq-core>=1.6.0->openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6))
+  Using cached duet-0.2.9-py3-none-any.whl.metadata (2.3 kB)
+Requirement already satisfied: matplotlib~=3.9 in ./quenais-env/lib/python3.11/site-packages (from cirq-core>=1.6.0->openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6)) (3.11.1)
+Collecting pandas<3.1.0.dev,>=2.3 (from cirq-core>=1.6.0->openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6))
+  Downloading pandas-3.0.5-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (79 kB)
+Collecting tqdm>=4.12 (from cirq-core>=1.6.0->openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6))
+  Downloading tqdm-4.70.0-py3-none-any.whl.metadata (57 kB)
+Requirement already satisfied: contourpy>=1.0.1 in ./quenais-env/lib/python3.11/site-packages (from matplotlib~=3.9->cirq-core>=1.6.0->openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6)) (1.3.3)
+Requirement already satisfied: cycler>=0.10 in ./quenais-env/lib/python3.11/site-packages (from matplotlib~=3.9->cirq-core>=1.6.0->openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6)) (0.12.1)
+Requirement already satisfied: fonttools>=4.28.2 in ./quenais-env/lib/python3.11/site-packages (from matplotlib~=3.9->cirq-core>=1.6.0->openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6)) (4.63.0)
+Requirement already satisfied: kiwisolver>=1.3.1 in ./quenais-env/lib/python3.11/site-packages (from matplotlib~=3.9->cirq-core>=1.6.0->openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6)) (1.5.0)
+Requirement already satisfied: packaging>=20.0 in ./quenais-env/lib/python3.11/site-packages (from matplotlib~=3.9->cirq-core>=1.6.0->openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6)) (26.2)
+Requirement already satisfied: pillow>=9 in ./quenais-env/lib/python3.11/site-packages (from matplotlib~=3.9->cirq-core>=1.6.0->openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6)) (12.3.0)
+Requirement already satisfied: pyparsing>=3 in ./quenais-env/lib/python3.11/site-packages (from matplotlib~=3.9->cirq-core>=1.6.0->openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6)) (3.3.2)
+Collecting ml_dtypes>=0.5.0 (from jax>=0.4.30->qiskit-addon-sqd>=0.5->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 4))
+  Using cached ml_dtypes-0.5.4-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (8.9 kB)
+Requirement already satisfied: six>=1.5 in ./quenais-env/lib/python3.11/site-packages (from python-dateutil>=2.8.0->qiskit-aer>=0.14->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 3)) (1.17.0)
+Collecting onemkl-license==2026.1.0 (from mkl-include->block2==0.5.2->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 7))
+  Downloading onemkl_license-2026.1.0-py2.py3-none-manylinux_2_28_x86_64.whl.metadata (1.6 kB)
+Requirement already satisfied: charset_normalizer<4,>=2 in ./quenais-env/lib/python3.11/site-packages (from requests->openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6)) (3.4.9)
+Requirement already satisfied: idna<4,>=2.5 in ./quenais-env/lib/python3.11/site-packages (from requests->openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6)) (3.18)
+Requirement already satisfied: urllib3<3,>=1.26 in ./quenais-env/lib/python3.11/site-packages (from requests->openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6)) (2.7.0)
+Requirement already satisfied: certifi>=2023.5.7 in ./quenais-env/lib/python3.11/site-packages (from requests->openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6)) (2026.7.22)
+Collecting mpmath<1.4,>=1.1.0 (from sympy->openfermion>=1.6->-r /home/loharkar/quenais-standalone/quenais/mambafwgj32a2awt (line 6))
+  Using cached mpmath-1.3.0-py3-none-any.whl.metadata (8.6 kB)
+Using cached block2-0.5.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (185.5 MB)
+Using cached mkl-2021.4.0-py2.py3-none-manylinux1_x86_64.whl (280.9 MB)
+Using cached intel_openmp-2021.4.0-py2.py3-none-manylinux1_x86_64.whl (9.9 MB)
+Using cached pybind11-2.10.1-py3-none-any.whl (216 kB)
+Using cached tbb-2021.13.1-py2.py3-none-manylinux1_x86_64.whl (5.4 MB)
+Downloading pyscf-2.14.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (52.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 52.8/52.8 MB 14.4 MB/s  0:00:03
+Downloading qiskit-2.5.1-cp310-abi3-manylinux_2_28_x86_64.whl (9.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 9.7/9.7 MB 12.0 MB/s  0:00:00
+Using cached qiskit_aer-0.17.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (12.4 MB)
+Using cached qiskit_addon_sqd-0.12.1-py3-none-any.whl (36 kB)
+Downloading ffsim-0.0.83-cp311-abi3-manylinux_2_28_x86_64.whl (742 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 742.8/742.8 kB 11.3 MB/s  0:00:00
+Downloading openfermion-1.8.1-py3-none-any.whl (44.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 44.7/44.7 MB 18.5 MB/s  0:00:02
+Downloading cirq_core-1.7.0-py3-none-any.whl (2.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 17.8 MB/s  0:00:00
+Downloading pandas-3.0.5-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (11.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 11.3/11.3 MB 14.8 MB/s  0:00:00
+Downloading cmake-4.4.0-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (30.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 30.2/30.2 MB 16.2 MB/s  0:00:01
+Using cached dill-0.4.1-py3-none-any.whl (120 kB)
+Using cached duet-0.2.9-py3-none-any.whl (29 kB)
+Using cached jax-0.10.2-py3-none-any.whl (3.2 MB)
+Using cached jaxlib-0.10.2-cp311-cp311-manylinux_2_27_x86_64.whl (85.4 MB)
+Using cached ml_dtypes-0.5.4-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (5.0 MB)
+Downloading rustworkx-0.18.1-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (2.4 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.4/2.4 MB 17.6 MB/s  0:00:00
+Downloading stevedore-5.9.0-py3-none-any.whl (54 kB)
+Downloading tqdm-4.70.0-py3-none-any.whl (80 kB)
+Using cached deprecation-2.1.0-py2.py3-none-any.whl (11 kB)
+Downloading mkl_include-2026.1.0-py2.py3-none-manylinux_2_28_x86_64.whl (1.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 14.4 MB/s  0:00:00
+Downloading onemkl_license-2026.1.0-py2.py3-none-manylinux_2_28_x86_64.whl (56 kB)
+Using cached opt_einsum-3.4.0-py3-none-any.whl (71 kB)
+Using cached orjson-3.11.9-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (133 kB)
+Using cached pubchempy-1.0.5-py3-none-any.whl (21 kB)
+Using cached sympy-1.14.0-py3-none-any.whl (6.3 MB)
+Using cached mpmath-1.3.0-py3-none-any.whl (536 kB)
+Installing collected packages: tbb, onemkl-license, mpmath, intel-openmp, tqdm, sympy, stevedore, rustworkx, pybind11, pubchempy, orjson, opt-einsum, ml_dtypes, mkl-include, mkl, duet, dill, deprecation, cmake, qiskit, pyscf, pandas, jaxlib, block2, qiskit-aer, jax, cirq-core, qiskit-addon-sqd, openfermion, ffsim
+Successfully installed block2-0.5.2 cirq-core-1.7.0 cmake-4.4.0 deprecation-2.1.0 dill-0.4.1 duet-0.2.9 ffsim-0.0.83 intel-openmp-2021.4.0 jax-0.10.2 jaxlib-0.10.2 mkl-2021.4.0 mkl-include-2026.1.0 ml_dtypes-0.5.4 mpmath-1.3.0 onemkl-license-2026.1.0 openfermion-1.8.1 opt-einsum-3.4.0 orjson-3.11.9 pandas-3.0.5 pubchempy-1.0.5 pybind11-2.10.1 pyscf-2.14.0 qiskit-2.5.1 qiskit-addon-sqd-0.12.1 qiskit-aer-0.17.2 rustworkx-0.18.1 stevedore-5.9.0 sympy-1.14.0 tbb-2021.13.1 tqdm-4.70.0
+(base) [loharkar@erebos05:quenais]$ mamba activate ./quenais-env/
+(/home/loharkar/quenais-standalone/quenais/quenais-env) [loharkar@erebos05:quenais]$ bash install.sh
+=== QuEnAIS Installation ===
+[0/6] Checking system requirements...
+/home/loharkar/quenais-standalone/quenais/quenais-env/bin/python
+/home/loharkar/quenais-standalone/quenais/quenais-env/bin/pip
+/usr/bin/git
+/home/loharkar/quenais-standalone/quenais/quenais-env/bin/cargo
+/home/loharkar/quenais-standalone/quenais/quenais-env/bin/clang
+  Python 3.11
+[1/6] Installing base dependencies...
+Requirement already satisfied: jupyter in ./quenais-env/lib/python3.11/site-packages (from -r requirements-base.txt (line 6)) (1.1.1)
+Requirement already satisfied: ipykernel in ./quenais-env/lib/python3.11/site-packages (from -r requirements-base.txt (line 7)) (7.3.0)
+Requirement already satisfied: block2==0.5.2 in ./quenais-env/lib/python3.11/site-packages (from -r requirements-base.txt (line 8)) (0.5.2)
+Requirement already satisfied: numpy>=1.24 in ./quenais-env/lib/python3.11/site-packages (from -r requirements-base.txt (line 9)) (2.4.6)
+Requirement already satisfied: scipy>=1.10 in ./quenais-env/lib/python3.11/site-packages (from -r requirements-base.txt (line 10)) (1.17.1)
+Requirement already satisfied: matplotlib>=3.7 in ./quenais-env/lib/python3.11/site-packages (from -r requirements-base.txt (line 11)) (3.11.1)
+Requirement already satisfied: h5py>=3.9 in ./quenais-env/lib/python3.11/site-packages (from -r requirements-base.txt (line 12)) (3.16.0)
+Requirement already satisfied: pytest in ./quenais-env/lib/python3.11/site-packages (from -r requirements-base.txt (line 13)) (9.1.1)
+Requirement already satisfied: mkl==2021.4 in ./quenais-env/lib/python3.11/site-packages (from block2==0.5.2->-r requirements-base.txt (line 8)) (2021.4.0)
+Requirement already satisfied: mkl-include in ./quenais-env/lib/python3.11/site-packages (from block2==0.5.2->-r requirements-base.txt (line 8)) (2026.1.0)
+Requirement already satisfied: intel-openmp in ./quenais-env/lib/python3.11/site-packages (from block2==0.5.2->-r requirements-base.txt (line 8)) (2021.4.0)
+Requirement already satisfied: cmake>=3.19 in ./quenais-env/lib/python3.11/site-packages (from block2==0.5.2->-r requirements-base.txt (line 8)) (4.4.0)
+Requirement already satisfied: psutil in ./quenais-env/lib/python3.11/site-packages (from block2==0.5.2->-r requirements-base.txt (line 8)) (7.2.2)
+Requirement already satisfied: pybind11<=2.10.1 in ./quenais-env/lib/python3.11/site-packages (from block2==0.5.2->-r requirements-base.txt (line 8)) (2.10.1)
+Requirement already satisfied: tbb==2021.* in ./quenais-env/lib/python3.11/site-packages (from mkl==2021.4->block2==0.5.2->-r requirements-base.txt (line 8)) (2021.13.1)
+Requirement already satisfied: notebook in ./quenais-env/lib/python3.11/site-packages (from jupyter->-r requirements-base.txt (line 6)) (7.6.1)
+Requirement already satisfied: jupyter-console in ./quenais-env/lib/python3.11/site-packages (from jupyter->-r requirements-base.txt (line 6)) (6.6.3)
+Requirement already satisfied: nbconvert in ./quenais-env/lib/python3.11/site-packages (from jupyter->-r requirements-base.txt (line 6)) (7.17.1)
+Requirement already satisfied: ipywidgets in ./quenais-env/lib/python3.11/site-packages (from jupyter->-r requirements-base.txt (line 6)) (8.1.8)
+Requirement already satisfied: jupyterlab in ./quenais-env/lib/python3.11/site-packages (from jupyter->-r requirements-base.txt (line 6)) (4.6.2)
+Requirement already satisfied: comm>=0.1.1 in ./quenais-env/lib/python3.11/site-packages (from ipykernel->-r requirements-base.txt (line 7)) (0.2.3)
+Requirement already satisfied: debugpy>=1.6.5 in ./quenais-env/lib/python3.11/site-packages (from ipykernel->-r requirements-base.txt (line 7)) (1.8.21)
+Requirement already satisfied: ipython>=7.23.1 in ./quenais-env/lib/python3.11/site-packages (from ipykernel->-r requirements-base.txt (line 7)) (9.16.1)
+Requirement already satisfied: jupyter-client>=8.9.0 in ./quenais-env/lib/python3.11/site-packages (from ipykernel->-r requirements-base.txt (line 7)) (8.9.1)
+Requirement already satisfied: jupyter-core!=6.0.*,>=5.1 in ./quenais-env/lib/python3.11/site-packages (from ipykernel->-r requirements-base.txt (line 7)) (5.9.1)
+Requirement already satisfied: matplotlib-inline>=0.1 in ./quenais-env/lib/python3.11/site-packages (from ipykernel->-r requirements-base.txt (line 7)) (0.2.2)
+Requirement already satisfied: nest-asyncio2>=1.7.0 in ./quenais-env/lib/python3.11/site-packages (from ipykernel->-r requirements-base.txt (line 7)) (1.7.2)
+Requirement already satisfied: packaging>=22 in ./quenais-env/lib/python3.11/site-packages (from ipykernel->-r requirements-base.txt (line 7)) (26.2)
+Requirement already satisfied: pyzmq>=25 in ./quenais-env/lib/python3.11/site-packages (from ipykernel->-r requirements-base.txt (line 7)) (27.1.0)
+Requirement already satisfied: tornado>=6.4.1 in ./quenais-env/lib/python3.11/site-packages (from ipykernel->-r requirements-base.txt (line 7)) (6.5.7)
+Requirement already satisfied: traitlets>=5.4.0 in ./quenais-env/lib/python3.11/site-packages (from ipykernel->-r requirements-base.txt (line 7)) (5.16.0)
+Requirement already satisfied: contourpy>=1.0.1 in ./quenais-env/lib/python3.11/site-packages (from matplotlib>=3.7->-r requirements-base.txt (line 11)) (1.3.3)
+Requirement already satisfied: cycler>=0.10 in ./quenais-env/lib/python3.11/site-packages (from matplotlib>=3.7->-r requirements-base.txt (line 11)) (0.12.1)
+Requirement already satisfied: fonttools>=4.28.2 in ./quenais-env/lib/python3.11/site-packages (from matplotlib>=3.7->-r requirements-base.txt (line 11)) (4.63.0)
+Requirement already satisfied: kiwisolver>=1.3.1 in ./quenais-env/lib/python3.11/site-packages (from matplotlib>=3.7->-r requirements-base.txt (line 11)) (1.5.0)
+Requirement already satisfied: pillow>=9 in ./quenais-env/lib/python3.11/site-packages (from matplotlib>=3.7->-r requirements-base.txt (line 11)) (12.3.0)
+Requirement already satisfied: pyparsing>=3 in ./quenais-env/lib/python3.11/site-packages (from matplotlib>=3.7->-r requirements-base.txt (line 11)) (3.3.2)
+Requirement already satisfied: python-dateutil>=2.7 in ./quenais-env/lib/python3.11/site-packages (from matplotlib>=3.7->-r requirements-base.txt (line 11)) (2.9.0.post0)
+Requirement already satisfied: iniconfig>=1.0.1 in ./quenais-env/lib/python3.11/site-packages (from pytest->-r requirements-base.txt (line 13)) (2.3.0)
+Requirement already satisfied: pluggy<2,>=1.5 in ./quenais-env/lib/python3.11/site-packages (from pytest->-r requirements-base.txt (line 13)) (1.6.0)
+Requirement already satisfied: pygments>=2.7.2 in ./quenais-env/lib/python3.11/site-packages (from pytest->-r requirements-base.txt (line 13)) (2.20.0)
+Requirement already satisfied: ipython-pygments-lexers>=1.0.0 in ./quenais-env/lib/python3.11/site-packages (from ipython>=7.23.1->ipykernel->-r requirements-base.txt (line 7)) (1.1.1)
+Requirement already satisfied: jedi>=0.18.2 in ./quenais-env/lib/python3.11/site-packages (from ipython>=7.23.1->ipykernel->-r requirements-base.txt (line 7)) (0.20.0)
+Requirement already satisfied: pexpect>4.6 in ./quenais-env/lib/python3.11/site-packages (from ipython>=7.23.1->ipykernel->-r requirements-base.txt (line 7)) (4.9.0)
+Requirement already satisfied: prompt_toolkit<3.1.0,>=3.0.41 in ./quenais-env/lib/python3.11/site-packages (from ipython>=7.23.1->ipykernel->-r requirements-base.txt (line 7)) (3.0.53)
+Requirement already satisfied: stack_data>=0.6.0 in ./quenais-env/lib/python3.11/site-packages (from ipython>=7.23.1->ipykernel->-r requirements-base.txt (line 7)) (0.6.3)
+Requirement already satisfied: typing_extensions>=4.6 in ./quenais-env/lib/python3.11/site-packages (from ipython>=7.23.1->ipykernel->-r requirements-base.txt (line 7)) (4.16.0)
+Requirement already satisfied: wcwidth>=0.1.4 in ./quenais-env/lib/python3.11/site-packages (from prompt_toolkit<3.1.0,>=3.0.41->ipython>=7.23.1->ipykernel->-r requirements-base.txt (line 7)) (0.8.2)
+Requirement already satisfied: parso<0.9.0,>=0.8.6 in ./quenais-env/lib/python3.11/site-packages (from jedi>=0.18.2->ipython>=7.23.1->ipykernel->-r requirements-base.txt (line 7)) (0.8.7)
+Requirement already satisfied: platformdirs>=2.5 in ./quenais-env/lib/python3.11/site-packages (from jupyter-core!=6.0.*,>=5.1->ipykernel->-r requirements-base.txt (line 7)) (4.11.0)
+Requirement already satisfied: ptyprocess>=0.5 in ./quenais-env/lib/python3.11/site-packages (from pexpect>4.6->ipython>=7.23.1->ipykernel->-r requirements-base.txt (line 7)) (0.7.0)
+Requirement already satisfied: six>=1.5 in ./quenais-env/lib/python3.11/site-packages (from python-dateutil>=2.7->matplotlib>=3.7->-r requirements-base.txt (line 11)) (1.17.0)
+Requirement already satisfied: executing>=1.2.0 in ./quenais-env/lib/python3.11/site-packages (from stack_data>=0.6.0->ipython>=7.23.1->ipykernel->-r requirements-base.txt (line 7)) (2.2.1)
+Requirement already satisfied: asttokens>=2.1.0 in ./quenais-env/lib/python3.11/site-packages (from stack_data>=0.6.0->ipython>=7.23.1->ipykernel->-r requirements-base.txt (line 7)) (3.0.2)
+Requirement already satisfied: pure_eval in ./quenais-env/lib/python3.11/site-packages (from stack_data>=0.6.0->ipython>=7.23.1->ipykernel->-r requirements-base.txt (line 7)) (0.2.3)
+Requirement already satisfied: widgetsnbextension~=4.0.14 in ./quenais-env/lib/python3.11/site-packages (from ipywidgets->jupyter->-r requirements-base.txt (line 6)) (4.0.15)
+Requirement already satisfied: jupyterlab_widgets~=3.0.15 in ./quenais-env/lib/python3.11/site-packages (from ipywidgets->jupyter->-r requirements-base.txt (line 6)) (3.0.16)
+Requirement already satisfied: async-lru>=1.0.0 in ./quenais-env/lib/python3.11/site-packages (from jupyterlab->jupyter->-r requirements-base.txt (line 6)) (2.3.0)
+Requirement already satisfied: httpx<1,>=0.25.0 in ./quenais-env/lib/python3.11/site-packages (from jupyterlab->jupyter->-r requirements-base.txt (line 6)) (0.28.1)
+Requirement already satisfied: jinja2>=3.0.3 in ./quenais-env/lib/python3.11/site-packages (from jupyterlab->jupyter->-r requirements-base.txt (line 6)) (3.1.6)
+Requirement already satisfied: jupyter-builder>=1.0.2 in ./quenais-env/lib/python3.11/site-packages (from jupyterlab->jupyter->-r requirements-base.txt (line 6)) (1.2.1)
+Requirement already satisfied: jupyter-lsp>=2.0.0 in ./quenais-env/lib/python3.11/site-packages (from jupyterlab->jupyter->-r requirements-base.txt (line 6)) (2.3.1)
+Requirement already satisfied: jupyter-server<3,>=2.19.0 in ./quenais-env/lib/python3.11/site-packages (from jupyterlab->jupyter->-r requirements-base.txt (line 6)) (2.20.0)
+Requirement already satisfied: jupyterlab-server<3,>=2.28.0 in ./quenais-env/lib/python3.11/site-packages (from jupyterlab->jupyter->-r requirements-base.txt (line 6)) (2.28.0)
+Requirement already satisfied: notebook-shim>=0.2 in ./quenais-env/lib/python3.11/site-packages (from jupyterlab->jupyter->-r requirements-base.txt (line 6)) (0.2.4)
+Requirement already satisfied: anyio in ./quenais-env/lib/python3.11/site-packages (from httpx<1,>=0.25.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (4.14.2)
+Requirement already satisfied: certifi in ./quenais-env/lib/python3.11/site-packages (from httpx<1,>=0.25.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (2026.7.22)
+Requirement already satisfied: httpcore==1.* in ./quenais-env/lib/python3.11/site-packages (from httpx<1,>=0.25.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (1.0.9)
+Requirement already satisfied: idna in ./quenais-env/lib/python3.11/site-packages (from httpx<1,>=0.25.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (3.18)
+Requirement already satisfied: h11>=0.16 in ./quenais-env/lib/python3.11/site-packages (from httpcore==1.*->httpx<1,>=0.25.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (0.16.0)
+Requirement already satisfied: argon2-cffi>=21.1 in ./quenais-env/lib/python3.11/site-packages (from jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (25.1.0)
+Requirement already satisfied: jupyter-events>=0.11.0 in ./quenais-env/lib/python3.11/site-packages (from jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (0.12.1)
+Requirement already satisfied: jupyter-server-terminals>=0.4.4 in ./quenais-env/lib/python3.11/site-packages (from jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (0.5.4)
+Requirement already satisfied: nbformat>=5.3.0 in ./quenais-env/lib/python3.11/site-packages (from jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (5.10.4)
+Requirement already satisfied: overrides>=5.0 in ./quenais-env/lib/python3.11/site-packages (from jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (7.7.0)
+Requirement already satisfied: prometheus-client>=0.9 in ./quenais-env/lib/python3.11/site-packages (from jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (0.26.0)
+Requirement already satisfied: send2trash>=1.8.2 in ./quenais-env/lib/python3.11/site-packages (from jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (2.1.0)
+Requirement already satisfied: terminado>=0.8.3 in ./quenais-env/lib/python3.11/site-packages (from jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (0.18.1)
+Requirement already satisfied: websocket-client>=1.7 in ./quenais-env/lib/python3.11/site-packages (from jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (1.9.0)
+Requirement already satisfied: babel>=2.10 in ./quenais-env/lib/python3.11/site-packages (from jupyterlab-server<3,>=2.28.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (2.18.0)
+Requirement already satisfied: json5>=0.9.0 in ./quenais-env/lib/python3.11/site-packages (from jupyterlab-server<3,>=2.28.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (0.15.0)
+Requirement already satisfied: jsonschema>=4.18.0 in ./quenais-env/lib/python3.11/site-packages (from jupyterlab-server<3,>=2.28.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (4.26.0)
+Requirement already satisfied: requests>=2.31 in ./quenais-env/lib/python3.11/site-packages (from jupyterlab-server<3,>=2.28.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (2.34.2)
+Requirement already satisfied: argon2-cffi-bindings in ./quenais-env/lib/python3.11/site-packages (from argon2-cffi>=21.1->jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (25.1.0)
+Requirement already satisfied: MarkupSafe>=2.0 in ./quenais-env/lib/python3.11/site-packages (from jinja2>=3.0.3->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (3.0.3)
+Requirement already satisfied: attrs>=22.2.0 in ./quenais-env/lib/python3.11/site-packages (from jsonschema>=4.18.0->jupyterlab-server<3,>=2.28.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (26.1.0)
+Requirement already satisfied: jsonschema-specifications>=2023.03.6 in ./quenais-env/lib/python3.11/site-packages (from jsonschema>=4.18.0->jupyterlab-server<3,>=2.28.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (2025.9.1)
+Requirement already satisfied: referencing>=0.28.4 in ./quenais-env/lib/python3.11/site-packages (from jsonschema>=4.18.0->jupyterlab-server<3,>=2.28.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (0.37.0)
+Requirement already satisfied: rpds-py>=0.25.0 in ./quenais-env/lib/python3.11/site-packages (from jsonschema>=4.18.0->jupyterlab-server<3,>=2.28.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (2026.6.3)
+Requirement already satisfied: python-json-logger>=2.0.4 in ./quenais-env/lib/python3.11/site-packages (from jupyter-events>=0.11.0->jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (4.1.0)
+Requirement already satisfied: pyyaml>=5.3 in ./quenais-env/lib/python3.11/site-packages (from jupyter-events>=0.11.0->jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (6.0.3)
+Requirement already satisfied: rfc3339-validator in ./quenais-env/lib/python3.11/site-packages (from jupyter-events>=0.11.0->jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (0.1.4)
+Requirement already satisfied: rfc3986-validator>=0.1.1 in ./quenais-env/lib/python3.11/site-packages (from jupyter-events>=0.11.0->jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (0.1.1)
+Requirement already satisfied: fqdn in ./quenais-env/lib/python3.11/site-packages (from jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (1.5.1)
+Requirement already satisfied: isoduration in ./quenais-env/lib/python3.11/site-packages (from jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (20.11.0)
+Requirement already satisfied: jsonpointer>1.13 in ./quenais-env/lib/python3.11/site-packages (from jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (3.1.1)
+Requirement already satisfied: rfc3987-syntax>=1.1.0 in ./quenais-env/lib/python3.11/site-packages (from jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (1.1.0)
+Requirement already satisfied: uri-template in ./quenais-env/lib/python3.11/site-packages (from jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (1.3.0)
+Requirement already satisfied: webcolors>=24.6.0 in ./quenais-env/lib/python3.11/site-packages (from jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (25.10.0)
+Requirement already satisfied: beautifulsoup4 in ./quenais-env/lib/python3.11/site-packages (from nbconvert->jupyter->-r requirements-base.txt (line 6)) (4.15.0)
+Requirement already satisfied: bleach!=5.0.0 in ./quenais-env/lib/python3.11/site-packages (from bleach[css]!=5.0.0->nbconvert->jupyter->-r requirements-base.txt (line 6)) (6.4.0)
+Requirement already satisfied: defusedxml in ./quenais-env/lib/python3.11/site-packages (from nbconvert->jupyter->-r requirements-base.txt (line 6)) (0.7.1)
+Requirement already satisfied: jupyterlab-pygments in ./quenais-env/lib/python3.11/site-packages (from nbconvert->jupyter->-r requirements-base.txt (line 6)) (0.3.0)
+Requirement already satisfied: mistune<4,>=2.0.3 in ./quenais-env/lib/python3.11/site-packages (from nbconvert->jupyter->-r requirements-base.txt (line 6)) (3.3.4)
+Requirement already satisfied: nbclient>=0.5.0 in ./quenais-env/lib/python3.11/site-packages (from nbconvert->jupyter->-r requirements-base.txt (line 6)) (0.11.0)
+Requirement already satisfied: pandocfilters>=1.4.1 in ./quenais-env/lib/python3.11/site-packages (from nbconvert->jupyter->-r requirements-base.txt (line 6)) (1.5.0)
+Requirement already satisfied: webencodings in ./quenais-env/lib/python3.11/site-packages (from bleach!=5.0.0->bleach[css]!=5.0.0->nbconvert->jupyter->-r requirements-base.txt (line 6)) (0.5.1)
+Requirement already satisfied: tinycss2>=1.1.0 in ./quenais-env/lib/python3.11/site-packages (from bleach[css]!=5.0.0->nbconvert->jupyter->-r requirements-base.txt (line 6)) (1.4.0)
+Requirement already satisfied: fastjsonschema>=2.15 in ./quenais-env/lib/python3.11/site-packages (from nbformat>=5.3.0->jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (2.22.1)
+Requirement already satisfied: charset_normalizer<4,>=2 in ./quenais-env/lib/python3.11/site-packages (from requests>=2.31->jupyterlab-server<3,>=2.28.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (3.4.9)
+Requirement already satisfied: urllib3<3,>=1.26 in ./quenais-env/lib/python3.11/site-packages (from requests>=2.31->jupyterlab-server<3,>=2.28.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (2.7.0)
+Requirement already satisfied: lark>=1.2.2 in ./quenais-env/lib/python3.11/site-packages (from rfc3987-syntax>=1.1.0->jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (1.3.1)
+Requirement already satisfied: cffi>=1.0.1 in ./quenais-env/lib/python3.11/site-packages (from argon2-cffi-bindings->argon2-cffi>=21.1->jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (2.1.0)
+Requirement already satisfied: pycparser in ./quenais-env/lib/python3.11/site-packages (from cffi>=1.0.1->argon2-cffi-bindings->argon2-cffi>=21.1->jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (3.0)
+Requirement already satisfied: soupsieve>=1.6.1 in ./quenais-env/lib/python3.11/site-packages (from beautifulsoup4->nbconvert->jupyter->-r requirements-base.txt (line 6)) (2.9.1)
+Requirement already satisfied: arrow>=0.15.0 in ./quenais-env/lib/python3.11/site-packages (from isoduration->jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (1.4.0)
+Requirement already satisfied: tzdata in ./quenais-env/lib/python3.11/site-packages (from arrow>=0.15.0->isoduration->jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.19.0->jupyterlab->jupyter->-r requirements-base.txt (line 6)) (2026.3)
+Requirement already satisfied: onemkl-license==2026.1.0 in ./quenais-env/lib/python3.11/site-packages (from mkl-include->block2==0.5.2->-r requirements-base.txt (line 8)) (2026.1.0)
+  ✓ base done
+[2/6] Installing quantum dependencies...
+Requirement already satisfied: pyscf>=2.4 in ./quenais-env/lib/python3.11/site-packages (from -r requirements-quantum.txt (line 5)) (2.14.0)
+Requirement already satisfied: qiskit>=1.0 in ./quenais-env/lib/python3.11/site-packages (from -r requirements-quantum.txt (line 8)) (2.5.1)
+Requirement already satisfied: qiskit-aer>=0.14 in ./quenais-env/lib/python3.11/site-packages (from -r requirements-quantum.txt (line 9)) (0.17.2)
+Requirement already satisfied: qiskit-addon-sqd>=0.5 in ./quenais-env/lib/python3.11/site-packages (from -r requirements-quantum.txt (line 10)) (0.12.1)
+Requirement already satisfied: openfermion>=1.6 in ./quenais-env/lib/python3.11/site-packages (from -r requirements-quantum.txt (line 13)) (1.8.1)
+Requirement already satisfied: ffsim>=0.0.50 in ./quenais-env/lib/python3.11/site-packages (from -r requirements-quantum.txt (line 16)) (0.0.83)
+Requirement already satisfied: networkx>=3.0 in ./quenais-env/lib/python3.11/site-packages (from -r requirements-quantum.txt (line 19)) (3.6.1)
+Requirement already satisfied: numpy!=1.16,!=1.17,>=1.13 in ./quenais-env/lib/python3.11/site-packages (from pyscf>=2.4->-r requirements-quantum.txt (line 5)) (2.4.6)
+Requirement already satisfied: scipy>=1.6.0 in ./quenais-env/lib/python3.11/site-packages (from pyscf>=2.4->-r requirements-quantum.txt (line 5)) (1.17.1)
+Requirement already satisfied: h5py>=2.7 in ./quenais-env/lib/python3.11/site-packages (from pyscf>=2.4->-r requirements-quantum.txt (line 5)) (3.16.0)
+Requirement already satisfied: setuptools in ./quenais-env/lib/python3.11/site-packages (from pyscf>=2.4->-r requirements-quantum.txt (line 5)) (83.0.0)
+Requirement already satisfied: rustworkx>=0.15.0 in ./quenais-env/lib/python3.11/site-packages (from qiskit>=1.0->-r requirements-quantum.txt (line 8)) (0.18.1)
+Requirement already satisfied: dill>=0.3 in ./quenais-env/lib/python3.11/site-packages (from qiskit>=1.0->-r requirements-quantum.txt (line 8)) (0.4.1)
+Requirement already satisfied: stevedore>=3.0.0 in ./quenais-env/lib/python3.11/site-packages (from qiskit>=1.0->-r requirements-quantum.txt (line 8)) (5.9.0)
+Requirement already satisfied: typing-extensions in ./quenais-env/lib/python3.11/site-packages (from qiskit>=1.0->-r requirements-quantum.txt (line 8)) (4.16.0)
+Requirement already satisfied: psutil>=5 in ./quenais-env/lib/python3.11/site-packages (from qiskit-aer>=0.14->-r requirements-quantum.txt (line 9)) (7.2.2)
+Requirement already satisfied: python-dateutil>=2.8.0 in ./quenais-env/lib/python3.11/site-packages (from qiskit-aer>=0.14->-r requirements-quantum.txt (line 9)) (2.9.0.post0)
+Requirement already satisfied: jax>=0.4.30 in ./quenais-env/lib/python3.11/site-packages (from qiskit-addon-sqd>=0.5->-r requirements-quantum.txt (line 10)) (0.10.2)
+Requirement already satisfied: jaxlib>=0.4.30 in ./quenais-env/lib/python3.11/site-packages (from qiskit-addon-sqd>=0.5->-r requirements-quantum.txt (line 10)) (0.10.2)
+Requirement already satisfied: cirq-core>=1.6.0 in ./quenais-env/lib/python3.11/site-packages (from openfermion>=1.6->-r requirements-quantum.txt (line 13)) (1.7.0)
+Requirement already satisfied: deprecation in ./quenais-env/lib/python3.11/site-packages (from openfermion>=1.6->-r requirements-quantum.txt (line 13)) (2.1.0)
+Requirement already satisfied: pubchempy in ./quenais-env/lib/python3.11/site-packages (from openfermion>=1.6->-r requirements-quantum.txt (line 13)) (1.0.5)
+Requirement already satisfied: requests in ./quenais-env/lib/python3.11/site-packages (from openfermion>=1.6->-r requirements-quantum.txt (line 13)) (2.34.2)
+Requirement already satisfied: sympy in ./quenais-env/lib/python3.11/site-packages (from openfermion>=1.6->-r requirements-quantum.txt (line 13)) (1.14.0)
+Requirement already satisfied: opt-einsum in ./quenais-env/lib/python3.11/site-packages (from ffsim>=0.0.50->-r requirements-quantum.txt (line 16)) (3.4.0)
+Requirement already satisfied: orjson in ./quenais-env/lib/python3.11/site-packages (from ffsim>=0.0.50->-r requirements-quantum.txt (line 16)) (3.11.9)
+Requirement already satisfied: attrs>=21.3.0 in ./quenais-env/lib/python3.11/site-packages (from cirq-core>=1.6.0->openfermion>=1.6->-r requirements-quantum.txt (line 13)) (26.1.0)
+Requirement already satisfied: duet>=0.2.8 in ./quenais-env/lib/python3.11/site-packages (from cirq-core>=1.6.0->openfermion>=1.6->-r requirements-quantum.txt (line 13)) (0.2.9)
+Requirement already satisfied: matplotlib~=3.9 in ./quenais-env/lib/python3.11/site-packages (from cirq-core>=1.6.0->openfermion>=1.6->-r requirements-quantum.txt (line 13)) (3.11.1)
+Requirement already satisfied: pandas<3.1.0.dev,>=2.3 in ./quenais-env/lib/python3.11/site-packages (from cirq-core>=1.6.0->openfermion>=1.6->-r requirements-quantum.txt (line 13)) (3.0.5)
+Requirement already satisfied: tqdm>=4.12 in ./quenais-env/lib/python3.11/site-packages (from cirq-core>=1.6.0->openfermion>=1.6->-r requirements-quantum.txt (line 13)) (4.70.0)
+Requirement already satisfied: contourpy>=1.0.1 in ./quenais-env/lib/python3.11/site-packages (from matplotlib~=3.9->cirq-core>=1.6.0->openfermion>=1.6->-r requirements-quantum.txt (line 13)) (1.3.3)
+Requirement already satisfied: cycler>=0.10 in ./quenais-env/lib/python3.11/site-packages (from matplotlib~=3.9->cirq-core>=1.6.0->openfermion>=1.6->-r requirements-quantum.txt (line 13)) (0.12.1)
+Requirement already satisfied: fonttools>=4.28.2 in ./quenais-env/lib/python3.11/site-packages (from matplotlib~=3.9->cirq-core>=1.6.0->openfermion>=1.6->-r requirements-quantum.txt (line 13)) (4.63.0)
+Requirement already satisfied: kiwisolver>=1.3.1 in ./quenais-env/lib/python3.11/site-packages (from matplotlib~=3.9->cirq-core>=1.6.0->openfermion>=1.6->-r requirements-quantum.txt (line 13)) (1.5.0)
+Requirement already satisfied: packaging>=20.0 in ./quenais-env/lib/python3.11/site-packages (from matplotlib~=3.9->cirq-core>=1.6.0->openfermion>=1.6->-r requirements-quantum.txt (line 13)) (26.2)
+Requirement already satisfied: pillow>=9 in ./quenais-env/lib/python3.11/site-packages (from matplotlib~=3.9->cirq-core>=1.6.0->openfermion>=1.6->-r requirements-quantum.txt (line 13)) (12.3.0)
+Requirement already satisfied: pyparsing>=3 in ./quenais-env/lib/python3.11/site-packages (from matplotlib~=3.9->cirq-core>=1.6.0->openfermion>=1.6->-r requirements-quantum.txt (line 13)) (3.3.2)
+Requirement already satisfied: ml_dtypes>=0.5.0 in ./quenais-env/lib/python3.11/site-packages (from jax>=0.4.30->qiskit-addon-sqd>=0.5->-r requirements-quantum.txt (line 10)) (0.5.4)
+Requirement already satisfied: six>=1.5 in ./quenais-env/lib/python3.11/site-packages (from python-dateutil>=2.8.0->qiskit-aer>=0.14->-r requirements-quantum.txt (line 9)) (1.17.0)
+Requirement already satisfied: charset_normalizer<4,>=2 in ./quenais-env/lib/python3.11/site-packages (from requests->openfermion>=1.6->-r requirements-quantum.txt (line 13)) (3.4.9)
+Requirement already satisfied: idna<4,>=2.5 in ./quenais-env/lib/python3.11/site-packages (from requests->openfermion>=1.6->-r requirements-quantum.txt (line 13)) (3.18)
+Requirement already satisfied: urllib3<3,>=1.26 in ./quenais-env/lib/python3.11/site-packages (from requests->openfermion>=1.6->-r requirements-quantum.txt (line 13)) (2.7.0)
+Requirement already satisfied: certifi>=2023.5.7 in ./quenais-env/lib/python3.11/site-packages (from requests->openfermion>=1.6->-r requirements-quantum.txt (line 13)) (2026.7.22)
+Requirement already satisfied: mpmath<1.4,>=1.1.0 in ./quenais-env/lib/python3.11/site-packages (from sympy->openfermion>=1.6->-r requirements-quantum.txt (line 13)) (1.3.0)
+  ✓ quantum done
+[3/6] Generating block2 wrapper...
+  CPU vendor: AuthenticAMD
+  AMD CPU detected — applying MKL workaround
+  ✓ block2 wrapper → /home/loharkar/block2main_wrapper.sh
+[4/6] Installing ASF (Active Space Finder)...
+Cloning into '/tmp/tmp.Bo47XJrqXZ'...
+remote: Enumerating objects: 730, done.
+remote: Counting objects: 100% (188/188), done.
+remote: Compressing objects: 100% (115/115), done.
+remote: Total 730 (delta 61), reused 137 (delta 49), pack-reused 542 (from 1)
+Receiving objects: 100% (730/730), 14.77 MiB | 1.24 MiB/s, done.
+Resolving deltas: 100% (214/214), done.
+Processing /tmp/tmp.Bo47XJrqXZ
+  Installing build dependencies ... done
+  Getting requirements to build wheel ... done
+  Preparing metadata (pyproject.toml) ... done
+Requirement already satisfied: block2 in ./quenais-env/lib/python3.11/site-packages (from active-space-finder==2.0.2.dev2+g6e4873934) (0.5.2)
+Requirement already satisfied: matplotlib in ./quenais-env/lib/python3.11/site-packages (from active-space-finder==2.0.2.dev2+g6e4873934) (3.11.1)
+Requirement already satisfied: networkx in ./quenais-env/lib/python3.11/site-packages (from active-space-finder==2.0.2.dev2+g6e4873934) (3.6.1)
+Requirement already satisfied: numpy in ./quenais-env/lib/python3.11/site-packages (from active-space-finder==2.0.2.dev2+g6e4873934) (2.4.6)
+Requirement already satisfied: pyscf in ./quenais-env/lib/python3.11/site-packages (from active-space-finder==2.0.2.dev2+g6e4873934) (2.14.0)
+Collecting pyscf-dmrgscf @ git+https://github.com/pyscf/dmrgscf (from active-space-finder==2.0.2.dev2+g6e4873934)
+  Cloning https://github.com/pyscf/dmrgscf to /tmp/pip-install-jvp1p3lm/pyscf-dmrgscf_bc67e773404e41bdbafb3af3551c9395
+  Running command git clone --filter=blob:none --quiet https://github.com/pyscf/dmrgscf /tmp/pip-install-jvp1p3lm/pyscf-dmrgscf_bc67e773404e41bdbafb3af3551c9395
+  Resolved https://github.com/pyscf/dmrgscf to commit a03f7b6c67c61626f129e9c0c771016c14912400
+  Installing build dependencies ... done
+  Getting requirements to build wheel ... done
+  Preparing metadata (pyproject.toml) ... done
+Requirement already satisfied: scipy in ./quenais-env/lib/python3.11/site-packages (from active-space-finder==2.0.2.dev2+g6e4873934) (1.17.1)
+Requirement already satisfied: typing-extensions in ./quenais-env/lib/python3.11/site-packages (from active-space-finder==2.0.2.dev2+g6e4873934) (4.16.0)
+Requirement already satisfied: mkl==2021.4 in ./quenais-env/lib/python3.11/site-packages (from block2->active-space-finder==2.0.2.dev2+g6e4873934) (2021.4.0)
+Requirement already satisfied: mkl-include in ./quenais-env/lib/python3.11/site-packages (from block2->active-space-finder==2.0.2.dev2+g6e4873934) (2026.1.0)
+Requirement already satisfied: intel-openmp in ./quenais-env/lib/python3.11/site-packages (from block2->active-space-finder==2.0.2.dev2+g6e4873934) (2021.4.0)
+Requirement already satisfied: cmake>=3.19 in ./quenais-env/lib/python3.11/site-packages (from block2->active-space-finder==2.0.2.dev2+g6e4873934) (4.4.0)
+Requirement already satisfied: psutil in ./quenais-env/lib/python3.11/site-packages (from block2->active-space-finder==2.0.2.dev2+g6e4873934) (7.2.2)
+Requirement already satisfied: pybind11<=2.10.1 in ./quenais-env/lib/python3.11/site-packages (from block2->active-space-finder==2.0.2.dev2+g6e4873934) (2.10.1)
+Requirement already satisfied: tbb==2021.* in ./quenais-env/lib/python3.11/site-packages (from mkl==2021.4->block2->active-space-finder==2.0.2.dev2+g6e4873934) (2021.13.1)
+Requirement already satisfied: contourpy>=1.0.1 in ./quenais-env/lib/python3.11/site-packages (from matplotlib->active-space-finder==2.0.2.dev2+g6e4873934) (1.3.3)
+Requirement already satisfied: cycler>=0.10 in ./quenais-env/lib/python3.11/site-packages (from matplotlib->active-space-finder==2.0.2.dev2+g6e4873934) (0.12.1)
+Requirement already satisfied: fonttools>=4.28.2 in ./quenais-env/lib/python3.11/site-packages (from matplotlib->active-space-finder==2.0.2.dev2+g6e4873934) (4.63.0)
+Requirement already satisfied: kiwisolver>=1.3.1 in ./quenais-env/lib/python3.11/site-packages (from matplotlib->active-space-finder==2.0.2.dev2+g6e4873934) (1.5.0)
+Requirement already satisfied: packaging>=20.0 in ./quenais-env/lib/python3.11/site-packages (from matplotlib->active-space-finder==2.0.2.dev2+g6e4873934) (26.2)
+Requirement already satisfied: pillow>=9 in ./quenais-env/lib/python3.11/site-packages (from matplotlib->active-space-finder==2.0.2.dev2+g6e4873934) (12.3.0)
+Requirement already satisfied: pyparsing>=3 in ./quenais-env/lib/python3.11/site-packages (from matplotlib->active-space-finder==2.0.2.dev2+g6e4873934) (3.3.2)
+Requirement already satisfied: python-dateutil>=2.7 in ./quenais-env/lib/python3.11/site-packages (from matplotlib->active-space-finder==2.0.2.dev2+g6e4873934) (2.9.0.post0)
+Requirement already satisfied: six>=1.5 in ./quenais-env/lib/python3.11/site-packages (from python-dateutil>=2.7->matplotlib->active-space-finder==2.0.2.dev2+g6e4873934) (1.17.0)
+Requirement already satisfied: onemkl-license==2026.1.0 in ./quenais-env/lib/python3.11/site-packages (from mkl-include->block2->active-space-finder==2.0.2.dev2+g6e4873934) (2026.1.0)
+Requirement already satisfied: h5py>=2.7 in ./quenais-env/lib/python3.11/site-packages (from pyscf->active-space-finder==2.0.2.dev2+g6e4873934) (3.16.0)
+Requirement already satisfied: setuptools in ./quenais-env/lib/python3.11/site-packages (from pyscf->active-space-finder==2.0.2.dev2+g6e4873934) (83.0.0)
+Building wheels for collected packages: active-space-finder, pyscf-dmrgscf
+  Building wheel for active-space-finder (pyproject.toml) ... done
+  Created wheel for active-space-finder: filename=active_space_finder-2.0.2.dev2+g6e4873934-py3-none-any.whl size=84751 sha256=86777b1ef0fffbf71b8f703654d611555dff2c8f9aa1f54b05c8dea145958b5c
+  Stored in directory: /tmp/pip-ephem-wheel-cache-ctaec5h0/wheels/e7/38/3f/0244829e3e630f66c04af3c69438bda0f0720f9c486ea5d444
+  Building wheel for pyscf-dmrgscf (pyproject.toml) ... done
+  Created wheel for pyscf-dmrgscf: filename=pyscf_dmrgscf-0.1.0-cp311-cp311-linux_x86_64.whl size=39837 sha256=a96bf8e77aea7c3d8ad46112a83b8aafc97b4f3c599a106e10e1f2a192659896
+  Stored in directory: /tmp/pip-ephem-wheel-cache-ctaec5h0/wheels/1e/19/bb/f770f2e56c7588a3c76dc2b2e58a578582e1192c9d5c8e2a12
+Successfully built active-space-finder pyscf-dmrgscf
+Installing collected packages: pyscf-dmrgscf, active-space-finder
+Successfully installed active-space-finder-2.0.2.dev2+g6e4873934 pyscf-dmrgscf-0.1.0
+Settings written to /home/loharkar/quenais-standalone/quenais/quenais-env/lib/python3.11/site-packages/pyscf/dmrgscf/settings.py .
+  ✓ ASF installed
+[5/6] Installing qiskit-fermions (Rust compilation)...
+Cloning into '/tmp/tmp.nX5MPv42v3'...
+remote: Enumerating objects: 3461, done.
+remote: Counting objects: 100% (1039/1039), done.
+remote: Compressing objects: 100% (434/434), done.
+remote: Total 3461 (delta 804), reused 631 (delta 600), pack-reused 2422 (from 3)
+Receiving objects: 100% (3461/3461), 2.28 MiB | 987.00 KiB/s, done.
+Resolving deltas: 100% (2092/2092), done.
+Requirement already satisfied: setuptools>=77.0.1 in /home/loharkar/quenais-standalone/quenais/quenais-env/lib/python3.11/site-packages (83.0.0)
+Collecting setuptools-rust
+  Downloading setuptools_rust-1.13.0-py3-none-any.whl.metadata (9.6 kB)
+Requirement already satisfied: qiskit>=2.5 in /home/loharkar/quenais-standalone/quenais/quenais-env/lib/python3.11/site-packages (2.5.1)
+Collecting semantic_version<3,>=2.8.2 (from setuptools-rust)
+  Using cached semantic_version-2.10.0-py2.py3-none-any.whl.metadata (9.7 kB)
+Requirement already satisfied: numpy<3,>=2.0 in /home/loharkar/quenais-standalone/quenais/quenais-env/lib/python3.11/site-packages (from qiskit>=2.5) (2.4.6)
+Requirement already satisfied: scipy>=1.14 in /home/loharkar/quenais-standalone/quenais/quenais-env/lib/python3.11/site-packages (from qiskit>=2.5) (1.17.1)
+Requirement already satisfied: rustworkx>=0.15.0 in /home/loharkar/quenais-standalone/quenais/quenais-env/lib/python3.11/site-packages (from qiskit>=2.5) (0.18.1)
+Requirement already satisfied: dill>=0.3 in /home/loharkar/quenais-standalone/quenais/quenais-env/lib/python3.11/site-packages (from qiskit>=2.5) (0.4.1)
+Requirement already satisfied: stevedore>=3.0.0 in /home/loharkar/quenais-standalone/quenais/quenais-env/lib/python3.11/site-packages (from qiskit>=2.5) (5.9.0)
+Requirement already satisfied: typing-extensions in /home/loharkar/quenais-standalone/quenais/quenais-env/lib/python3.11/site-packages (from qiskit>=2.5) (4.16.0)
+Downloading setuptools_rust-1.13.0-py3-none-any.whl (30 kB)
+Using cached semantic_version-2.10.0-py2.py3-none-any.whl (15 kB)
+Installing collected packages: semantic_version, setuptools-rust
+Successfully installed semantic_version-2.10.0 setuptools-rust-1.13.0
+Processing ./.
+  Preparing metadata (pyproject.toml) ... done
+Requirement already satisfied: qiskit<3,>=2.5.0 in /home/loharkar/quenais-standalone/quenais/quenais-env/lib/python3.11/site-packages (from qiskit-fermions==0.1.0.dev0+0a989ee) (2.5.1)
+Requirement already satisfied: scipy>=1.10 in /home/loharkar/quenais-standalone/quenais/quenais-env/lib/python3.11/site-packages (from qiskit-fermions==0.1.0.dev0+0a989ee) (1.17.1)
+Requirement already satisfied: stevedore>=3.0.0 in /home/loharkar/quenais-standalone/quenais/quenais-env/lib/python3.11/site-packages (from qiskit-fermions==0.1.0.dev0+0a989ee) (5.9.0)
+Requirement already satisfied: typing-extensions in /home/loharkar/quenais-standalone/quenais/quenais-env/lib/python3.11/site-packages (from qiskit-fermions==0.1.0.dev0+0a989ee) (4.16.0)
+Requirement already satisfied: numpy<3,>=2.0 in /home/loharkar/quenais-standalone/quenais/quenais-env/lib/python3.11/site-packages (from qiskit<3,>=2.5.0->qiskit-fermions==0.1.0.dev0+0a989ee) (2.4.6)
+Requirement already satisfied: rustworkx>=0.15.0 in /home/loharkar/quenais-standalone/quenais/quenais-env/lib/python3.11/site-packages (from qiskit<3,>=2.5.0->qiskit-fermions==0.1.0.dev0+0a989ee) (0.18.1)
+Requirement already satisfied: dill>=0.3 in /home/loharkar/quenais-standalone/quenais/quenais-env/lib/python3.11/site-packages (from qiskit<3,>=2.5.0->qiskit-fermions==0.1.0.dev0+0a989ee) (0.4.1)
+Building wheels for collected packages: qiskit-fermions
+  Building wheel for qiskit-fermions (pyproject.toml) ... done
+  Created wheel for qiskit-fermions: filename=qiskit_fermions-0.1.0.dev0+0a989ee-cp310-abi3-linux_x86_64.whl size=1879507 sha256=bfbcf0ff74e73a947b81b74112e0a3660e246dfbedce382098ac1cb285fe75b6
+  Stored in directory: /tmp/pip-ephem-wheel-cache-frr8mv5a/wheels/20/ea/e1/1a7546479e6da936e99ff980a287a7f68d07e51ab4ff4eab6b
+Successfully built qiskit-fermions
+Installing collected packages: qiskit-fermions
+Successfully installed qiskit-fermions-0.1.0.dev0+0a989ee
+/home/loharkar/quenais-standalone/quenais
+  ✓ qiskit-fermions installed
+[6/7] Installing quenais...
+Obtaining file:///home/loharkar/quenais-standalone/quenais
+  Installing build dependencies ... done
+  Checking if build backend supports build_editable ... done
+  Getting requirements to build editable ... done
+  Preparing editable metadata (pyproject.toml) ... done
+Requirement already satisfied: numpy>=1.24 in ./quenais-env/lib/python3.11/site-packages (from quenais==0.2.0) (2.4.6)
+Requirement already satisfied: scipy>=1.10 in ./quenais-env/lib/python3.11/site-packages (from quenais==0.2.0) (1.17.1)
+Requirement already satisfied: matplotlib>=3.7 in ./quenais-env/lib/python3.11/site-packages (from quenais==0.2.0) (3.11.1)
+Requirement already satisfied: pyscf>=2.3 in ./quenais-env/lib/python3.11/site-packages (from quenais==0.2.0) (2.14.0)
+Requirement already satisfied: qiskit>=1.0 in ./quenais-env/lib/python3.11/site-packages (from quenais==0.2.0) (2.5.1)
+Requirement already satisfied: qiskit-aer>=0.14 in ./quenais-env/lib/python3.11/site-packages (from quenais==0.2.0) (0.17.2)
+Requirement already satisfied: qiskit-addon-sqd>=0.5 in ./quenais-env/lib/python3.11/site-packages (from quenais==0.2.0) (0.12.1)
+Requirement already satisfied: ffsim>=0.0.50 in ./quenais-env/lib/python3.11/site-packages (from quenais==0.2.0) (0.0.83)
+Requirement already satisfied: openfermion>=1.6 in ./quenais-env/lib/python3.11/site-packages (from quenais==0.2.0) (1.8.1)
+Requirement already satisfied: jax in ./quenais-env/lib/python3.11/site-packages (from ffsim>=0.0.50->quenais==0.2.0) (0.10.2)
+Requirement already satisfied: opt-einsum in ./quenais-env/lib/python3.11/site-packages (from ffsim>=0.0.50->quenais==0.2.0) (3.4.0)
+Requirement already satisfied: orjson in ./quenais-env/lib/python3.11/site-packages (from ffsim>=0.0.50->quenais==0.2.0) (3.11.9)
+Requirement already satisfied: typing-extensions in ./quenais-env/lib/python3.11/site-packages (from ffsim>=0.0.50->quenais==0.2.0) (4.16.0)
+Requirement already satisfied: contourpy>=1.0.1 in ./quenais-env/lib/python3.11/site-packages (from matplotlib>=3.7->quenais==0.2.0) (1.3.3)
+Requirement already satisfied: cycler>=0.10 in ./quenais-env/lib/python3.11/site-packages (from matplotlib>=3.7->quenais==0.2.0) (0.12.1)
+Requirement already satisfied: fonttools>=4.28.2 in ./quenais-env/lib/python3.11/site-packages (from matplotlib>=3.7->quenais==0.2.0) (4.63.0)
+Requirement already satisfied: kiwisolver>=1.3.1 in ./quenais-env/lib/python3.11/site-packages (from matplotlib>=3.7->quenais==0.2.0) (1.5.0)
+Requirement already satisfied: packaging>=20.0 in ./quenais-env/lib/python3.11/site-packages (from matplotlib>=3.7->quenais==0.2.0) (26.2)
+Requirement already satisfied: pillow>=9 in ./quenais-env/lib/python3.11/site-packages (from matplotlib>=3.7->quenais==0.2.0) (12.3.0)
+Requirement already satisfied: pyparsing>=3 in ./quenais-env/lib/python3.11/site-packages (from matplotlib>=3.7->quenais==0.2.0) (3.3.2)
+Requirement already satisfied: python-dateutil>=2.7 in ./quenais-env/lib/python3.11/site-packages (from matplotlib>=3.7->quenais==0.2.0) (2.9.0.post0)
+Requirement already satisfied: cirq-core>=1.6.0 in ./quenais-env/lib/python3.11/site-packages (from openfermion>=1.6->quenais==0.2.0) (1.7.0)
+Requirement already satisfied: deprecation in ./quenais-env/lib/python3.11/site-packages (from openfermion>=1.6->quenais==0.2.0) (2.1.0)
+Requirement already satisfied: h5py in ./quenais-env/lib/python3.11/site-packages (from openfermion>=1.6->quenais==0.2.0) (3.16.0)
+Requirement already satisfied: networkx in ./quenais-env/lib/python3.11/site-packages (from openfermion>=1.6->quenais==0.2.0) (3.6.1)
+Requirement already satisfied: pubchempy in ./quenais-env/lib/python3.11/site-packages (from openfermion>=1.6->quenais==0.2.0) (1.0.5)
+Requirement already satisfied: requests in ./quenais-env/lib/python3.11/site-packages (from openfermion>=1.6->quenais==0.2.0) (2.34.2)
+Requirement already satisfied: sympy in ./quenais-env/lib/python3.11/site-packages (from openfermion>=1.6->quenais==0.2.0) (1.14.0)
+Requirement already satisfied: attrs>=21.3.0 in ./quenais-env/lib/python3.11/site-packages (from cirq-core>=1.6.0->openfermion>=1.6->quenais==0.2.0) (26.1.0)
+Requirement already satisfied: duet>=0.2.8 in ./quenais-env/lib/python3.11/site-packages (from cirq-core>=1.6.0->openfermion>=1.6->quenais==0.2.0) (0.2.9)
+Requirement already satisfied: pandas<3.1.0.dev,>=2.3 in ./quenais-env/lib/python3.11/site-packages (from cirq-core>=1.6.0->openfermion>=1.6->quenais==0.2.0) (3.0.5)
+Requirement already satisfied: tqdm>=4.12 in ./quenais-env/lib/python3.11/site-packages (from cirq-core>=1.6.0->openfermion>=1.6->quenais==0.2.0) (4.70.0)
+Requirement already satisfied: setuptools in ./quenais-env/lib/python3.11/site-packages (from pyscf>=2.3->quenais==0.2.0) (83.0.0)
+Requirement already satisfied: six>=1.5 in ./quenais-env/lib/python3.11/site-packages (from python-dateutil>=2.7->matplotlib>=3.7->quenais==0.2.0) (1.17.0)
+Requirement already satisfied: rustworkx>=0.15.0 in ./quenais-env/lib/python3.11/site-packages (from qiskit>=1.0->quenais==0.2.0) (0.18.1)
+Requirement already satisfied: dill>=0.3 in ./quenais-env/lib/python3.11/site-packages (from qiskit>=1.0->quenais==0.2.0) (0.4.1)
+Requirement already satisfied: stevedore>=3.0.0 in ./quenais-env/lib/python3.11/site-packages (from qiskit>=1.0->quenais==0.2.0) (5.9.0)
+Requirement already satisfied: jaxlib>=0.4.30 in ./quenais-env/lib/python3.11/site-packages (from qiskit-addon-sqd>=0.5->quenais==0.2.0) (0.10.2)
+Requirement already satisfied: ml_dtypes>=0.5.0 in ./quenais-env/lib/python3.11/site-packages (from jax->ffsim>=0.0.50->quenais==0.2.0) (0.5.4)
+Requirement already satisfied: psutil>=5 in ./quenais-env/lib/python3.11/site-packages (from qiskit-aer>=0.14->quenais==0.2.0) (7.2.2)
+Requirement already satisfied: charset_normalizer<4,>=2 in ./quenais-env/lib/python3.11/site-packages (from requests->openfermion>=1.6->quenais==0.2.0) (3.4.9)
+Requirement already satisfied: idna<4,>=2.5 in ./quenais-env/lib/python3.11/site-packages (from requests->openfermion>=1.6->quenais==0.2.0) (3.18)
+Requirement already satisfied: urllib3<3,>=1.26 in ./quenais-env/lib/python3.11/site-packages (from requests->openfermion>=1.6->quenais==0.2.0) (2.7.0)
+Requirement already satisfied: certifi>=2023.5.7 in ./quenais-env/lib/python3.11/site-packages (from requests->openfermion>=1.6->quenais==0.2.0) (2026.7.22)
+Requirement already satisfied: mpmath<1.4,>=1.1.0 in ./quenais-env/lib/python3.11/site-packages (from sympy->openfermion>=1.6->quenais==0.2.0) (1.3.0)
+Building wheels for collected packages: quenais
+  Building editable for quenais (pyproject.toml) ... done
+  Created wheel for quenais: filename=quenais-0.2.0-0.editable-py3-none-any.whl size=7782 sha256=dabd3c0a2d5b4176cf43516f2984f80ecc64e8e57f5cc3034cd41f7f145f28f2
+  Stored in directory: /tmp/pip-ephem-wheel-cache-hzesfbuw/wheels/75/f2/69/e9436e4d34deb4b79a0973accc0afe7bd9ffffcffdf9e51db5
+Successfully built quenais
+Installing collected packages: quenais
+Successfully installed quenais-0.2.0
+  ✓ quenais installed
+[7/7] Preparing the GQE submodule...
+  - gqe-for-qsci not present, skipping.
+    For the GQE solver: git submodule update --init --recursive
+    then: quenais-gqe-setup --repo ./gqe-for-qsci
+
+=== Verifying Installation ===
+  ✓ quenais
+  ✓ pyscf
+  ✓ block2
+  ✓ qiskit
+  ✓ qiskit-aer
+  ✓ qiskit-addon-sqd
+  ✓ ffsim
+  ✓ asf
+  ✓ qiskit-fermions
+
+=== Self-test ===
+Running LiH end to end against known-good values.
+If this fails, the install is not sound -- do not trust later results.
+
+
+QuEnAIS self-test -- LiH
+==================================================================
+[  ok  ] thread environment                           OPENBLAS=1 OMP=1 (from SLURM_CPUS_PER_TASK)
+[  ok  ] HF energy                                    -7.862026959 Ha  (delta 5.3e-15)
+[  ok  ] MP2 energy                                   -7.874890917 Ha  (delta 3.0e-12)
+[  ok  ] CCSD energy                                  -7.882392917 Ha  (delta 5.3e-15)
+[  ok  ] active space                                 (2e, 2o) MOs=[1, 2]
+[  ok  ] step 1 provides dm_ao_alpha_mp2              required by the embedding stage
+[  ok  ] step 1 provides dm_ao_beta_mp2               required by the embedding stage
+[  ok  ] bath orbital count                           2 (expected 2)
+[  ok  ] embedded electron count                      (2a, 2b) -- from the reference density, not the active space
+[  ok  ] ecore                                        -5.010051310 Ha  (delta 2.0e-10)
+[  ok  ] embedded SCF vs full UHF                     delta -2.91e-09 Ha  (tol 2e-07)
+
+==================================================================
+  11 passed, 0 failed, 0 skipped
+
+  Install looks sound.
+==================================================================
+
+=== Installation Complete ===
+  block2 wrapper : /home/loharkar/block2main_wrapper.sh
+  Run pipeline   : quenais-run --help
+  Verify anytime : quenais-selftest
+  Notebooks      : notebooks/01_quickstart.ipynb
+(/home/loharkar/quenais-standalone/quenais/quenais-env) [loharkar@erebos05:quenais]$ pytest  -q
+................................................................................................................ [ 42%]
+.........................ssss................................................................................... [ 84%]
+..........................................                                                                       [100%]
+262 passed, 4 skipped in 20.14s
+(/home/loharkar/quenais-standalone/quenais/quenais-env) [loharkar@erebos05:quenais]$
